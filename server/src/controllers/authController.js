@@ -18,13 +18,11 @@ exports.login = async (req, res) => {
 
         res.json({
             message: "Login successful",
-            accessToken,
+            token: accessToken,
             user: {
                 id: user._id,
-                userName: user.userName,
-                name: user.name,
-                email: user.email,
-                phone: user.phone
+                username: user.userName,
+                role: user.role
             }
         });
 

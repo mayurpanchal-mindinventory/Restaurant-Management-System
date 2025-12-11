@@ -15,6 +15,7 @@ exports.registerService = async (data) => {
         email,
         phone,
         passwordHash,
+        role
     });
 };
 
@@ -23,7 +24,8 @@ exports.loginService = async ({ email, password }) => {
     if (!user) throw new Error("Invalid Username or password");
     const match = await comparePassword(password, user.passwordHash);
     if (!match) throw new Error("Invalid Username or password");
-    const accessToken = generateAccessToken(user);
+    const accessToken = generateAccessToken();
+    // const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
     await Token.findOneAndUpdate(
         { userId: user._id },
