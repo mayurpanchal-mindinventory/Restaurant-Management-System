@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../slices/authSlice";
+import { toast } from 'react-hot-toast';
 
 function Register() {
   const [regiValue, setRegiValue] = useState({
