@@ -27,7 +27,7 @@ function Register() {
     e.preventDefault();
 
     const userData = {
-      username: regiValue.name,
+      name: regiValue.name,
       email: regiValue.email,
       phone: regiValue.phone,
       password: regiValue.password,
@@ -37,9 +37,10 @@ function Register() {
       await dispatch(registerUser(userData)).unwrap();
 
       navigate("/");
-      alert("Registration successful! Please log in.");
+
+      toast.success("Registration successful! Please log in.");
     } catch (err) {
-      console.error("Registration failed:", err);
+      toast.error("Registration failed:", err);
     }
   };
 

@@ -1,11 +1,18 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "../services/apiClient";
-import axios from "axios";
 
-// Function to get user from local storage
-const user = JSON.parse(localStorage.getItem("user"));
+const storedUser = localStorage.getItem("user");
 
-// --- Initial State ---
+let user = null;
+if (storedUser && storedUser !== "undefined") {
+  try {
+    user = JSON.parse(storedUser);
+  } catch (e) {
+    console.error("Error parsing user from localStorage", e);
+
+    localStorage.removeItem("user");
+  }
+}
 const initialState = {
   user: user ? user : null,
   isAuthenticated: !!user,
@@ -13,15 +20,13 @@ const initialState = {
   error: null,
 };
 
-// --- Async Thunks (API calls) ---
-
-// Login User Thunk
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, thunkAPI) => {
     try {
-      const response = await axios.post(apiClient + "signin", userData);
-      if (response.data.accessToken) {
+      const response = await apiClient.post("/api/auth/login", userData);
+
+      if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
       return response.data;
@@ -41,7 +46,9 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, thunkAPI) => {
     try {
-      const response = await axios.post(apiClient + "signup", userData);
+      console.log(userData);
+
+      const response = await apiClient.post("/api/auth/register", userData);
 
       return response.data;
     } catch (error) {
@@ -63,14 +70,16 @@ const authSlice = createSlice({
   reducers: {
     // Logout Reducer: clears state and local storage
     logout: (state) => {
-      localStorage.removeItem("user");
+      localStorage.removeItem("user"); // Clear the 'user' item
+      // Note: If you also store 'userToken' separately, clear it too:
+      // localStorage.removeItem("userToken");
       state.user = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
     },
   },
-  // --- Extra Reducers (handles async thunk actions) ---
+  // ... extraReducers remain the same ...
   extraReducers: (builder) => {
     builder
       // Login Handlers

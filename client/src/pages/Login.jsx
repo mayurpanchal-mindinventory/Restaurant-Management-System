@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../slices/authSlice";
+import toast from "react-hot-toast";
 
 function Login() {
   const [loginValue, setLoginValue] = useState({ email: "", password: "" });
@@ -17,7 +18,8 @@ function Login() {
       if (user.role === "admin") {
         navigate("/AdminLayout");
       } else {
-        navigate("/User/Home");
+        navigate("/Home");
+        toast.success("Successfully Log-in!");
       }
     }
   }, [isAuthenticated, user, navigate]);
@@ -34,7 +36,7 @@ function Login() {
     e.preventDefault();
 
     if (loginValue.email.trim() === "" || loginValue.password.trim() === "") {
-      alert("Please enter valid email and password.");
+      toast("Please enter valid email and password.");
       return;
     }
 
@@ -47,6 +49,7 @@ function Login() {
       await dispatch(loginUser(credentials)).unwrap();
     } catch (err) {
       console.error("Login failed:", err);
+      toast.error("Login failed!");
     }
   };
 
