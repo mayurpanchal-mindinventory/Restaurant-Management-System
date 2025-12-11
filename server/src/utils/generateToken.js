@@ -6,6 +6,7 @@ exports.generateAccessToken = () => {
         { expiresIn: "15m" }
     );
 }
+
 exports.generateRefreshToken = (user) => {
     return jwt.sign(
         { id: user._id },

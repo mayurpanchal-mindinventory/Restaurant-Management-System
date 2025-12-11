@@ -9,8 +9,8 @@ const billSchema = new mongoose.Schema(
         items: [
             {
                 itemId: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" },
-                name: String,                         // snapshot
-                price: Number,                        // snapshot
+                name: String,
+                price: Number,
                 quantity: Number,
                 total: Number
             }
