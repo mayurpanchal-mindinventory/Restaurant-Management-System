@@ -1,20 +1,30 @@
 const mongoose = require("mongoose");
+const abbreviatedDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const restaurantSchema = new mongoose.Schema(
-    {
-        email: { type: String, required: true, unique: true },
-        passwordHash: { type: String, required: true },
-
-        name: { type: String, required: true },
-        description: { type: String },
-
-        logoImage: { type: String },
-        mainImage: { type: String },
-
-        openDays: [{ type: Number }],
-        closedDates: [{ type: Date }]
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
     },
-    { timestamps: true }
+    name: { type: String, required: true },
+    description: { type: String },
+
+    logoImage: { type: String },
+    mainImage: { type: String },
+
+    openDays: [
+      {
+        type: String,
+        enum: abbreviatedDays,
+      },
+    ],
+
+    closedDates: [{ type: Date }],
+  },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Restaurant", restaurantSchema);

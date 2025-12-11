@@ -2,20 +2,23 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const authRoutes = require('./src/routes/authRoutes')
+const authRoutes = require("./src/routes/authRoutes.js");
+const adminRoutes = require("./src/routes/adminRoutes.js");
 dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Add this for form data parsing
 
 app.use("/api/auth", authRoutes);
-
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch(err => console.log(err));
+app.use("/api/admin", adminRoutes);
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
 app.listen(process.env.PORT, () =>
-    console.log(`Server running on port ${process.env.PORT}`)
+  console.log(`Server running on port ${process.env.PORT}`)
 );
