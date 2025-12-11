@@ -4,8 +4,8 @@ const timeSlotSchema = new mongoose.Schema(
     {
         restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant", required: true },
 
-        startTime: { type: String, required: true },   // "12:00 PM"
-        endTime: { type: String, required: true },     // "01:00 PM"
+        startTime: { type: String, required: true },
+        endTime: { type: String, required: true },
 
         maxBookings: { type: Number, required: true },
         discountPercent: { type: Number, default: 0 }
