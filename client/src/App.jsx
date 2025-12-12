@@ -10,6 +10,7 @@ import AddRestaurant from "./pages/AddRestaurant";
 import ProtectedRoute, {
   getDashboardRoute,
 } from "./components/auth/ProtectedRoute";
+import HomeLayout from "./components/layout/HomeLayout";
 
 function App() {
   return (
@@ -46,10 +47,12 @@ function App() {
           path="Home"
           element={
             <ProtectedRoute>
-              <Home />
+              <HomeLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Home />} />
+        </Route>
 
         <Route path="/dashboard" element={<DashboardRedirect />} />
 
