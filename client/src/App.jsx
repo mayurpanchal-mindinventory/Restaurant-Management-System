@@ -4,6 +4,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import { Toaster } from "react-hot-toast";
+import AdminLayout from "./components/layout/AdminLayout";
+import Restaurant from "./pages/Restaurant";
+import AddRestaurant from "./pages/AddRestaurant";
 
 function App() {
   return (
@@ -15,6 +18,12 @@ function App() {
           <Route index element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
+        <Route path="admin" element={<AdminLayout />}>
+          <Route path='add' element={<AddRestaurant />} />
+
+          <Route index element={<Restaurant />} />
+        </Route>
+
         <Route path="Home" element={<Home />} />
       </Routes>
     </>

@@ -16,7 +16,7 @@ function Login() {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.role === "admin") {
-        navigate("/AdminLayout");
+        navigate("/admin");
       } else {
         navigate("/Home");
         toast.success("Successfully Log-in!");
@@ -94,7 +94,7 @@ function Login() {
 
           <button
             type="submit"
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading}
             className="text-white bg-orange-500 border-0 py-2 px-8 w-full focus:outline-none hover:bg-orange-700 rounded text-lg font-semibold transition duration-200 disabled:opacity-50"
           >
             {isLoading ? "Logging in..." : "Submit"}

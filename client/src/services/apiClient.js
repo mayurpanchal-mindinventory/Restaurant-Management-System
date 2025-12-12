@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:5000/api/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,4 +20,9 @@ apiClient.interceptors.request.use(
   }
 );
 
-export default apiClient;
+export default {
+  get: apiClient.get,
+  post: apiClient.post,
+  put: apiClient.put,
+  delete: apiClient.delete,
+}
