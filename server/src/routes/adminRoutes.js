@@ -9,4 +9,13 @@ router.post(
   adminController.createRestaurantAccount
 );
 router.get("/display-restaurant", adminController.getAllRestaurantsWithOwners);
+router.put(
+  "/update-restaurant/:restaurantId",
+  upload,
+  adminController.updateRestaurant
+);
+router.delete(
+  "/delete-restaurant/:restaurantId",
+  adminController.deleteRestaurant
+);
 module.exports = router;
