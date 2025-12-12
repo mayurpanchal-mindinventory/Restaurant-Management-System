@@ -43,11 +43,11 @@ export default function AdminLayout() {
                     <>
                         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
                             <div className="flex items-center gap-2">
-                                <img
+                                {/* <img
                                     src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
                                     className="size-8"
                                     alt="Logo"
-                                />
+                                /> */}
                                 <span className="text-lg font-semibold hidden md:block">
                                     Admin Panel
                                 </span>

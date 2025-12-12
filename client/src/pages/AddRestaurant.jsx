@@ -1,10 +1,8 @@
-import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import DatePicker from "react-multi-date-picker";
-
+import { createRestaurant } from "../services/adminService";
 const validationSchema = Yup.object({
-    // restaurantName: Yup.string().required("Restaurant name is required"),
     password: Yup.string().required("Password is required"),
     email: Yup.string().email().required("Email is required"),
     phone: Yup.string().required("Phone number is required"),
@@ -30,8 +28,10 @@ export default function RestaurantForm() {
                 profilePhoto: null,
             }}
             validationSchema={validationSchema}
-            onSubmit={(values) => {
-                console.log("FORM SUBMITTED:", values);
+            onSubmit={async (values) => {
+                await createRestaurant(values);
+
+
             }}
         >
             {({ setFieldValue, values }) => (
@@ -101,7 +101,7 @@ export default function RestaurantForm() {
                             onChange={(dates) => setFieldValue("holidayDates", dates)}
                             placeholder="select Holiday Dates"
                             format="YYYY-MM-DD"
-                            className="border rounded-md p-4 w-full mt-1"
+                            className="border rounded-md  w-full mt-1"
                         />
 
                         <ErrorMessage
@@ -129,7 +129,7 @@ export default function RestaurantForm() {
                                         type="checkbox"
                                         name="weeklyOff"
                                         value={day}
-                                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                        className="h-4 w-4 border-gray-300 rounded"
                                     />
                                     <span>{day}</span>
                                 </label>
@@ -144,11 +144,13 @@ export default function RestaurantForm() {
                     </div>
 
                     <div>
+
+
                         <label className="block text-sm font-medium">Cover Photo</label>
 
                         <input
                             type="file"
-                            className="mt-2 w-full border rounded-md p-2"
+                            className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
                             onChange={(e) =>
                                 setFieldValue("coverPhoto", e.currentTarget.files[0])
                             }
@@ -166,7 +168,7 @@ export default function RestaurantForm() {
 
                         <input
                             type="file"
-                            className="mt-2 w-full border rounded-md p-2"
+                            className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
                             onChange={(e) =>
                                 setFieldValue("profilePhoto", e.currentTarget.files[0])
                             }
@@ -186,7 +188,7 @@ export default function RestaurantForm() {
                         >
                             Submit
                         </button>
-                        <button
+                        <button onClick={() => Formik.setFieldValue = initialValues}
                             type="submit"
                             className="mt-4 w-full bg-red-500 text-white py-2 rounded-md hover:bg-indigo-700"
                         >
