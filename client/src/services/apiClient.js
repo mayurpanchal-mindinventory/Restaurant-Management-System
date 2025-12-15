@@ -25,4 +25,6 @@ export default {
   post: apiClient.post,
   put: apiClient.put,
   delete: apiClient.delete,
-}
+
+  getFeaturedRestaurants: () => apiClient.get("/admin/display-restaurant"),
+};

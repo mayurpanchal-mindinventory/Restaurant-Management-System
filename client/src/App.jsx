@@ -11,7 +11,6 @@ import ProtectedRoute, {
   getDashboardRoute,
 } from "./components/auth/ProtectedRoute";
 import HomeLayout from "./components/layout/HomeLayout";
-
 function App() {
   return (
     <>
