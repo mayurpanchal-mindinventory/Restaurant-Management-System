@@ -1,8 +1,16 @@
-/* src/index.css or src/App.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Define Poppins font variable */
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+}
+
+/* Apply Poppins font globally */
+body {
+  font-family: var(--font-poppins), sans-serif;
+}
 
 
 .loader-line {

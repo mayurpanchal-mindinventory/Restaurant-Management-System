@@ -11,6 +11,7 @@ import ProtectedRoute, {
   getDashboardRoute,
 } from "./components/auth/ProtectedRoute";
 import HomeLayout from "./components/layout/HomeLayout";
+import RestoDetails from "./pages/RestoDetails";
 function App() {
   return (
     <>
@@ -51,6 +52,7 @@ function App() {
           }
         >
           <Route index element={<Home />} />
+          <Route path="Home/restaurant" element={<RestoDetails />} />
         </Route>
 
         <Route path="/dashboard" element={<DashboardRedirect />} />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../services/apiClient";
 import { Star } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const brandColor = "text-orange-500";
 const brandBgColor = "bg-orange-500";
@@ -50,11 +51,13 @@ const RestaurantCard = ({ restaurant }) => {
             </span>
           </div>
 
-          <button
-            className={`text-sm font-semibold ${brandColor} hover:text-orange-600 transition duration-200`}
-          >
-            View Menu
-          </button>
+          <NavLink to="Home/restaurant">
+            <button
+              className={`text-sm font-semibold ${brandColor} hover:text-orange-600 transition duration-200`}
+            >
+              View Details
+            </button>
+          </NavLink>
         </div>
       </div>
     </div>
