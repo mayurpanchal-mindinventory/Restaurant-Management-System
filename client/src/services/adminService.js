@@ -39,3 +39,18 @@ export const deleteMenuById = async (id) => {
     const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
     return res.data;
 }
+
+
+
+//Slot Api's
+
+export const createSlot = async (body) => {
+    return await apiClient.post(`api/admin/slot`, body);
+}
+export const getSlotListByRestaurant = async (id) => {
+    return await apiClient.get(`api/admin/slotlist/${id}`);
+}
+export const deleteSlotById = async (id) => {
+    const res = await apiClient.delete(`api/admin/delete-slot/${id}`);
+    return res.data;
+}

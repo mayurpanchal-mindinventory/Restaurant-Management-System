@@ -25,7 +25,7 @@ function MenuList() {
         <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <Link to={'/admin/menu'} className="bg-gray-900 text-white px-4 py-4 rounded-lg text-l justify-items-end font-bold uppercase">
+                <Link to={`/admin/addmenu/${id}`} className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
                     Add Menu
                 </Link>
                 <div>
@@ -72,15 +72,9 @@ function MenuList() {
                                 <td className="p-3">Rs. {r?.price || "-"}</td>
 
                                 <td className="p-3">
-                                    <Link to={`add/${r._id}`}>
+                                    <Link to={`/admin/editmenu/${r._id}`}>
                                         <button className="p-2 rounded hover:bg-gray-100">
                                             <PencilIcon className="size-6 text-orange-500" />
-                                        </button>
-                                    </Link>
-
-                                    <Link to={`menu/${r._id}`}>
-                                        <button className="p-2 rounded hover:bg-gray-100">
-                                            <MenuSquareIcon className="size-6 text-orange-500" />
                                         </button>
                                     </Link>
 

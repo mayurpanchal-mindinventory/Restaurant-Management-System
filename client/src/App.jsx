@@ -9,6 +9,7 @@ import Restaurant from "./pages/Restaurant";
 import AddRestaurant from "./pages/AddRestaurant";
 import Menu from "./pages/Menu";
 import MenuList from "./pages/MenuList";
+import Slot from "./pages/Slot";
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
           <Route path="add" element={<AddRestaurant />} />
           <Route path="add/:id" element={<AddRestaurant />} />
           <Route path="menu/:id" element={<MenuList />} />
-          <Route path="menu" element={<Menu />} />
+          <Route path="addmenu/:id" element={<Menu />} />
+          <Route path="editmenu/:id" element={<Menu />} />
+          <Route path="slot/:id" element={<Slot />} />
 
           <Route index element={<Restaurant />} />
         </Route>

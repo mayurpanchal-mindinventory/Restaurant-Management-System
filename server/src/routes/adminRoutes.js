@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require("../controllers/restaurantController.js");
 const { upload, uploadMenu } = require("../middleware/uploadMiddleware");
 const menuController = require("../controllers/menuController.js");
-
+const slotController = require('../controllers/slotController.js')
 router.post(
   "/create-restaurant",
   upload,
@@ -33,5 +33,21 @@ router.post(
 
 router.get(`/menulist/:id`, menuController.getAllMenusByRestaurant);
 router.delete(`/delete-menu/:id`, menuController.deleteMenuById);
+
+
+//Routers for Slot
+
+
+router.post(
+  "/slot",
+  slotController.createSlot
+);
+router.get(
+  "/slotlist/:id",
+  slotController.getSlotList
+);
+router.delete(`/delete-slot/:id`, slotController.deleteSlotById);
+
+
 
 module.exports = router;

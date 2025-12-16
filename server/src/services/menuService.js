@@ -1,11 +1,10 @@
 const { STATUS, MESSAGES } = require("../utils/constants");
 const categories = require('../models/MenuCategory');
 const MenuItem = require("../models/MenuItem");
-const { default: mongoose } = require("mongoose");
+const { mongoose } = require("mongoose");
 const fs = require("fs");
 const cloudinary = require("../config/cloudinaryConfig.js");
 const { uploadToCloudinary } = require("./adminService");
-const Restaurant = require("../models/Restaurant.js");
 
 const getAllCategories = async () => {
     try {

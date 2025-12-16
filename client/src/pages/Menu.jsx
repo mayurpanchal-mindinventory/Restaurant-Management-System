@@ -1,6 +1,6 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { createMenu, getAllCategories } from "../services/adminService";
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
@@ -12,6 +12,11 @@ const validationSchema = Yup.object({
 });
 
 export default function Menu() {
+    const location = useLocation();
+    const [edit, setEdit] = useState(false)
+    const updateLocation = location.pathname;
+    console.log(updateLocation);
+
 
     const { id } = useParams();
     const [categories, setCategories] = useState(null);
@@ -37,6 +42,8 @@ export default function Menu() {
     };
 
     useEffect(() => {
+        updateLocation.startsWith("/admin/editmenu") ? setEdit(true) : setEdit(false)
+
         getCategories();
         return () => {
             if (imagePreviewUrl) {
@@ -140,7 +147,7 @@ export default function Menu() {
                             type="submit"
                             className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md hover:bg-indigo-700"
                         >
-                            Add
+                            {!edit ? "Add" : "Update Menu"}
                         </button>
                     </div>
                 </Form>

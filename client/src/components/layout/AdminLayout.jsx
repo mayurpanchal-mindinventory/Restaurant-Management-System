@@ -10,9 +10,10 @@ import { Link, Outlet } from "react-router-dom";
 
 
 const navigation = [
-    { name: "Restaurants", href: "#", current: true },
-    // { name: "Menus", href: "#", current: false },
+    { name: "Restaurants", href: "/admin", current: false },
     { name: "Bookings", href: "#", current: false },
+    // { name: "Slots", href: "slot", current: false },
+
 ];
 
 function classNames(...classes) {
@@ -28,11 +29,7 @@ export default function AdminLayout() {
                     <>
                         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
                             <div className="flex items-center gap-2">
-                                {/* <img
-                                    src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                                    className="size-8"
-                                    alt="Logo"
-                                /> */}
+
                                 <span className="text-lg font-semibold hidden md:block">
                                     Admin Panel
                                 </span>
@@ -47,16 +44,16 @@ export default function AdminLayout() {
                             </DisclosureButton>
                         </div>
 
-                        <div className="hidden md:block px-3 py-4 space-y-1">
+                        <div className="hidden md:block px-3 py-4 space-y-1 ">
                             {navigation.map((item) => (
                                 <Link
+                                    to={item.href}
                                     key={item.name}
-                                    href={item.href}
                                     className={classNames(
                                         item.current
                                             ? "bg-gray-700 text-white"
                                             : "text-gray-300 hover:bg-gray-700",
-                                        "block rounded-md px-3 py-2 text-sm font-medium"
+                                        "block rounded-md px-3 py-2 text-lg"
                                     )}
                                 >
                                     {item.name}
@@ -64,22 +61,7 @@ export default function AdminLayout() {
                             ))}
                         </div>
 
-                        <DisclosurePanel className="md:hidden px-3 py-4 space-y-1">
-                            {navigation.map((item) => (
-                                <a
-                                    key={item.name}
-                                    href={item.href}
-                                    className={classNames(
-                                        item.current
-                                            ? "bg-gray-700 text-white"
-                                            : "text-gray-300 hover:bg-gray-700",
-                                        "block rounded-md px-3 py-2 text-sm font-medium"
-                                    )}
-                                >
-                                    {item.name}
-                                </a>
-                            ))}
-                        </DisclosurePanel>
+
                     </>
                 )}
             </Disclosure>
@@ -91,7 +73,7 @@ export default function AdminLayout() {
                 </header>
 
                 <main className="p-6 bg-white w-full h-full">
-                    <div className="">
+                    <div className="p-6 bg-gray-100 min-h-full">
                         <Outlet />
                     </div>
                 </main>

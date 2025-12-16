@@ -2,7 +2,7 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
-import { MenuSquareIcon } from 'lucide-react'
+import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
     const restaurantList = async () => {
@@ -33,8 +33,9 @@ function Restaurant() {
     return (
         <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <Link to={'add'} className="bg-gray-900 text-white px-4 py-4 rounded-lg text-l justify-items-end font-bold uppercase">
+                <Link to={'add'} className="bg-gray-900 text-white px-4 py-2 rounded-lg  justify-items-end font-bold ">
                     Add Restaurant
                 </Link>
                 <div>
@@ -59,7 +60,8 @@ function Restaurant() {
                             <th className="p-3">Email</th>
                             <th className="p-3">Phone</th>
                             <th className="p-3">Open Days</th>
-                            {/* <th className="p-3">Closed Days</th> */}
+                            <th className="p-3">Menu</th>
+                            <th className="p-3">Slots</th>
                             <th className="p-3">Actions</th>
                         </tr>
                     </thead>
@@ -81,25 +83,29 @@ function Restaurant() {
                                 <td className="p-3">{r.userId.email}</td>
                                 <td className="p-3">{r.userId.phone}</td>
                                 <td className="p-3">{r?.openDays || "-"}</td>
-                                {/* <td className="p-3">{new Date(r.closedDates).toLocaleDateString().split('T')[0]}</td> */}
-
+                                <td className="p-3">
+                                    <Link to={`menu/${r._id}`}>
+                                        <button className="p-2 rounded hover:bg-gray-100">
+                                            <NotebookPenIcon className="size-6 text-orange-500" />
+                                        </button>
+                                    </Link>
+                                </td>
+                                <td className="p-3">
+                                    <Link to={`slot/${r._id}`}>
+                                        <button className="p-2 rounded hover:bg-gray-100">
+                                            <MenuSquareIcon className="size-6 text-orange-500" />
+                                        </button>
+                                    </Link>
+                                </td>
                                 <td className="p-3">
                                     <Link to={`add/${r._id}`}>
                                         <button className="p-2 rounded hover:bg-gray-100">
                                             <PencilIcon className="size-6 text-orange-500" />
                                         </button>
                                     </Link>
-
-                                    <Link to={`menu/${r._id}`}>
-                                        <button className="p-2 rounded hover:bg-gray-100">
-                                            <MenuSquareIcon className="size-6 text-orange-500" />
-                                        </button>
-                                    </Link>
-
                                     <button onClick={() => deleteRestaurant(r._id)} className="p-2 rounded hover:bg-gray-100">
                                         <TrashIcon className="size-6 text-red-500" />
                                     </button>
-
                                 </td>
                             </tr>
                         ))}
@@ -126,7 +132,7 @@ function Restaurant() {
                 <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
             </div>
 
-        </div>
+        </div >
     );
 }
 
