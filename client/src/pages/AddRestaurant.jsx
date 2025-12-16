@@ -1,38 +1,91 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useParams } from "react-router-dom";
 import DatePicker from "react-multi-date-picker";
-import { createRestaurant } from "../services/adminService";
+import { createRestaurant, getRestaurantsById, updateRestaurant } from "../services/adminService";
+import { toast } from 'react-hot-toast';
+import { useEffect, useState } from "react";
 const validationSchema = Yup.object({
     password: Yup.string().required("Password is required"),
     email: Yup.string().email().required("Email is required"),
     phone: Yup.string().required("Phone number is required"),
 
-    holidayDates: Yup.array().min(1, "Select at least one holiday date"),
-    weeklyOff: Yup.array().min(1, "Select at least one weekly off day"),
+    // closedDates: Yup.array().min(0, "Select at least one holiday date"),
+    // openDays: Yup.array().min(0, "Select at least one weekly off day"),
 
-    coverPhoto: Yup.mixed().required("Cover photo is required"),
-    profilePhoto: Yup.mixed().required("Profile photo is required"),
+    mainImage: Yup.mixed().required("Cover photo is required"),
+    logoImage: Yup.mixed().required("Profile photo is required"),
 });
 
 export default function RestaurantForm() {
+
+    const { id } = useParams();
+    const [apiData, setApiData] = useState(null)
+    const getDetails = async () => {
+        try {
+            const res = await getRestaurantsById(id);
+            setApiData(res.data);
+            console.log(res.data);
+
+        } catch (e) {
+            toast("abc")
+        }
+    }
+
+    const initialValues = {
+        restaurantName: apiData?.name || "",
+        password: apiData?.password || "",
+        email: apiData?.userId?.email || "",
+        phone: apiData?.userId?.phone || "",
+        closedDates: apiData?.closedDates || [],
+        openDays: apiData?.openDays || [],
+        mainImage: apiData?.mainImage || null,
+        logoImage: apiData?.logoImage || null,
+    }
+
+    useEffect(() => {
+        if (id) {
+
+            getDetails();
+        }
+    }, [id])
+
     return (
+
         <Formik
-            initialValues={{
-                restaurantName: "",
-                password: "",
-                email: "",
-                phone: "",
-                holidayDates: [],
-                weeklyOff: [],
-                coverPhoto: null,
-                profilePhoto: null,
-            }}
+            initialValues={initialValues} enableReinitialize={true}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
-                await createRestaurant(values);
+                const formData = new FormData();
 
+                formData.append("restaurantName", values.restaurantName);
+                formData.append("email", values.email);
+                formData.append("password", values.password);
+                formData.append("phone", values.phone);
+                values.closedDates.forEach(date => {
+                    formData.append("closedDates[]", date);
+                });
+                formData.append("openDays", values.openDays);
+
+                formData.append("mainImage", values.mainImage);
+                formData.append("logoImage", values.logoImage);
+
+                try {
+
+                    if (!id) {
+                        const res = await createRestaurant(formData);
+                        toast.success("Restaurant Created");
+                    } else {
+                        const res = await updateRestaurant(id, formData);
+                        toast.success("Restaurant information Updated");
+                    }
+
+                } catch (e) {
+                    toast("abc")
+                }
 
             }}
+
         >
             {({ setFieldValue, values }) => (
                 <Form className="space-y-6 p-6 max-w-3xl mx-auto bg-white text-black rounded-lg shadow">
@@ -97,15 +150,20 @@ export default function RestaurantForm() {
 
                         <DatePicker
                             multiple
-                            value={values.holidayDates}
-                            onChange={(dates) => setFieldValue("holidayDates", dates)}
+                            value={values.closedDates}
+                            onChange={(dates) =>
+                                setFieldValue(
+                                    "closedDates",
+                                    dates.map((d) => d.format("YYYY-MM-DD"))
+                                )
+                            }
                             placeholder="select Holiday Dates"
                             format="YYYY-MM-DD"
                             className="border rounded-md  w-full mt-1"
                         />
 
                         <ErrorMessage
-                            name="holidayDates"
+                            name="closedDates"
                             component="p"
                             className="text-red-500 text-sm"
                         />
@@ -116,18 +174,18 @@ export default function RestaurantForm() {
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {[
-                                "Monday",
-                                "Tuesday",
-                                "Wednesday",
-                                "Thursday",
-                                "Friday",
-                                "Saturday",
-                                "Sunday",
+                                "Mon",
+                                "Tue",
+                                "Wed",
+                                "Thu",
+                                "Fri",
+                                "Sat",
+                                "Sun",
                             ].map((day) => (
                                 <label key={day} className="flex items-center gap-2">
                                     <Field
                                         type="checkbox"
-                                        name="weeklyOff"
+                                        name="openDays"
                                         value={day}
                                         className="h-4 w-4 border-gray-300 rounded"
                                     />
@@ -137,7 +195,7 @@ export default function RestaurantForm() {
                         </div>
 
                         <ErrorMessage
-                            name="weeklyOff"
+                            name="openDays"
                             component="p"
                             className="text-red-500 text-sm mt-1"
                         />
@@ -152,30 +210,30 @@ export default function RestaurantForm() {
                             type="file"
                             className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
                             onChange={(e) =>
-                                setFieldValue("coverPhoto", e.currentTarget.files[0])
+                                setFieldValue("mainImage", e.currentTarget.files[0])
                             }
                         />
 
                         <ErrorMessage
-                            name="coverPhoto"
+                            name="mainImage"
                             component="p"
                             className="text-red-500 text-sm"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium">Profile Photo</label>
+                        <label className="block text-sm font-medium">Restaurant Logo</label>
 
                         <input
                             type="file"
                             className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
                             onChange={(e) =>
-                                setFieldValue("profilePhoto", e.currentTarget.files[0])
+                                setFieldValue("logoImage", e.currentTarget.files[0])
                             }
                         />
 
                         <ErrorMessage
-                            name="profilePhoto"
+                            name="logoImage"
                             component="p"
                             className="text-red-500 text-sm"
                         />
@@ -186,14 +244,14 @@ export default function RestaurantForm() {
                             type="submit"
                             className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md hover:bg-indigo-700"
                         >
-                            Submit
+                            {!id ? "Submit" : "Update"}
                         </button>
-                        <button onClick={() => Formik.setFieldValue = initialValues}
+                        {/* <button
                             type="submit"
                             className="mt-4 w-full bg-red-500 text-white py-2 rounded-md hover:bg-indigo-700"
                         >
                             Reset
-                        </button>
+                        </button> */}
                     </div>
                 </Form>
             )}

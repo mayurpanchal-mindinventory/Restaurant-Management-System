@@ -3,31 +3,16 @@ import {
     Disclosure,
     DisclosureButton,
     DisclosurePanel,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuItems,
+
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, Outlet } from "react-router-dom";
 
-const user = {
-    name: "Tom Cook",
-    email: "tom@example.com",
-    imageUrl:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-};
 
 const navigation = [
     { name: "Restaurants", href: "#", current: true },
-    { name: "Menus", href: "#", current: false },
+    // { name: "Menus", href: "#", current: false },
     { name: "Bookings", href: "#", current: false },
-];
-
-const userNavigation = [
-    { name: "Your profile", href: "#" },
-    { name: "Settings", href: "#" },
-    { name: "Sign out", href: "#" },
 ];
 
 function classNames(...classes) {
@@ -103,42 +88,6 @@ export default function AdminLayout() {
 
                 <header className="flex justify-between items-center px-6 py-4 bg-gray-800 border-b border-gray-700">
                     <h1 className="text-2xl font-semibold">Dashboard</h1>
-
-                    <div className="flex items-center gap-4">
-                        <button className="p-2 text-gray-300 hover:text-white">
-                            <BellIcon className="size-6" />
-                        </button>
-
-                        <Menu as="div" className="relative">
-                            <MenuButton className="flex rounded-full">
-                                <img
-                                    src={user.imageUrl}
-                                    className="size-9 rounded-full"
-                                    alt="User"
-                                />
-                            </MenuButton>
-
-                            <MenuItems className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg">
-                                {userNavigation.map((item) => (
-                                    <MenuItem key={item.name}>
-                                        {({ active }) => (
-                                            <a
-                                                href={item.href}
-                                                className={classNames(
-                                                    active
-                                                        ? "bg-gray-700"
-                                                        : "",
-                                                    "block px-4 py-2 text-sm text-gray-300"
-                                                )}
-                                            >
-                                                {item.name}
-                                            </a>
-                                        )}
-                                    </MenuItem>
-                                ))}
-                            </MenuItems>
-                        </Menu>
-                    </div>
                 </header>
 
                 <main className="p-6 bg-white w-full h-full">

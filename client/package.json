@@ -22,7 +22,8 @@
     "react-multi-date-picker": "^4.5.2",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.10.1",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "lucide-react": "^0.554.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -50,5 +50,28 @@ const upload = multer({
   { name: "logoImage", maxCount: 1 }, // Expects a field named 'logoImage'
   { name: "mainImage", maxCount: 1 }, // Expects a field named 'mainImage'
 ]);
+const uploadMenu = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
 
-module.exports = upload;
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    // If validation fails, return an error
+    cb(new Error("Only images are allowed (JPEG, JPG, PNG, GIF)"));
+  },
+}).fields([
+  { name: "image", maxCount: 1 }, // Expects a field named 'logoImage'
+  // Expects a field named 'mainImage'
+]);
+
+
+module.exports = {
+  upload, uploadMenu
+};
