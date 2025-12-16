@@ -22,7 +22,7 @@ exports.login = async (req, res) => {
       token: accessToken,
       user: {
         id: user._id,
-        username: user.userName,
+        username: user.name,
         role: user.role,
       },
     });

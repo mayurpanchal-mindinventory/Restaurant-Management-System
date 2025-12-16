@@ -44,7 +44,7 @@ function App() {
         ></Route>
 
         <Route
-          path="Home"
+          path="Home/*"
           element={
             <ProtectedRoute>
               <HomeLayout />
@@ -52,7 +52,7 @@ function App() {
           }
         >
           <Route index element={<Home />} />
-          <Route path="Home/restaurant" element={<RestoDetails />} />
+          <Route path="restaurant" element={<RestoDetails />} />
         </Route>
 
         <Route path="/dashboard" element={<DashboardRedirect />} />

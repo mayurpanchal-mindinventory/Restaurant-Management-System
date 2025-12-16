@@ -17,10 +17,9 @@ function Home() {
   return (
     <>
       <div className="flex flex-col">
-        {/* Hero Section */}
         <div className="relative h-[600px]">
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="fixed inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${img1})` }}
           >
             <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -80,17 +79,18 @@ function Home() {
             </div>
           </div>
         </div>
+        <div className="bg-white z-20">
+          <div className="   w-full flex justify-center items-center rounded-lg -mt-[50px] z-20 relative">
+            <PizzaRow />
+          </div>
 
-        <div className="   w-full flex justify-center items-center rounded-lg -mt-[50px] z-20 relative">
-          <PizzaRow />
-        </div>
+          <div className="w-full ">
+            <FeaturedRestaurants />
+          </div>
 
-        <div className="w-full ">
-          <FeaturedRestaurants />
-        </div>
-
-        <div>
-          <Brands />
+          <div>
+            <Brands />
+          </div>
         </div>
       </div>
     </>

@@ -51,7 +51,7 @@ const RestaurantCard = ({ restaurant }) => {
             </span>
           </div>
 
-          <NavLink to="Home/restaurant">
+          <NavLink to="/Home/restaurant" state={{ id: restaurant._id }}>
             <button
               className={`text-sm font-semibold ${brandColor} hover:text-orange-600 transition duration-200`}
             >

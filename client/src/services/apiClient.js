@@ -2,7 +2,6 @@ import axios from "axios";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:5000",
-
 });
 
 apiClient.interceptors.request.use(
@@ -24,5 +23,5 @@ export default {
   put: apiClient.put,
   delete: apiClient.delete,
 
-  getFeaturedRestaurants: () => apiClient.get("/admin/display-restaurant"),
+  getFeaturedRestaurants: () => apiClient.get("api/admin/display-restaurant"),
 };
