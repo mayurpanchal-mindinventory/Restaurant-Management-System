@@ -20,6 +20,9 @@ export const MESSAGES = {
   RESTAURANT_NOTADD: "Something went wrong Restaurant adding failed",
   RESTAURANT_NOTUPDATE: "Something went wrong Restaurant update failed",
   RESTAURANT_NOTDELETE: "Something went wrong Restaurant delete failed",
+  MENU_DELETED: "Menu deleted successfully.",
+  MENU_NOTDELETE: "Something went wrong Menu delete failed",
+
 };
 
 export const sendResponse = (res, status, msg, data) => {

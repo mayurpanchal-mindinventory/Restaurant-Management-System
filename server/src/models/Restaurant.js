@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const abbreviatedDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const restaurantSchema = new mongoose.Schema(
   {
@@ -18,7 +17,6 @@ const restaurantSchema = new mongoose.Schema(
     openDays: [
       {
         type: String,
-        enum: abbreviatedDays,
       },
     ],
 

@@ -116,6 +116,7 @@ const createRestaurantAccount = async (req) => {
       logoImage: logoImageUrl,
       mainImage: mainImageUrl,
       openDays: req.body.openDays || [],
+
       closedDates: req.body.closedDates || [],
     });
     await newRestaurantProfile.save({ session });
@@ -166,6 +167,36 @@ const getAllRestaurantsWithOwners = async () => {
     throw error;
   }
 };
+
+const getRestaurantWithOwnerById = async (Id) => {
+  try {
+    const restaurant = await Restaurant.findById(Id).populate({
+      path: "userId",
+      select: "name email phone",
+    });
+
+    if (!restaurant) {
+      return {
+        success: false,
+        message: MESSAGES.RESTAURANT_NOT_FOUND,
+        data: null,
+      };
+    }
+
+    return {
+      success: true,
+      message: MESSAGES.RESTAURANT_FOUND,
+      data: restaurant,
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message = MESSAGES.SERVER_ERROR;
+    }
+    throw error;
+  }
+};
+
 
 const updateRestaurant = async (req) => {
   const { restaurantId } = req.params;
@@ -384,4 +415,5 @@ module.exports = {
   getAllRestaurantsWithOwners,
   updateRestaurant,
   deleteRestaurant,
+  getRestaurantWithOwnerById
 };

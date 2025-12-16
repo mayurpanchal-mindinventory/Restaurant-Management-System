@@ -1,44 +1,35 @@
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
-import { MenuSquareIcon } from 'lucide-react'
-function Restaurant() {
-    const [restaurant, setRestaurant] = useState([]);
-    const restaurantList = async () => {
-        const res = await getAllRestaurants();
-        if (res.status === 401) {
-            logout();
-            return;
-        }
-        setRestaurant(res);
+import { Link, useParams } from "react-router-dom";
+import { deleteMenuById, getMenuList } from "../services/adminService";
+import { IndianRupee, MenuSquareIcon } from 'lucide-react'
+import Menu from './Menu';
 
+function MenuList() {
+
+    const { id } = useParams();
+    const [menulist, setMenuList] = useState([]);
+    const getmenus = async () => {
+        const res = await getMenuList(id);
+        setMenuList(res.data);
     };
     useEffect(() => {
-        restaurantList();
+        getmenus();
     }, [])
 
-    const deleteRestaurant = async (id) => {
-        const res = await deleteRestaurantById(id);
-        if (res.status === 401) {
-            logout();
-            return;
-        }
-
-        toast.error("Restaurant Removed", {
-            theme: "colored"
-        });
-        restaurantList();
+    const deleteMenu = async (id) => {
+        await deleteMenuById(id);
+        getmenus();
     };
     return (
         <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <Link to={'add'} className="bg-gray-900 text-white px-4 py-4 rounded-lg text-l justify-items-end font-bold uppercase">
-                    Add Restaurant
+                <Link to={'/admin/menu'} className="bg-gray-900 text-white px-4 py-4 rounded-lg text-l justify-items-end font-bold uppercase">
+                    Add Menu
                 </Link>
                 <div>
-                    <h2 className="text-xl font-semibold"> Restaurants</h2>
+                    <h2 className="text-xl font-semibold">Menu List</h2>
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
@@ -55,33 +46,30 @@ function Restaurant() {
                 <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-gray-100 text-gray-700">
-                            <th className="p-3">Restaurant</th>
-                            <th className="p-3">Email</th>
-                            <th className="p-3">Phone</th>
-                            <th className="p-3">Open Days</th>
-                            {/* <th className="p-3">Closed Days</th> */}
+                            <th className="p-3">Menu</th>
+                            <th className="p-3">Menu Category</th>
+                            <th className="p-3">Menu Item</th>
+                            <th className="p-3">Price</th>
                             <th className="p-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="text-black">
-                        {restaurant?.data?.map((r) => (
+                        {menulist?.data?.map((r) => (
 
                             <tr key={r._id} className="border-b">
                                 <td className="p-3">
                                     <div className="flex items-center gap-3">
                                         <img
-                                            src={r.logoImage}
+                                            src={r.image}
                                             className="h-11 w-11 rounded-full border"
                                             alt="restaurant"
                                         />
-                                        <span className="font-semibold">{r.name}</span>
                                     </div>
                                 </td>
+                                <td className="p-3">{r?.categoryId.categoryName}</td>
 
-                                <td className="p-3">{r.userId.email}</td>
-                                <td className="p-3">{r.userId.phone}</td>
-                                <td className="p-3">{r?.openDays || "-"}</td>
-                                {/* <td className="p-3">{new Date(r.closedDates).toLocaleDateString().split('T')[0]}</td> */}
+                                <td className="p-3">{r?.name}</td>
+                                <td className="p-3">Rs. {r?.price || "-"}</td>
 
                                 <td className="p-3">
                                     <Link to={`add/${r._id}`}>
@@ -96,7 +84,7 @@ function Restaurant() {
                                         </button>
                                     </Link>
 
-                                    <button onClick={() => deleteRestaurant(r._id)} className="p-2 rounded hover:bg-gray-100">
+                                    <button onClick={() => deleteMenu(r._id)} className="p-2 rounded hover:bg-gray-100">
                                         <TrashIcon className="size-6 text-red-500" />
                                     </button>
 
@@ -130,4 +118,4 @@ function Restaurant() {
     );
 }
 
-export default Restaurant;
+export default MenuList;

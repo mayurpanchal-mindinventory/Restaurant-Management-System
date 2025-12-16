@@ -7,6 +7,8 @@ import { Toaster } from "react-hot-toast";
 import AdminLayout from "./components/layout/AdminLayout";
 import Restaurant from "./pages/Restaurant";
 import AddRestaurant from "./pages/AddRestaurant";
+import Menu from "./pages/Menu";
+import MenuList from "./pages/MenuList";
 
 function App() {
   return (
@@ -19,7 +21,10 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
         <Route path="admin" element={<AdminLayout />}>
-          <Route path='add' element={<AddRestaurant />} />
+          <Route path="add" element={<AddRestaurant />} />
+          <Route path="add/:id" element={<AddRestaurant />} />
+          <Route path="menu/:id" element={<MenuList />} />
+          <Route path="menu" element={<Menu />} />
 
           <Route index element={<Restaurant />} />
         </Route>
