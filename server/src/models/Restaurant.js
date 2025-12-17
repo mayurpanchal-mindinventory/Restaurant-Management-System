@@ -9,7 +9,7 @@ const restaurantSchema = new mongoose.Schema(
       unique: true,
     },
     name: { type: String, required: true },
-    description: { type: String },
+    description: { type: String, required: true },
 
     logoImage: { type: String },
     mainImage: { type: String },

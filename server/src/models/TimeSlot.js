@@ -7,6 +7,7 @@ const timeSlotSchema = new mongoose.Schema(
         maxBookings: { type: Number, required: true },
         discountPercent: { type: Number, default: 0 }
     },
+    { collection: "timeslots" },
     { timestamps: true }
 );
 

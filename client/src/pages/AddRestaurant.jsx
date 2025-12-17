@@ -9,10 +9,6 @@ const validationSchema = Yup.object({
     password: Yup.string().required("Password is required"),
     email: Yup.string().email().required("Email is required"),
     phone: Yup.string().required("Phone number is required"),
-
-    // closedDates: Yup.array().min(0, "Select at least one holiday date"),
-    // openDays: Yup.array().min(0, "Select at least one weekly off day"),
-
     mainImage: Yup.mixed().required("Cover photo is required"),
     logoImage: Yup.mixed().required("Profile photo is required"),
 });
@@ -36,6 +32,7 @@ export default function RestaurantForm() {
         restaurantName: apiData?.name || "",
         password: apiData?.password || "",
         email: apiData?.userId?.email || "",
+        description: apiData?.userId?.description || "",
         phone: apiData?.userId?.phone || "",
         closedDates: apiData?.closedDates || [],
         openDays: apiData?.openDays || [],
@@ -60,6 +57,7 @@ export default function RestaurantForm() {
 
                 formData.append("restaurantName", values.restaurantName);
                 formData.append("email", values.email);
+                formData.append("description", values.email);
                 formData.append("password", values.password);
                 formData.append("phone", values.phone);
                 values.closedDates.forEach(date => {
@@ -164,6 +162,18 @@ export default function RestaurantForm() {
 
                         <ErrorMessage
                             name="closedDates"
+                            component="p"
+                            className="text-red-500 text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium">Description</label>
+                        <Field
+                            name="description"
+                            className="mt-1 w-full p-2 border rounded-md"
+                        />
+                        <ErrorMessage
+                            name="description"
                             component="p"
                             className="text-red-500 text-sm"
                         />
