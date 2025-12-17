@@ -70,3 +70,9 @@ export const getSlotById = async (id) => {
 export const updateSlot = async (slotId, body) => {
     return await apiClient.put(`api/admin/update-slot/${slotId}`, body);
 }
+
+//Booking Api
+export const getAllBooking = async () => {
+    const res = await apiClient.get("api/admin/bookings");
+    return res.data;
+}

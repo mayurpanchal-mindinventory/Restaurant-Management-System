@@ -11,7 +11,7 @@ import { Link, Outlet } from "react-router-dom";
 
 const navigation = [
     { name: "Restaurants", href: "/admin", current: false },
-    { name: "Bookings", href: "#", current: false },
+    { name: "Bookings", href: "/admin/bookingList", current: false },
     // { name: "Slots", href: "slot", current: false },
 
 ];

@@ -10,6 +10,7 @@ import AddRestaurant from "./pages/AddRestaurant";
 import Menu from "./pages/Menu";
 import MenuList from "./pages/MenuList";
 import Slot from "./pages/Slot";
+import BookingList from "./pages/BookingList";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="addmenu/:id" element={<Menu />} />
           <Route path="editmenu/:id" element={<Menu />} />
           <Route path="slot/:id" element={<Slot />} />
+          <Route path="bookingList" element={<BookingList />} />
 
           <Route index element={<Restaurant />} />
         </Route>
