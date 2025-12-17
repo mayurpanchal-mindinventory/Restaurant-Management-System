@@ -1,270 +1,227 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-multi-date-picker";
 import { createRestaurant, getRestaurantsById, updateRestaurant } from "../services/adminService";
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
-const validationSchema = Yup.object({
-    password: Yup.string().required("Password is required"),
-    email: Yup.string().email().required("Email is required"),
-    phone: Yup.string().required("Phone number is required"),
-    mainImage: Yup.mixed().required("Cover photo is required"),
-    logoImage: Yup.mixed().required("Profile photo is required"),
-});
+import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi"; // Optional: npm install react-icons
+
 
 export default function RestaurantForm() {
 
     const { id } = useParams();
-    const [apiData, setApiData] = useState(null)
+    const navigate = useNavigate();
+    const [apiData, setApiData] = useState(null);
+    const [previews, setPreviews] = useState({ main: null, logo: null });
+
+    const validationSchema = Yup.object({
+        restaurantName: Yup.string().required("Name is required"),
+        password: id ? Yup.string() : Yup.string().required("Password is required"),
+        email: Yup.string().email().required("Email is required"),
+        phone: Yup.string().required("Phone number is required"),
+        mainImage: Yup.mixed().required("Cover photo is required"),
+        logoImage: Yup.mixed().required("Profile photo is required"),
+    });
     const getDetails = async () => {
         try {
             const res = await getRestaurantsById(id);
             setApiData(res.data);
-            console.log(res.data);
-
+            setPreviews({ main: res.data.mainImage, logo: res.data.logoImage });
         } catch (e) {
-            toast("abc")
+            toast.error("Failed to fetch details");
         }
     }
+
+    useEffect(() => { if (id) getDetails(); }, [id]);
 
     const initialValues = {
         restaurantName: apiData?.name || "",
         password: apiData?.password || "",
         email: apiData?.userId?.email || "",
-        description: apiData?.userId?.description || "",
+        description: apiData?.description || "",
         phone: apiData?.userId?.phone || "",
         closedDates: apiData?.closedDates || [],
         openDays: apiData?.openDays || [],
         mainImage: apiData?.mainImage || null,
         logoImage: apiData?.logoImage || null,
-    }
+    };
 
-    useEffect(() => {
-        if (id) {
-
-            getDetails();
+    const handleFileChange = (e, setFieldValue, fieldName) => {
+        const file = e.currentTarget.files[0];
+        setFieldValue(fieldName, file);
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => setPreviews(prev => ({ ...prev, [fieldName === 'mainImage' ? 'main' : 'logo']: reader.result }));
+            reader.readAsDataURL(file);
         }
-    }, [id])
+    };
 
     return (
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+            <Formik
+                initialValues={initialValues}
+                enableReinitialize={true}
+                validationSchema={validationSchema}
+                onSubmit={async (values) => {
+                    const formData = new FormData();
+                    Object.keys(values).forEach(key => {
+                        if (key === 'closedDates') {
+                            values.closedDates.forEach(date => formData.append("closedDates[]", date));
+                        } else {
+                            formData.append(key, values[key]);
+                        }
+                    });
 
-        <Formik
-            initialValues={initialValues} enableReinitialize={true}
-            validationSchema={validationSchema}
-            onSubmit={async (values) => {
-                const formData = new FormData();
-
-                formData.append("restaurantName", values.restaurantName);
-                formData.append("email", values.email);
-                formData.append("description", values.email);
-                formData.append("password", values.password);
-                formData.append("phone", values.phone);
-                values.closedDates.forEach(date => {
-                    formData.append("closedDates[]", date);
-                });
-                formData.append("openDays", values.openDays);
-
-                formData.append("mainImage", values.mainImage);
-                formData.append("logoImage", values.logoImage);
-
-                try {
-
-                    if (!id) {
-                        const res = await createRestaurant(formData);
-                        toast.success("Restaurant Created");
-                    } else {
-                        const res = await updateRestaurant(id, formData);
-                        toast.success("Restaurant information Updated");
+                    try {
+                        id ? await updateRestaurant(id, formData) : await createRestaurant(formData);
+                        toast.success(`Restaurant ${id ? 'Updated' : 'Created'} Successfully`);
+                        navigate('/admin');
+                    } catch (e) {
+                        toast.error("An error occurred");
                     }
+                }}
+            >
+                {({ setFieldValue, values, isSubmitting }) => (
+                    <Form className="flex-1 flex flex-col">
+                        {/* HEADER STICKY BAR */}
+                        <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
+                            <div className="flex text-orange-500 items-center gap-4">
+                                <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                                    <FiArrowLeft size={20} />
+                                </button>
+                                <h1 className="text-xl font-bold text-gray-800">
+                                    {id ? "Edit Restaurant Profile" : "Register New Restaurant"}
+                                </h1>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="bg-orange-500 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                            >
+                                <FiSave /> {isSubmitting ? "Saving..." : "Save Changes"}
+                            </button>
+                        </header>
 
-                } catch (e) {
-                    toast("abc")
-                }
+                        <main className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            }}
+                            {/* LEFT COLUMN: Media & Branding */}
+                            <div className="lg:col-span-1 space-y-6  text-black">
+                                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                                    <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Branding</h2>
 
-        >
-            {({ setFieldValue, values }) => (
-                <Form className="space-y-6 p-6 max-w-3xl mx-auto bg-white text-black rounded-lg shadow">
+                                    {/* Cover Image */}
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium mb-2">Cover Photo</label>
+                                        <div className="relative h-40 w-full bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group">
+                                            {previews.main ? (
+                                                <img src={previews.main} className="w-full h-full object-cover" alt="Cover" />
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                                    <FiUpload size={24} />
+                                                    <span className="text-xs mt-2">Upload Cover</span>
+                                                </div>
+                                            )}
+                                            <input
+                                                type="file"
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                onChange={(e) => handleFileChange(e, setFieldValue, "mainImage")}
+                                            />
+                                        </div>
+                                        <ErrorMessage name="mainImage" component="p" className="text-red-500 text-xs mt-1" />
+                                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium">Restaurant Name</label>
-                            <Field
-                                name="restaurantName"
-                                className="mt-1 w-full p-2 border rounded-md"
-                            />
-                            <ErrorMessage
-                                name="restaurantName"
-                                component="p"
-                                className="text-red-500 text-sm"
-                            />
-                        </div>
+                                    {/* Logo Image */}
+                                    <div className="flex flex-col items-center">
+                                        <label className="block text-sm font-medium mb-2 w-full text-left">Logo</label>
+                                        <div className="relative h-24 w-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100 group">
+                                            {previews.logo ? (
+                                                <img src={previews.logo} className="w-full h-full object-cover" alt="Logo" />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-gray-400"><FiUpload /></div>
+                                            )}
+                                            <input
+                                                type="file"
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                onChange={(e) => handleFileChange(e, setFieldValue, "logoImage")}
+                                            />
+                                        </div>
+                                        <ErrorMessage name="logoImage" component="p" className="text-red-500 text-xs mt-1" />
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium">Email</label>
-                            <Field
-                                name="email"
-                                className="mt-1 w-full p-2 border rounded-md"
-                            />
-                            <ErrorMessage
-                                name="email"
-                                component="p"
-                                className="text-red-500 text-sm"
-                            />
-                        </div>
+                            {/* RIGHT COLUMN: Form Details */}
+                            <div className="lg:col-span-2 space-y-6  text-black">
+                                <div className="bg-white p-8 rounded-xl shadow-sm border">
+                                    <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">General Information</h2>
 
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-600">Restaurant Name</label>
+                                            <Field name="restaurantName" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <ErrorMessage name="restaurantName" component="p" className="text-red-500 text-xs mt-1" />
+                                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium">Password</label>
-                            <Field
-                                name="password"
-                                className="mt-1 w-full p-2 border rounded-md"
-                            />
-                            <ErrorMessage
-                                name="password"
-                                component="p"
-                                className="text-red-500 text-sm"
-                            />
-                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600">Email Address</label>
+                                            <Field name="email" type="email" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <ErrorMessage name="email" component="p" className="text-red-500 text-xs mt-1" />
+                                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium">Phone</label>
-                            <Field
-                                name="phone"
-                                className="mt-1 w-full p-2 border rounded-md"
-                            />
-                            <ErrorMessage
-                                name="phone"
-                                component="p"
-                                className="text-red-500 text-sm"
-                            />
-                        </div>
-                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600">Phone Number</label>
+                                            <Field name="phone" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <ErrorMessage name="phone" component="p" className="text-red-500 text-xs mt-1" />
+                                        </div>
 
-                    <div>
-                        <label className="block text-sm  font-medium">Holiday Dates</label>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-600">Password</label>
+                                            <Field name="password" type="password" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <ErrorMessage name="password" component="p" className="text-red-500 text-xs mt-1" />
 
-                        <DatePicker
-                            multiple
-                            value={values.closedDates}
-                            onChange={(dates) =>
-                                setFieldValue(
-                                    "closedDates",
-                                    dates.map((d) => d.format("YYYY-MM-DD"))
-                                )
-                            }
-                            placeholder="select Holiday Dates"
-                            format="YYYY-MM-DD"
-                            className="border rounded-md  w-full mt-1"
-                        />
+                                        </div>
 
-                        <ErrorMessage
-                            name="closedDates"
-                            component="p"
-                            className="text-red-500 text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Description</label>
-                        <Field
-                            name="description"
-                            className="mt-1 w-full p-2 border rounded-md"
-                        />
-                        <ErrorMessage
-                            name="description"
-                            component="p"
-                            className="text-red-500 text-sm"
-                        />
-                    </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-600">Description</label>
+                                            <Field as="textarea" rows="3" name="description" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Weekly Off</label>
+                                {/* Operations Section */}
+                                <div className="bg-white p-8 rounded-xl shadow-sm border">
+                                    <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">Operational Hours</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600 mb-2">Holiday Dates</label>
+                                            <DatePicker
+                                                multiple
+                                                value={values.closedDates}
+                                                onChange={(dates) => setFieldValue("closedDates", dates?.map((d) => d.format("YYYY-MM-DD")))}
+                                                containerClassName="w-full"
+                                                inputClass="w-full border p-2.5 rounded-md bg-gray-50 border-gray-300 focus:ring-indigo-500"
+                                            />
+                                        </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {[
-                                "Mon",
-                                "Tue",
-                                "Wed",
-                                "Thu",
-                                "Fri",
-                                "Sat",
-                                "Sun",
-                            ].map((day) => (
-                                <label key={day} className="flex items-center gap-2">
-                                    <Field
-                                        type="checkbox"
-                                        name="openDays"
-                                        value={day}
-                                        className="h-4 w-4 border-gray-300 rounded"
-                                    />
-                                    <span>{day}</span>
-                                </label>
-                            ))}
-                        </div>
-
-                        <ErrorMessage
-                            name="openDays"
-                            component="p"
-                            className="text-red-500 text-sm mt-1"
-                        />
-                    </div>
-
-                    <div>
-
-
-                        <label className="block text-sm font-medium">Cover Photo</label>
-
-                        <input
-                            type="file"
-                            className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
-                            onChange={(e) =>
-                                setFieldValue("mainImage", e.currentTarget.files[0])
-                            }
-                        />
-
-                        <ErrorMessage
-                            name="mainImage"
-                            component="p"
-                            className="text-red-500 text-sm"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium">Restaurant Logo</label>
-
-                        <input
-                            type="file"
-                            className="w-full text-slate-500 font-medium text-base bg-gray-100 file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-800 file:hover:bg-gray-700 file:text-white rounded"
-                            onChange={(e) =>
-                                setFieldValue("logoImage", e.currentTarget.files[0])
-                            }
-                        />
-
-                        <ErrorMessage
-                            name="logoImage"
-                            component="p"
-                            className="text-red-500 text-sm"
-                        />
-                    </div>
-
-                    <div className="flex flex-row gap-10">
-                        <button
-                            type="submit"
-                            className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md hover:bg-indigo-700"
-                        >
-                            {!id ? "Submit" : "Update"}
-                        </button>
-                        {/* <button
-                            type="submit"
-                            className="mt-4 w-full bg-red-500 text-white py-2 rounded-md hover:bg-indigo-700"
-                        >
-                            Reset
-                        </button> */}
-                    </div>
-                </Form>
-            )}
-        </Formik>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600 mb-3">Weekly Off Days</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+                                                    <label key={day} className="flex items-center px-3 py-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                        <Field type="checkbox" name="openDays" value={day} className="h-4 w-4 text-indigo-600 rounded mr-2" />
+                                                        <span className="text-sm text-gray-700">{day}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </Form>
+                )}
+            </Formik>
+        </div>
     );
 }

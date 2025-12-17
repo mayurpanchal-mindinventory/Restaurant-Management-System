@@ -5,7 +5,7 @@ export default function Loader({ loading = false, size = 40, className = "", col
     if (!loading) return null;
 
     return (
-        <div className={`flex justify-center items-center w-full py-6 ${className}`}>
+        <div className={`flex justify-center items-center h-full w-full py-6 ${className}`}>
             <ClipLoader loading={loading} size={size} color={color} />
         </div>
     );

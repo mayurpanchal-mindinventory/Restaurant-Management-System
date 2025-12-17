@@ -3,8 +3,10 @@ import apiClient from "./apiClient.js";
 export const createRestaurant = async (body) => {
   return await apiClient.post(`api/admin/create-restaurant`, body);
 };
-export const getAllRestaurants = async () => {
-  const res = await apiClient.get("api/admin/display-restaurant");
+export const getAllRestaurants = async (currentpage) => {
+  const res = await apiClient.get(
+    `api/admin/display-restaurant?page=${currentpage}`
+  );
 
   return res.data;
 };
@@ -39,21 +41,40 @@ export const getMenuList = async (id) => {
   return await apiClient.get(`api/admin/menulist/${id}`);
 };
 export const deleteMenuById = async (id) => {
-    const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
-    return res.data;
-}
-
-
+  const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
+  return res.data;
+};
+export const getMenuById = async (id) => {
+  const res = await apiClient.get(`api/admin/menu/${id}`);
+  return res.data;
+};
+export const updateMenuById = async (menuId, body) => {
+  return await apiClient.put(`api/admin/update-menu/${menuId}`, body);
+};
 
 //Slot Api's
 
 export const createSlot = async (body) => {
-    return await apiClient.post(`api/admin/slot`, body);
-}
+  return await apiClient.post(`api/admin/slot`, body);
+};
 export const getSlotListByRestaurant = async (id) => {
-    return await apiClient.get(`api/admin/slotlist/${id}`);
-}
+  return await apiClient.get(`api/admin/slotlist/${id}`);
+};
 export const deleteSlotById = async (id) => {
-    const res = await apiClient.delete(`api/admin/delete-slot/${id}`);
-    return res.data;
-}
+  const res = await apiClient.delete(`api/admin/delete-slot/${id}`);
+  return res.data;
+};
+export const getSlotById = async (id) => {
+  const res = await apiClient.get(`api/admin/slot/${id}`);
+
+  return res.data;
+};
+export const updateSlot = async (slotId, body) => {
+  return await apiClient.put(`api/admin/update-slot/${slotId}`, body);
+};
+
+//Booking Api
+export const getAllBooking = async (page) => {
+  const res = await apiClient.get(`api/admin/viewbooking?page=${page}`);
+  return res.data;
+};

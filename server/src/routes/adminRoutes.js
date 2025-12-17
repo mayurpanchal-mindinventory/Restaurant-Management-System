@@ -33,6 +33,9 @@ router.post(
 
 router.get(`/menulist/:id`, menuController.getAllMenusByRestaurant);
 router.delete(`/delete-menu/:id`, menuController.deleteMenuById);
+router.put(`/update-menu/:id`, uploadMenu,
+  menuController.updateMenu);
+router.get(`/menu/:id`, menuController.getMenuDetails);
 
 
 //Routers for Slot
@@ -48,6 +51,9 @@ router.get(
 );
 router.delete(`/delete-slot/:id`, slotController.deleteSlotById);
 
+router.put(`/update-slot/:id`, slotController.updateSlotById);
+router.get(`/slot/:id`, slotController.getSlotById);
+router.get(`/viewbooking`, adminController.getAllBookingswithDetails);
 
 
 module.exports = router;

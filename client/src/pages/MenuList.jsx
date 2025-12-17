@@ -1,12 +1,13 @@
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteMenuById, getMenuList } from "../services/adminService";
 import { IndianRupee, MenuSquareIcon } from 'lucide-react'
 import Menu from './Menu';
+import { FiArrowLeft } from "react-icons/fi";
 
 function MenuList() {
-
+    const navigate = useNavigate();
     const { id } = useParams();
     const [menulist, setMenuList] = useState([]);
     const getmenus = async () => {
@@ -23,11 +24,18 @@ function MenuList() {
     };
     return (
         <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <header className="bg-white border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+                <div className="flex text-orange-500 items-center">
+                    <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                        <FiArrowLeft size={20} />
+                    </button>
+                </div>
                 <Link to={`/admin/addmenu/${id}`} className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
                     Add Menu
                 </Link>
+            </header>
+            <div className="flex flex-col md:flex-row md:items-center mt-2 justify-between gap-4">
+
                 <div>
                     <h2 className="text-xl font-semibold">Menu List</h2>
                 </div>

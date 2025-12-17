@@ -3,35 +3,48 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
 import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
+import Loader from "../components/common/Loader";
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [currentpage, setcurrentpage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const restaurantList = async () => {
-        const res = await getAllRestaurants();
-        if (res.status === 401) {
-            logout();
-            return;
-        }
-        setRestaurant(res);
-
+        const res = await getAllRestaurants(currentpage);
+        setRestaurant(res?.data?.restaurants);
+        setTotalPages(res?.data?.totalPages)
     };
     useEffect(() => {
         restaurantList();
-    }, [])
+    }, [currentpage])
 
-    const deleteRestaurant = async (id) => {
-        const res = await deleteRestaurantById(id);
-        if (res.status === 401) {
-            logout();
-            return;
+    const goToNextPage = () => {
+        if (currentpage < totalPages) {
+            setcurrentpage(currentpage + 1);
         }
+    };
+
+    const goToPrevpage = () => {
+        if (currentpage > 1) {
+            setcurrentpage(currentpage - 1);
+        }
+    };
+    const deleteRestaurant = async (id) => {
+        setLoading(true)
+        const res = await deleteRestaurantById(id);
+        // if (res.status === 401) {
+        //     logout();
+        //     return;
+        // }
 
         toast.error("Restaurant Removed", {
             theme: "colored"
         });
         restaurantList();
+        setLoading(false);
     };
     return (
-        <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        loading ? <Loader loading={loading} size={40} /> : (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -59,14 +72,14 @@ function Restaurant() {
                             <th className="p-3">Restaurant</th>
                             <th className="p-3">Email</th>
                             <th className="p-3">Phone</th>
-                            <th className="p-3">Open Days</th>
+                            <th className="p-3">Close Day</th>
                             <th className="p-3">Menu</th>
                             <th className="p-3">Slots</th>
                             <th className="p-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="text-black">
-                        {restaurant?.data?.map((r) => (
+                        {restaurant?.map((r) => (
 
                             <tr key={r._id} className="border-b">
                                 <td className="p-3">
@@ -116,23 +129,17 @@ function Restaurant() {
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm">Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
-                    {[1, 2, 3, "...", 8, 9, 10].map((n, i) => (
-                        <button
-                            key={i}
-                            className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
-                        >
-                            {n}
-                        </button>
-                    ))}
+                    <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
 
-        </div >
+
+        </div >)
     );
 }
 

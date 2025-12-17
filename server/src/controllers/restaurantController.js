@@ -5,6 +5,7 @@ const {
   updateRestaurant,
   deleteRestaurant,
   getRestaurantWithOwnerById,
+  allBooking,
 } = require("../services/adminService.js");
 
 exports.createRestaurantAccount = async (req, res) => {
@@ -24,7 +25,7 @@ exports.createRestaurantAccount = async (req, res) => {
 
 exports.getAllRestaurantsWithOwners = async (req, res) => {
   try {
-    const result = await getAllRestaurantsWithOwners();
+    const result = await getAllRestaurantsWithOwners(req);
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error in getAllRestaurantsWithOwners controller:", error);
@@ -77,6 +78,23 @@ exports.deleteRestaurant = async (req, res) => {
       error.status || STATUS.INTERNAL_SERVER_ERROR,
       error.message || MESSAGES.SERVER_ERROR,
       error.details
+    );
+  }
+};
+
+
+exports.getAllBookingswithDetails = async (req, res) => {
+  try {
+
+    const result = await allBooking(req);
+
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in getRestaurantsWithOwnerById controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
     );
   }
 };
