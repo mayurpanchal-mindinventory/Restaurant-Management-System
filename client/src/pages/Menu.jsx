@@ -1,9 +1,10 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useParams, useLocation } from "react-router-dom";
-import { createMenu, getAllCategories } from "../services/adminService";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { createMenu, getAllCategories, getMenuById, updateMenuById } from "../services/adminService";
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
+import { FiArrowLeft, FiSave } from "react-icons/fi";
 
 const validationSchema = Yup.object({
     MenuName: Yup.string().required("Menu Name is required"),
@@ -14,11 +15,14 @@ const validationSchema = Yup.object({
 export default function Menu() {
     const location = useLocation();
     const [edit, setEdit] = useState(false)
+    const [menuDetail, setMenuDetail] = useState([])
+
     const updateLocation = location.pathname;
-    console.log(updateLocation);
+    const navigate = useNavigate();
 
 
     const { id } = useParams();
+
     const [categories, setCategories] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const handleFileChange = (event, setFieldValue) => {
@@ -32,6 +36,8 @@ export default function Menu() {
         }
     };
 
+
+
     const getCategories = async () => {
         try {
             const res = await getAllCategories();
@@ -41,43 +47,77 @@ export default function Menu() {
         }
     };
 
+    const getMenuDetail = async (id) => {
+        try {
+            const res = await getMenuById(id);
+            console.log(res.data);
+            setMenuDetail(res.data);
+            setImagePreviewUrl(res?.data?.image)
+        } catch (e) {
+            toast(e.ErrorMessage);
+        }
+    };
+    const initialValues = {
+        MenuName: menuDetail?.name || "",
+        price: menuDetail?.price || "",
+        MenuImage: menuDetail?.image || null,
+        categories: menuDetail?.categoryId?._id || ""
+    }
     useEffect(() => {
-        updateLocation.startsWith("/admin/editmenu") ? setEdit(true) : setEdit(false)
-
+        updateLocation.includes("/admin/editmenu") ? setEdit(true) : setEdit(false)
+        if (edit) {
+            getMenuDetail(id);
+        }
         getCategories();
         return () => {
             if (imagePreviewUrl) {
                 URL.revokeObjectURL(imagePreviewUrl);
             }
         };
-    }, []);
+    }, [edit]);
     return (
         <Formik
-            initialValues={{
-                MenuName: "",
-                price: "",
-                MenuImage: null,
-                categories: ""
-            }}
+            initialValues={initialValues}
             validationSchema={validationSchema}
+            enableReinitialize={true}
             onSubmit={async (values) => {
                 const formData = new FormData();
                 formData.append("name", values.MenuName);
                 formData.append("price", values.price);
                 formData.append("image", values.MenuImage);
                 formData.append("categoryId", values.categories);
-                formData.append("restaurantId", id);
+                !edit && formData.append("restaurantId", id);
 
                 try {
-                    await createMenu(formData);
-                    toast.success("Menu item created successfully!");
+
+                    !edit ? await createMenu(formData) : await updateMenuById(id, formData);
+                    toast.success(`Menu item ${!edit ? "created" : "update"} successfully!`);
+                    navigate(-1);
+
                 } catch (e) {
                     toast.error("Failed to create menu item.");
                 }
             }}
         >
-            {({ setFieldValue }) => (
+            {({ setFieldValue, isSubmitting }) => (
                 <Form className="space-y-6 p-6 max-w-3xl mx-auto bg-white text-black rounded-lg shadow-lg">
+                    <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
+                        <div className="flex text-orange-500 items-center gap-4">
+                            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                                <FiArrowLeft size={20} />
+                            </button>
+                            <h1 className="text-xl font-bold text-gray-800">
+                                {edit ? "Edit Menu Item" : "Add New Menu Item"}
+                            </h1>
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="bg-orange-500 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                        >
+                            <FiSave /> {isSubmitting ? "Saving..." : "Save Changes"}
+                        </button>
+                    </header>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -131,7 +171,7 @@ export default function Menu() {
                                     <img
                                         src={imagePreviewUrl}
                                         alt="Preview"
-                                        className="absolute inset-0 w-full h-full object-cover rounded-base" // Added object-cover to fit nicely
+                                        className="w-full h-full object-cover rounded-base"
                                     />
                                 )}
                             </label>
@@ -142,14 +182,7 @@ export default function Menu() {
                             className="text-red-500 text-sm"
                         />
                     </div>
-                    <div className="flex flex-row gap-10">
-                        <button
-                            type="submit"
-                            className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md hover:bg-indigo-700"
-                        >
-                            {!edit ? "Add" : "Update Menu"}
-                        </button>
-                    </div>
+
                 </Form>
             )}
         </Formik>

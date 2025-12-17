@@ -22,6 +22,7 @@ export const MESSAGES = {
   RESTAURANT_NOTDELETE: "Something went wrong Restaurant delete failed",
   MENU_DELETED: "Menu deleted successfully.",
   MENU_NOTDELETE: "Something went wrong Menu delete failed",
+  MENU_NOT_UPDATED: "Something Went Wrong while updating menu item"
 
 };
 

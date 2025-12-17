@@ -3,8 +3,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
 import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
+import Loader from "../components/common/Loader";
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
+    const [loading, setLoading] = useState(false);
+
     const restaurantList = async () => {
         const res = await getAllRestaurants();
         if (res.status === 401) {
@@ -19,19 +22,21 @@ function Restaurant() {
     }, [])
 
     const deleteRestaurant = async (id) => {
+        setLoading(true)
         const res = await deleteRestaurantById(id);
-        if (res.status === 401) {
-            logout();
-            return;
-        }
+        // if (res.status === 401) {
+        //     logout();
+        //     return;
+        // }
 
         toast.error("Restaurant Removed", {
             theme: "colored"
         });
         restaurantList();
+        setLoading(false);
     };
     return (
-        <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        loading ? <Loader loading={loading} size={40} /> : (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -59,7 +64,7 @@ function Restaurant() {
                             <th className="p-3">Restaurant</th>
                             <th className="p-3">Email</th>
                             <th className="p-3">Phone</th>
-                            <th className="p-3">Open Days</th>
+                            <th className="p-3">Close Day</th>
                             <th className="p-3">Menu</th>
                             <th className="p-3">Slots</th>
                             <th className="p-3">Actions</th>
@@ -132,7 +137,7 @@ function Restaurant() {
                 <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
             </div>
 
-        </div >
+        </div >)
     );
 }
 

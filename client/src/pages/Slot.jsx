@@ -1,29 +1,29 @@
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
-import { Link, useParams } from "react-router-dom";
-import { createSlot, deleteSlotById, getSlotListByRestaurant } from "../services/adminService";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { createSlot, deleteSlotById, getSlotById, getSlotListByRestaurant, updateSlot } from "../services/adminService";
 import { Field, Form, Formik } from 'formik';
 import { ErrorMessage } from 'formik';
 import { toast } from 'react-hot-toast';
 import Loader from '../components/common/Loader';
+import { FiArrowLeft } from "react-icons/fi";
 const validationSchema = Yup.object({
     timeslot: Yup.string().required("Time Slot is required"),
     maxbooking: Yup.string().required("Maximum Booking is required"),
     discount: Yup.string().required("Discount is required"),
 });
 function Slot() {
-
+    const navigate = useNavigate();
     const { id } = useParams();
     const [slot, setSlotList] = useState([]);
+    const [detail, setDetail] = useState(null)
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const getSlotList = async () => {
         const res = await getSlotListByRestaurant(id);
         setSlotList(res.data.data);
         setLoading(false)
-
     };
 
     useEffect(() => {
@@ -36,30 +36,33 @@ function Slot() {
         getSlotList();
     };
 
+    const editSlot = async (id) => {
+        setLoading(true)
+        const res = await getSlotById(id);
+        setDetail(res.data);
+        setLoading(false);
+        setShowModal(true)
+    };
+
     const initialValues = {
-        timeslot: "",
-        maxbooking: "",
-        discount: ""
+        timeslot: detail?.timeSlot || "",
+        maxbooking: detail?.maxBookings || "",
+        discount: detail?.discountPercent || ""
     }
     return (
         <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <header className="bg-white border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+                <div className="flex text-orange-500 items-center">
+                    <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                        <FiArrowLeft size={20} />
+                    </button>
+                </div>
                 <Link onClick={() => setShowModal(true)} className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
                     Add Slot
                 </Link>
-                <div>
-                    <h2 className="text-xl font-semibold">Slot List</h2>
-                </div>
-
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                    />
-
-                </div>
+            </header>
+            <div>
+                <h2 className="text-xl font-semibold p-4">Slot List</h2>
             </div>
 
             {loading ? <Loader loading={loading} size={60} /> : (<div className="mt-6 overflow-x-auto">
@@ -81,7 +84,7 @@ function Slot() {
                                 <td className="p-3"> {r?.discountPercent || "-"} %</td>
 
                                 <td className="p-3">
-                                    <Link to={`/admin/editmenu/${r._id}`}>
+                                    <Link onClick={() => editSlot(r._id)}>
                                         <button className="p-2 rounded hover:bg-gray-100">
                                             <PencilIcon className="size-6 text-orange-500" />
                                         </button>
@@ -113,18 +116,20 @@ function Slot() {
                                 "discountPercent": Number(values.discount)
                             }
 
-                            const res = await createSlot(formdata);
-                            if (res?.error)
-                                toast.success("Slot Already Exist");
 
-                            // if (!id) {
 
-                            //     } else {
-                            //         const res = await updateRestaurant(id, formData);
-                            //         toast.success("Slot information Updated");
-                            //     }
-                            showModal(false);
+                            if (!detail) {
+                                const res = await createSlot(formdata);
+                                if (res)
+                                    toast.success("Slot Created");
+                            } else {
+                                const res = await updateSlot(detail._id, formdata);
+                                toast.success("Slot information Updated");
+                            }
+                            setShowModal(false);
+                            setDetail(null)
 
+                            getSlotList();
                         } catch (e) {
                             toast.error(e.response?.data?.error || e.message);
                         }
@@ -168,13 +173,13 @@ function Slot() {
 
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
-                                    onClick={() => setShowModal(false)}
+                                    onClick={() => { setShowModal(false), setDetail(false) }}
                                     className="px-4 py-2 rounded-lg border"
                                 >
                                     Cancel
                                 </button>
                                 <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white">
-                                    Save Slot
+                                    {!detail ? "Save Slot" : "Update Slot"}
                                 </button>
                             </div>
                         </div>

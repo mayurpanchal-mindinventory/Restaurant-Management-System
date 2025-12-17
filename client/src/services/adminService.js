@@ -39,6 +39,14 @@ export const deleteMenuById = async (id) => {
     const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
     return res.data;
 }
+export const getMenuById = async (id) => {
+    const res = await apiClient.get(`api/admin/menu/${id}`);
+    return res.data;
+}
+export const updateMenuById = async (menuId, body) => {
+    return await apiClient.put(`api/admin/update-menu/${menuId}`, body);
+}
+
 
 
 
@@ -53,4 +61,12 @@ export const getSlotListByRestaurant = async (id) => {
 export const deleteSlotById = async (id) => {
     const res = await apiClient.delete(`api/admin/delete-slot/${id}`);
     return res.data;
+}
+export const getSlotById = async (id) => {
+    const res = await apiClient.get(`api/admin/slot/${id}`);
+
+    return res.data;
+}
+export const updateSlot = async (slotId, body) => {
+    return await apiClient.put(`api/admin/update-slot/${slotId}`, body);
 }

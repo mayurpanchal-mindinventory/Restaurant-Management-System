@@ -120,6 +120,31 @@ const getAllMenusByRestaurant = async (restaurantId) => {
     }
 };
 
+const getMenuById = async (menuId) => {
+    try {
+        const menuData = await MenuItem.findById(menuId)
+            .populate({
+                path: "restaurantId",
+                select: "name categoryId.name "
+            }).populate({ path: "categoryId" })
+            .exec();
+
+
+        return {
+            success: true,
+            message: "Menu Founded",
+            data: menuData,
+        };
+    } catch (error) {
+        if (!error.status) {
+            error.status = STATUS.INTERNAL_SERVER_ERROR;
+            error.message = MESSAGES.SERVER_ERROR;
+        }
+        throw error;
+    }
+};
+
+
 const deleteMenuById = async (req) => {
     const { id } = req.params;
 
@@ -186,10 +211,92 @@ const deleteMenuById = async (req) => {
         throw error;
     }
 };
+
+
+const updateMenuById = async (req) => {
+    const { name, price, categoryId } = req.body;
+    const { id } = req.params;
+
+    if (!id) {
+        const error = new Error("Menu ID is required.");
+        error.status = STATUS.BAD_REQUEST;
+        throw error;
+    }
+
+    if (!name || !price) {
+        const error = new Error(
+            "Missing required fields: name and Price are required."
+        );
+        error.status = STATUS.BAD_REQUEST;
+        error.details = {
+            name: !name ? "Name is required" : null,
+            price: !price ? "Price is required" : null,
+        };
+        throw error;
+    }
+    if (!name.trim()) {
+        const error = new Error(
+            "Menu name cannot be empty or just whitespace."
+        );
+        error.status = STATUS.BAD_REQUEST;
+        throw error;
+    }
+
+    const mainFile = req.files["image"] ? req.files["image"][0] : null;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+
+    try {
+        const existingMenu = await MenuItem.findById(id);
+        console.log(existingMenu);
+
+        let mainImageUrl = existingMenu.image;
+        if (mainFile) {
+            mainImageUrl = await uploadToCloudinary(
+                mainFile.path,
+                "menu_images"
+            );
+        }
+        console.log("check " + mainImageUrl);
+
+        const updatedMenu = {
+            categoryId: categoryId,
+            name: name,
+            image: mainImageUrl,
+            price: Number(price)
+        };
+        await MenuItem.findByIdAndUpdate(id, updatedMenu, { session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return {
+            success: true,
+            message: "Menu updated",
+            data: updatedMenu
+        };
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+
+        if (mainFile && fs.existsSync(mainFile.path)) fs.unlinkSync(mainFile.path);
+
+        if (!error.status) {
+            error.status = STATUS.INTERNAL_SERVER_ERROR;
+            error.message = MESSAGES.MENU_NOT_UPDATED
+        }
+        throw error;
+    }
+}
+
 module.exports = {
 
     getAllCategories,
     createMenu,
     getAllMenusByRestaurant,
-    deleteMenuById
+    deleteMenuById,
+    updateMenuById,
+    getMenuById
 }

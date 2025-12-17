@@ -22,3 +22,16 @@ exports.deleteSlot = async (req) => {
     if (!exists) throw new Error("Slot ID must required");
     return await TimeSlot.findByIdAndDelete(id);
 };
+
+exports.updateSlot = async (req) => {
+    const { id } = req.params;
+    await TimeSlot.findByIdAndUpdate(id, req.body);
+
+};
+
+exports.getSlotDetails = async (req) => {
+    const { id } = req.params;
+
+    if (!id) throw new Error("Slot Id Required");
+    return await TimeSlot.findById(id);
+};
