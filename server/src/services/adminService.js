@@ -6,7 +6,7 @@ const fs = require("fs");
 const cloudinary = require("../config/cloudinaryConfig.js");
 const mongoose = require("mongoose");
 const { STATUS, MESSAGES } = require("../utils/constants");
-
+const Booking = require('../models/Booking.js')
 const uploadToCloudinary = (filePath, folderName) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
@@ -34,7 +34,7 @@ const uploadToCloudinary = (filePath, folderName) => {
 };
 
 const createRestaurantAccount = async (req) => {
-  const { email, restaurantName, description, phone } = req.body;
+  const { email, restaurantName, description, phone, password } = req.body;
 
   if (!email || !restaurantName) {
     const error = new Error(
@@ -87,8 +87,7 @@ const createRestaurantAccount = async (req) => {
       );
     }
 
-    const tempPassword = crypto.randomBytes(8).toString("hex");
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const existingUser = await User.findOne({
       email: email.toLowerCase().trim(),
@@ -147,17 +146,29 @@ const createRestaurantAccount = async (req) => {
   }
 };
 
-const getAllRestaurantsWithOwners = async () => {
+const getAllRestaurantsWithOwners = async (req) => {
   try {
+    const { page } = req.query;
+    const limit = 2;
+    const skip = (page - 1) * limit;
     const restaurants = await Restaurant.find({}).populate({
       path: "userId",
       select: "name email phone",
-    });
+    }).skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const count = await Restaurant.countDocuments();;
 
     return {
       success: true,
       message: MESSAGES.RESTAURANT_FOUND,
-      data: restaurants,
+      data: {
+        restaurants, totalPages: Math.ceil(count / limit),
+        currentPage: page * 1,
+        totalDocs: count
+      }
     };
   } catch (error) {
     if (!error.status) {
@@ -200,7 +211,7 @@ const getRestaurantWithOwnerById = async (Id) => {
 
 const updateRestaurant = async (req) => {
   const { restaurantId } = req.params;
-  const { email, restaurantName, description, phone, openDays, closedDates } =
+  const { email, restaurantName, description, phone, openDays, closedDates, password } =
     req.body;
 
   // Validation
@@ -272,11 +283,13 @@ const updateRestaurant = async (req) => {
     await Restaurant.findByIdAndUpdate(restaurantId, updateData, { session });
 
     // Update user details if provided
-    if (restaurantName || email || phone) {
+    if (restaurantName || email || phone || password) {
       const userUpdateData = {};
       if (restaurantName) userUpdateData.name = restaurantName.trim();
       if (email) userUpdateData.email = email.toLowerCase().trim();
       if (phone) userUpdateData.phone = phone.trim();
+      if (password) userUpdateData.passwordHash = await bcrypt.hash(password, 10);
+
 
       await User.findByIdAndUpdate(existingRestaurant.userId, userUpdateData, {
         session,
@@ -408,12 +421,46 @@ const deleteRestaurant = async (req) => {
     throw error;
   }
 };
+const allBooking = async (req) => {
+  try {
+    const { page } = req.query;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+    const booking = await Booking.find()
+      .populate('userId', 'name -_id')
+      .populate('restaurantId', 'name logoImage -_id')
+      .populate('timeSlotId', 'timeSlot -_id')
+      .select('numberOfGuests date status -_id')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
 
+    const count = await Booking.countDocuments();
+
+    return {
+      success: true,
+      data: {
+        booking, totalPages: Math.ceil(count / limit),
+        currentPage: page * 1,
+        totalDocs: count
+      }
+
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message;
+    }
+    throw error;
+  }
+};
 module.exports = {
   uploadToCloudinary,
   createRestaurantAccount,
   getAllRestaurantsWithOwners,
   updateRestaurant,
   deleteRestaurant,
-  getRestaurantWithOwnerById
+  getRestaurantWithOwnerById,
+  allBooking
 };

@@ -7,20 +7,28 @@ import Loader from "../components/common/Loader";
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const [currentpage, setcurrentpage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const restaurantList = async () => {
-        const res = await getAllRestaurants();
-        if (res.status === 401) {
-            logout();
-            return;
-        }
-        setRestaurant(res);
-
+        const res = await getAllRestaurants(currentpage);
+        setRestaurant(res?.data?.restaurants);
+        setTotalPages(res?.data?.totalPages)
     };
     useEffect(() => {
         restaurantList();
-    }, [])
+    }, [currentpage])
 
+    const goToNextPage = () => {
+        if (currentpage < totalPages) {
+            setcurrentpage(currentpage + 1);
+        }
+    };
+
+    const goToPrevpage = () => {
+        if (currentpage > 1) {
+            setcurrentpage(currentpage - 1);
+        }
+    };
     const deleteRestaurant = async (id) => {
         setLoading(true)
         const res = await deleteRestaurantById(id);
@@ -71,7 +79,7 @@ function Restaurant() {
                         </tr>
                     </thead>
                     <tbody className="text-black">
-                        {restaurant?.data?.map((r) => (
+                        {restaurant?.map((r) => (
 
                             <tr key={r._id} className="border-b">
                                 <td className="p-3">
@@ -121,21 +129,15 @@ function Restaurant() {
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm">Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
-                    {[1, 2, 3, "...", 8, 9, 10].map((n, i) => (
-                        <button
-                            key={i}
-                            className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
-                        >
-                            {n}
-                        </button>
-                    ))}
+                    <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
+
 
         </div >)
     );

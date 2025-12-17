@@ -3,8 +3,8 @@ import apiClient from "./apiClient.js";
 export const createRestaurant = async (body) => {
     return await apiClient.post(`api/admin/create-restaurant`, body);
 }
-export const getAllRestaurants = async () => {
-    const res = await apiClient.get("api/admin/display-restaurant");
+export const getAllRestaurants = async (currentpage) => {
+    const res = await apiClient.get(`api/admin/display-restaurant?page=${currentpage}`);
 
     return res.data;
 }
@@ -72,7 +72,7 @@ export const updateSlot = async (slotId, body) => {
 }
 
 //Booking Api
-export const getAllBooking = async () => {
-    const res = await apiClient.get("api/admin/bookings");
+export const getAllBooking = async (page) => {
+    const res = await apiClient.get(`api/admin/viewbooking?page=${page}`);
     return res.data;
 }

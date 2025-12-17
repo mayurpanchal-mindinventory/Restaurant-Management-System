@@ -53,6 +53,7 @@ router.delete(`/delete-slot/:id`, slotController.deleteSlotById);
 
 router.put(`/update-slot/:id`, slotController.updateSlotById);
 router.get(`/slot/:id`, slotController.getSlotById);
+router.get(`/viewbooking`, adminController.getAllBookingswithDetails);
 
 
 module.exports = router;
