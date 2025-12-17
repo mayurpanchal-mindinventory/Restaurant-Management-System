@@ -1,16 +1,17 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { logout } from "../../slices/authSlice";
 
 function Header(params) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // State for the desktop profile dropdown
   const [isScrolled, setIsScrolled] = useState(false);
+  const profileRef = useRef(null); // Ref to detect clicks outside the profile menu
 
-  //Header show and hide
   const changeNavbarColor = () => {
     if (window.scrollY >= 10) {
       setIsScrolled(true);
@@ -26,26 +27,48 @@ function Header(params) {
     };
   }, []);
 
+  // Close profile menu when clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleLogout = () => {
-    console.log("Logout clicked");
     dispatch(logout());
-    console.log("User after logout:", user);
     navigate("/");
+    setIsProfileMenuOpen(false); // Close menu on logout
   };
 
   const handleNavigation = (path) => {
     navigate(path);
-    setIsMenuOpen(false);
+    setIsMobileMenuOpen(false);
+    setIsProfileMenuOpen(false);
+  };
+
+  // Function to get initials from the user name or email for a simple avatar
+  const getInitials = (user) => {
+    if (user.name) {
+      const names = user.name.split("");
+      if (names.length > 1) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return names[0].toUpperCase();
+    }
+    return user.email[0].toUpperCase();
   };
 
   return (
     <>
-      {/*backdrop-blur-md is tailwind method i have used to blur background while we scroll*/}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? " backdrop-blur-3xl shadow-lg py-3 "
-            : "bg-transparent py-4"
+          isScrolled ? " backdrop-blur-3xl  py-3 " : "bg-transparent py-4"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,15 +119,40 @@ function Header(params) {
 
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
-                <div className="flex items-center space-x-4">
+                // Profile Section with Dropdown
+                <div className="relative" ref={profileRef}>
                   <button
-                    onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-500 text-white font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                    aria-label="User Profile"
                   >
-                    Logout
+                    {getInitials(user)}
                   </button>
+
+                  {isProfileMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                      <div className="py-1">
+                        <div className="px-4 py-3">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {user.name || "User Name"}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                        <div className="border-t border-gray-100"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-800"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
+                // Login/Signup Buttons
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleNavigation("/login")}
@@ -126,7 +174,7 @@ function Header(params) {
 
             <div className="md:hidden">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`focus:outline-none ${
                   isScrolled
                     ? "text-gray-700 hover:text-orange-500"
@@ -139,7 +187,7 @@ function Header(params) {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  {isMenuOpen ? (
+                  {isMobileMenuOpen ? (
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -159,7 +207,8 @@ function Header(params) {
             </div>
           </div>
 
-          {isMenuOpen && (
+          {/* Mobile Menu Dropdown */}
+          {isMobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-200 bg-white">
               <nav className="flex flex-col space-y-4">
                 <button

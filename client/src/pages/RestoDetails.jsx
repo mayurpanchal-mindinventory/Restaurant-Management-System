@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getRestaurantsById } from "../services/adminService";
+import {
+  getRestaurantsById,
+  getSlotListByRestaurant,
+} from "../services/adminService";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Star,
@@ -20,7 +23,7 @@ function RestoDetails() {
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.state?.id;
-
+  const [timeSlots, setTimeSlots] = useState([]);
   const [resto, setResto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,8 +59,16 @@ function RestoDetails() {
     };
 
     fetchResto(id);
-  }, [id]);
+  }, [id, timeSlots]);
+  useEffect(() => {
+    const fetchSlots = async () => {
+      const response = await getSlotListByRestaurant(id);
 
+      setTimeSlots(response.data.data);
+      // console.log("heloooooooooooooo", response.data.data);
+    };
+    fetchSlots();
+  }, []);
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -133,26 +144,6 @@ function RestoDetails() {
     { id: "photos", label: "Photos", icon: Camera },
     { id: "reviews", label: "Reviews", icon: MessageSquare },
   ];
-
-  const timeSlots = [
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM",
-    "6:00 PM",
-    "7:00 PM",
-    "8:00 PM",
-    "9:00 PM",
-  ];
-
-  const calculateTotalPrice = () => {
-    const basePrice = bookingData.people * 500;
-    const discountAmount = (basePrice * bookingData.discount) / 100;
-    return basePrice - discountAmount;
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -329,7 +320,7 @@ function RestoDetails() {
                   </div>
                 </div>
               )}
-
+              {/*Menu part */}
               {activeTab === "menu" && (
                 <div className="text-center py-12">
                   <h3 className="text-xl flex flex-row font-semibold text-gray-600 mb-2">
@@ -396,19 +387,22 @@ function RestoDetails() {
                   Time Slots
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.map((time) => (
+                  {timeSlots?.map((time) => (
                     <button
-                      key={time}
+                      key={time.timeSlot}
                       onClick={() =>
-                        setBookingData({ ...bookingData, timeSlot: time })
+                        setBookingData({
+                          ...bookingData,
+                          timeSlot: time.timeSlot,
+                        })
                       }
-                      className={`px-3 py-2 text-sm rounded-lg border transition duration-200 ${
+                      className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
                         bookingData.timeSlot === time
                           ? "bg-orange-500 text-white border-orange-500"
                           : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
                       }`}
                     >
-                      {time}
+                      {time.timeSlot}
                     </button>
                   ))}
                 </div>

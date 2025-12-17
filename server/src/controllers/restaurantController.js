@@ -38,7 +38,7 @@ exports.getAllRestaurantsWithOwners = async (req, res) => {
 exports.getRestaurantsWithOwnerById = async (req, res) => {
   try {
     const Id = req.params.Id;
-    console.log(Id);
+    // console.log(Id);
     const result = await getRestaurantWithOwnerById(Id);
 
     return sendResponse(res, STATUS.OK, result.message, result.data);
