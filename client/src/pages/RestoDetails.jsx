@@ -16,8 +16,104 @@ import {
   Utensils,
   Camera,
   MessageSquare,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  LayoutDashboard,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import MenuDetails from "../components/MenuDetails";
+import { useSelector } from "react-redux";
+import { createBookings } from "../services/userService";
+
+// Success SVG Component
+const SuccessAnimation = ({ isVisible, onComplete }) => {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onComplete]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center transform animate-bounce">
+        <div className="mb-6">
+          <svg
+            width="120"
+            height="120"
+            viewBox="0 0 120 120"
+            className="mx-auto"
+          >
+            <circle
+              cx="60"
+              cy="60"
+              r="50"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="4"
+              className="animate-pulse"
+            />
+            <circle
+              cx="60"
+              cy="60"
+              r="40"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="3"
+              strokeDasharray="251.2"
+              strokeDashoffset="251.2"
+              className="animate-[draw_2s_ease-in-out_forwards]"
+              style={{
+                animation: "draw 2s ease-in-out forwards",
+              }}
+            />
+            <path
+              d="M40 60 L52 72 L80 44"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="animate-[check_0.5s_ease-in-out_2s_forwards]"
+              style={{
+                strokeDasharray: "100",
+                strokeDashoffset: "100",
+                animation: "check 0.5s ease-in-out 2s forwards",
+              }}
+            />
+          </svg>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">
+          Booking Successful! 🎉
+        </h3>
+        <p className="text-gray-600 mb-4">
+          Your restaurant has been booked successfully. You'll receive a
+          confirmation shortly.
+        </p>
+        <div className="flex justify-center">
+          <CheckCircle className="w-8 h-8 text-green-500 animate-pulse" />
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes draw {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+        @keyframes check {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
 
 function RestoDetails() {
   const location = useLocation();
@@ -28,14 +124,86 @@ function RestoDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+
+  const userString = localStorage.getItem("user");
+  const userData = JSON.parse(userString);
+  const userId = userData.user.id;
+
   const [bookingData, setBookingData] = useState({
-    selectedMenu: "",
-    people: 2,
+    userId: userId,
+    restaurantId: id,
+    timeSlotId: "",
+    numberOfGuests: 2,
     date: "",
-    timeSlot: "",
-    discount: 0,
   });
 
+  const validateBookingData = () => {
+    if (!bookingData.date) {
+      toast.error("Please select a booking date");
+      return false;
+    }
+    if (!bookingData.timeSlotId) {
+      toast.error("Please select a time slot");
+      return false;
+    }
+    if (bookingData.numberOfGuests < 1 || bookingData.numberOfGuests > 20) {
+      toast.error("Number of guests must be between 1 and 20");
+      return false;
+    }
+    const selectedDate = new Date(bookingData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      toast.error("Booking date cannot be in the past");
+      return false;
+    }
+    return true;
+  };
+
+  const handleBooking = async () => {
+    if (!validateBookingData()) {
+      return;
+    }
+
+    try {
+      setBookingLoading(true);
+      const result = await createBookings(bookingData);
+
+      if (result.data) {
+        setShowSuccessAnimation(true);
+        toast.success("Restaurant booked successfully!", {
+          duration: 5000,
+          icon: "🎉",
+        });
+      }
+    } catch (error) {
+      console.error("Booking error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to book restaurant. Please try again.";
+
+      toast.error(errorMessage, {
+        duration: 5000,
+        icon: "❌",
+      });
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleSuccessAnimationComplete = () => {
+    setShowSuccessAnimation(false);
+
+    setBookingData({
+      userId: userId,
+      restaurantId: id,
+      timeSlotId: "",
+      numberOfGuests: 2,
+      date: "",
+    });
+  };
   useEffect(() => {
     const fetchResto = async (id) => {
       try {
@@ -139,7 +307,7 @@ function RestoDetails() {
   const staticReviewCount = 127;
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: Utensils },
+    { id: "overview", label: "Restaurant Details ", icon: LayoutDashboard },
     { id: "menu", label: "Menu Items", icon: Utensils },
     { id: "photos", label: "Photos", icon: Camera },
     { id: "reviews", label: "Reviews", icon: MessageSquare },
@@ -149,16 +317,12 @@ function RestoDetails() {
     <div className="min-h-screen bg-gray-50">
       <div className="relative h-96 w-full overflow-hidden">
         <img
-          src={
-            resto.mainImage ||
-            "https://via.placeholder.com/1200x400?text=Restaurant+Image"
-          }
+          src={resto.mainImage || "Image here"}
           alt={resto.name}
           className="object-cover w-full h-full"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src =
-              "https://via.placeholder.com/1200x400?text=Restaurant+Image";
+            e.target.src = "Image here";
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -387,17 +551,18 @@ function RestoDetails() {
                   Time Slots
                 </label>
                 <div className="grid grid-cols-2 gap-2">
+                  {/* {console.log(timeSlots)} */}
                   {timeSlots?.map((time) => (
                     <button
                       key={time.timeSlot}
                       onClick={() =>
                         setBookingData({
                           ...bookingData,
-                          timeSlot: time.timeSlot,
+                          timeSlotId: time._id,
                         })
                       }
                       className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
-                        bookingData.timeSlot === time
+                        bookingData.timeSlotId === time._id
                           ? "bg-orange-500 text-white border-orange-500"
                           : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
                       }`}
@@ -417,7 +582,10 @@ function RestoDetails() {
                     onClick={() =>
                       setBookingData({
                         ...bookingData,
-                        people: Math.max(1, bookingData.people - 1),
+                        numberOfGuests: Math.max(
+                          1,
+                          bookingData.numberOfGuests - 1
+                        ),
                       })
                     }
                     className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
@@ -427,14 +595,14 @@ function RestoDetails() {
                   <div className="flex items-center space-x-2">
                     <Users className="w-5 h-5 text-gray-500" />
                     <span className="text-lg font-semibold">
-                      {bookingData.people}
+                      {bookingData.numberOfGuests}
                     </span>
                   </div>
                   <button
                     onClick={() =>
                       setBookingData({
                         ...bookingData,
-                        people: bookingData.people + 1,
+                        numberOfGuests: bookingData.numberOfGuests + 1,
                       })
                     }
                     className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
@@ -445,15 +613,30 @@ function RestoDetails() {
               </div>
 
               <button
-                disabled={!bookingData.date || !bookingData.timeSlot}
-                className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition duration-200"
+                disabled={
+                  bookingLoading || !bookingData.date || !bookingData.timeSlotId
+                }
+                className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center space-x-2"
+                onClick={handleBooking}
               >
-                Book Restaurant
+                {bookingLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Booking...</span>
+                  </>
+                ) : (
+                  <span>Book Restaurant</span>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      <SuccessAnimation
+        isVisible={showSuccessAnimation}
+        onComplete={handleSuccessAnimationComplete}
+      />
     </div>
   );
 }

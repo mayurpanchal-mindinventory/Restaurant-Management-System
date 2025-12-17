@@ -22,7 +22,15 @@ export const MESSAGES = {
   RESTAURANT_NOTDELETE: "Something went wrong Restaurant delete failed",
   MENU_DELETED: "Menu deleted successfully.",
   MENU_NOTDELETE: "Something went wrong Menu delete failed",
-
+  BOOKING_CREATED: "Restaurant booked successfully!",
+  BOOKING_RETRIEVED: "Bookings retrieved successfully.",
+  BOOKING_FAILED: "Failed to create booking.",
+  BOOKING_NOT_FOUND: "Booking not found.",
+  BOOKING_INVALID_DATA: "Invalid booking data provided.",
+  BOOKING_DATE_INVALID: "Booking date cannot be in the past.",
+  BOOKING_GUESTS_INVALID: "Number of guests must be between 1 and 20.",
+  BOOKING_ALREADY_EXISTS: "This booking already exists.",
+  BOOKING_USER_REQUIRED: "User ID is required.",
 };
 
 export const sendResponse = (res, status, msg, data) => {

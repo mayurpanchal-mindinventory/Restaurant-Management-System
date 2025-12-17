@@ -12,6 +12,8 @@ import ProtectedRoute, {
 } from "./components/auth/ProtectedRoute";
 import HomeLayout from "./components/layout/HomeLayout";
 import RestoDetails from "./pages/RestoDetails";
+import MyBookings from "./pages/MyBookings";
+import RestaurantLayout from "./components/layout/Restaurant-Panal/RestaurantLayout";
 function App() {
   return (
     <>
@@ -38,7 +40,7 @@ function App() {
           path="restaurant/*"
           element={
             <ProtectedRoute requiredRole="restaurant">
-              <Restaurant />
+              <RestaurantLayout />
             </ProtectedRoute>
           }
         ></Route>
@@ -53,6 +55,7 @@ function App() {
         >
           <Route index element={<Home />} />
           <Route path="restaurant" element={<RestoDetails />} />
+          <Route path="bookings" element={<MyBookings />} />
         </Route>
 
         <Route path="/dashboard" element={<DashboardRedirect />} />
