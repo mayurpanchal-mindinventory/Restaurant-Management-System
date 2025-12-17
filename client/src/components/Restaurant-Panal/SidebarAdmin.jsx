@@ -38,16 +38,7 @@ function SidebarAdmin(params) {
 
         <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between px-3">
-            <div className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
-              <button
-                onClick={() => {
-                  dispatch(logout());
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg"
-              >
-                <LogOut size={16} /> Logout
-              </button>
-            </div>
+            <div className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"></div>
           </div>
         </div>
       </aside>

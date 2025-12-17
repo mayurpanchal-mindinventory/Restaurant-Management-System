@@ -14,6 +14,10 @@ import HomeLayout from "./components/layout/HomeLayout";
 import RestoDetails from "./pages/RestoDetails";
 import MyBookings from "./pages/MyBookings";
 import RestaurantLayout from "./components/layout/Restaurant-Panal/RestaurantLayout";
+import { Menu } from "lucide-react";
+import MenuList from "./pages/MenuList";
+import Slot from "./pages/Slot";
+import BookingList from "./pages/BookingList";
 function App() {
   return (
     <>
@@ -34,6 +38,12 @@ function App() {
         >
           <Route path="add" element={<AddRestaurant />} />
           <Route index element={<Restaurant />} />
+          <Route path="add/:id" element={<AddRestaurant />} />
+          <Route path="menu/:id" element={<MenuList />} />
+          <Route path="addmenu/:id" element={<Menu />} />
+          <Route path="editmenu/:id" element={<Menu />} />
+          <Route path="slot/:id" element={<Slot />} />
+          <Route path="bookingList" element={<BookingList />} />
         </Route>
 
         <Route
