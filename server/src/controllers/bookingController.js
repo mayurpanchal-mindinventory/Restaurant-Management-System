@@ -1,6 +1,9 @@
 const { STATUS, MESSAGES, sendResponse } = require("../utils/constants.js");
 const { BookRestaurant, getBookings } = require("../services/userService.js");
-
+const {
+  getBookingByRestaurent,
+  updateStatusById,
+} = require("../services/RestaurantPanelService.js");
 exports.createBooking = async (req, res) => {
   try {
     const { message, data } = await BookRestaurant(req);
@@ -32,6 +35,41 @@ exports.getUserBookings = async (req, res) => {
     return sendResponse(
       res,
       error.status || 500,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.getAllbookingByRestaurant = async (req, res) => {
+  try {
+    const result = await getBookingByRestaurent(req);
+
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error(
+      "Error in getError in getAlllbookingByRestaurant controller:",
+      error
+    );
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.updateBookingStatus = async (req, res) => {
+  try {
+    const result = await updateStatusById(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error(
+      "Error in getError in updateBookingStatus controller:",
+      error
+    );
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
       error.message || MESSAGES.SERVER_ERROR
     );
   }

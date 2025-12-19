@@ -75,7 +75,7 @@ function FeaturedRestaurants() {
         setLoading(true);
 
         const response = await apiClient.getFeaturedRestaurants();
-        setRestaurants(response.data.data || []);
+        setRestaurants(response.data.data.restaurants || []);
         setError(null);
       } catch (err) {
         console.error("Error fetching restaurants:", err);
@@ -120,7 +120,6 @@ function FeaturedRestaurants() {
       </div>
     );
   }
-
   return (
     <>
       <div className={`${sectionPadding} bg-gray-50`}>

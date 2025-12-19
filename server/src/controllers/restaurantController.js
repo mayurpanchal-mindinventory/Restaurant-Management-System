@@ -82,10 +82,8 @@ exports.deleteRestaurant = async (req, res) => {
   }
 };
 
-
 exports.getAllBookingswithDetails = async (req, res) => {
   try {
-
     const result = await allBooking(req);
 
     return sendResponse(res, STATUS.OK, result.message, result.data);

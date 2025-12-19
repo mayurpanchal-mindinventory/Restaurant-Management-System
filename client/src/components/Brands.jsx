@@ -12,7 +12,7 @@ function Brands(params) {
         setLoading(true);
 
         const response = await apiClient.getFeaturedRestaurants();
-        setRestaurants(response.data.data || []);
+        setRestaurants(response.data.data.restaurants || []);
         // console.log(response?.data?.data?.logoImage);
         setError(null);
       } catch (err) {
@@ -41,7 +41,7 @@ function Brands(params) {
         </div>
       </div>
       <div className="flex flex-row  items-center justify-center overflow-hidden bg-[]">
-        {restaurants != [] ? (
+        {restaurants.length > 0 ? (
           restaurants.map((item) => {
             return (
               <>

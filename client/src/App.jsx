@@ -18,6 +18,7 @@ import { Menu } from "lucide-react";
 import MenuList from "./pages/MenuList";
 import Slot from "./pages/Slot";
 import BookingList from "./pages/BookingList";
+import HanldeBooking from "./pages/Restaurant-Panal/HandleBooking";
 function App() {
   return (
     <>
@@ -47,13 +48,15 @@ function App() {
         </Route>
 
         <Route
-          path="restaurant/*"
+          path="restaurant"
           element={
             <ProtectedRoute requiredRole="restaurant">
               <RestaurantLayout />
             </ProtectedRoute>
           }
-        ></Route>
+        >
+          <Route path="restaurant/booking" element={<HanldeBooking />} />
+        </Route>
 
         <Route
           path="Home/*"

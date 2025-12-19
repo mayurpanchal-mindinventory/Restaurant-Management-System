@@ -13,7 +13,7 @@ export const getAllRestaurants = async (currentpage) => {
 
 export const getRestaurantsById = async (id) => {
   const res = await apiClient.get(`api/admin/display-restaurant/${id}`);
-  console.log(res);
+  // console.log(res);
   return res.data;
 };
 export const deleteRestaurantById = async (id) => {
