@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../slices/authSlice";
-import { toast } from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 function Register() {
   const [regiValue, setRegiValue] = useState({
@@ -11,6 +11,7 @@ function Register() {
     phone: "",
     password: "",
   });
+  const [errors, setErrors] = useState({});
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -22,26 +23,107 @@ function Register() {
       ...prevFormData,
       [name]: value,
     }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateName = (name) => {
+    if (!name.trim()) {
+      return "Name is required";
+    }
+    if (name.trim().length < 2) {
+      return "Name must be at least 2 characters long";
+    }
+    if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+      return "Name should only contain letters and spaces";
+    }
+    return "";
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
+  };
+
+  const validatePhone = (phone) => {
+    if (phone && phone.trim()) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+      if (cleanPhone.length < 10) {
+        return "Phone number should be at least 10 digits";
+      }
+      if (!phoneRegex.test(cleanPhone)) {
+        return "Please enter a valid phone number";
+      }
+    }
+    return "";
+  };
+
+  const validatePassword = (password) => {
+    if (!password.trim()) {
+      return "Password is required";
+    }
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return "Password must contain at least one uppercase letter, one lowercase letter, and one number";
+    }
+    return "";
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      name: validateName(regiValue.name),
+      email: validateEmail(regiValue.email),
+      phone: validatePhone(regiValue.phone),
+      password: validatePassword(regiValue.password),
+    };
+
+    Object.keys(newErrors).forEach((key) => {
+      if (!newErrors[key]) delete newErrors[key];
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      const errorMessages = Object.values(errors);
+      if (errorMessages.length > 0) {
+        toast.error(errorMessages[0]);
+      }
+      return;
+    }
+
     const userData = {
-      name: regiValue.name,
-      email: regiValue.email,
-      phone: regiValue.phone,
+      name: regiValue.name.trim(),
+      email: regiValue.email.trim(),
+      phone: regiValue.phone.trim(),
       password: regiValue.password,
     };
 
     try {
       await dispatch(registerUser(userData)).unwrap();
-
       navigate("/");
-
       toast.success("Registration successful! Please log in.");
     } catch (err) {
-      toast.error("Registration failed:", err);
+      console.error("Registration failed:", err);
+
+      toast.error(
+        "There was an error while creating your account. Please try again."
+      );
     }
   };
 
@@ -50,59 +132,99 @@ function Register() {
       <div className=" border p-8 rounded-3xl w-full max-w-md shadow-md ">
         <h2 className="text-black font-bold title-font mb-5">Register here</h2>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
           <div className="relative mb-4">
-            <label htmlFor="name" className="leading-7 text-sm "></label>
+            <label htmlFor="name" className="leading-7 text-sm text-gray-700">
+              Full Name
+            </label>
             <input
               type="text"
               id="name"
               name="name"
               value={regiValue.name}
               onChange={handleRegister}
-              placeholder="Name"
-              className="w-full  text-black rounded border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-base outline-none  py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              placeholder="Enter your full name"
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.name
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
+
           <div className="relative mb-4">
-            <label htmlFor="email" className="leading-7 text-sm "></label>
+            <label htmlFor="email" className="leading-7 text-sm text-gray-700">
+              Email Address
+            </label>
             <input
               type="email"
               id="email"
               name="email"
               value={regiValue.email}
               onChange={handleRegister}
-              placeholder="email"
-              className="w-full  text-black rounded border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-base outline-none  py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              placeholder="Enter your email address"
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.email
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
+
           <div className="relative mb-4">
-            <label htmlFor="phone" className="leading-7 text-sm "></label>
+            <label htmlFor="phone" className="leading-7 text-sm text-gray-700">
+              Phone Number{" "}
+              <span className="text-gray-400 text-xs">(Optional)</span>
+            </label>
             <input
-              type="phone"
+              type="tel"
               id="phone"
               name="phone"
               value={regiValue.phone}
               onChange={handleRegister}
-              placeholder="Phone Number"
-              className="w-full  text-black rounded border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-base outline-none  py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              placeholder="Enter your phone number"
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.phone
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
             />
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
 
           <div className="relative mb-4">
-            <label htmlFor="password" className="leading-7 text-sm "></label>
+            <label
+              htmlFor="password"
+              className="leading-7 text-sm text-gray-700"
+            >
+              Password
+            </label>
             <input
               type="password"
               id="password"
               name="password"
               value={regiValue.password}
               onChange={handleRegister}
-              placeholder="•••••••••"
-              className="w-full  text-black rounded border  focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-base outline-none  py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              placeholder="Enter your password"
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.password
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
 
           <button
