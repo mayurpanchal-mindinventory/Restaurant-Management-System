@@ -3,13 +3,11 @@ const mongoose = require("mongoose");
 const timeSlotSchema = new mongoose.Schema(
     {
         restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant", required: true },
-
-        startTime: { type: String, required: true },
-        endTime: { type: String, required: true },
-
+        timeSlot: { type: String, required: true },
         maxBookings: { type: Number, required: true },
         discountPercent: { type: Number, default: 0 }
     },
+    { collection: "timeslots" },
     { timestamps: true }
 );
 

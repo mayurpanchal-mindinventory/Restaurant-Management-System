@@ -1,14 +1,58 @@
-import { PencilIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
+import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
+import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
+import Loader from "../components/common/Loader";
 function Restaurant() {
+    const [restaurant, setRestaurant] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [currentpage, setcurrentpage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const restaurantList = async () => {
+        const res = await getAllRestaurants(currentpage);
+        setRestaurant(res?.data?.restaurants);
+        setTotalPages(res?.data?.totalPages)
+    };
+    useEffect(() => {
+        restaurantList();
+    }, [currentpage])
+
+    const goToNextPage = () => {
+        if (currentpage < totalPages) {
+            setcurrentpage(currentpage + 1);
+        }
+    };
+
+    const goToPrevpage = () => {
+        if (currentpage > 1) {
+            setcurrentpage(currentpage - 1);
+        }
+    };
+    const deleteRestaurant = async (id) => {
+        setLoading(true)
+        const res = await deleteRestaurantById(id);
+        // if (res.status === 401) {
+        //     logout();
+        //     return;
+        // }
+
+        toast.error("Restaurant Removed", {
+            theme: "colored"
+        });
+        restaurantList();
+        setLoading(false);
+    };
     return (
-        <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        loading ? <Loader loading={loading} size={40} /> : (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <Link to={'add'} className="bg-gray-900 text-white px-4 py-2 rounded-lg  justify-items-end font-bold ">
+                    Add Restaurant
+                </Link>
                 <div>
-                    <h2 className="text-xl font-semibold">Recent Restaurants</h2>
+                    <h2 className="text-xl font-semibold"> Restaurants</h2>
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
@@ -17,9 +61,7 @@ function Restaurant() {
                         placeholder="Search..."
                         className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
                     />
-                    <Link to={'add'} className="bg-gray-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase">
-                        Add Restaurant
-                    </Link>
+
                 </div>
             </div>
 
@@ -28,78 +70,76 @@ function Restaurant() {
                     <thead>
                         <tr className="bg-gray-100 text-gray-700">
                             <th className="p-3">Restaurant</th>
-                            <th className="p-3">Date</th>
-                            <th className="p-3">Amount</th>
-                            <th className="p-3">Status</th>
-                            <th className="p-3">Account</th>
-                            <th className="p-3"></th>
+                            <th className="p-3">Email</th>
+                            <th className="p-3">Phone</th>
+                            <th className="p-3">Close Day</th>
+                            <th className="p-3">Menu</th>
+                            <th className="p-3">Slots</th>
+                            <th className="p-3">Actions</th>
                         </tr>
                     </thead>
-
                     <tbody className="text-black">
-                        <tr className="border-b">
-                            <td className="p-3">
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src="https://docs.material-tailwind.com/img/logos/logo-netflix.svg"
-                                        className="h-10 w-10 rounded-full border p-1"
-                                        alt="netflix"
-                                    />
-                                    <span className="font-semibold">Netflix</span>
-                                </div>
-                            </td>
+                        {restaurant?.map((r) => (
 
-                            <td className="p-3">$14,000</td>
-                            <td className="p-3">Wed 3:30am</td>
-
-                            <td className="p-3">
-                                <span className="bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold uppercase">
-                                    Cancelled
-                                </span>
-                            </td>
-
-                            <td className="p-3">
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src="https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/logos/visa.png"
-                                        className="h-8 w-12 object-contain border rounded"
-                                        alt="visa"
-                                    />
-                                    <div>
-                                        <p className="font-medium">Visa 1234</p>
-                                        <p className="text-gray-500 text-xs">06/2026</p>
+                            <tr key={r._id} className="border-b">
+                                <td className="p-3">
+                                    <div className="flex items-center gap-3">
+                                        <img
+                                            src={r.logoImage}
+                                            className="h-11 w-11 rounded-full border"
+                                            alt="restaurant"
+                                        />
+                                        <span className="font-semibold">{r.name}</span>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            <td className="p-3 text-right">
-                                <button className="p-2 rounded hover:bg-gray-100">
-                                    <PencilIcon />
-                                </button>
-                            </td>
-                        </tr>
+                                <td className="p-3">{r.userId.email}</td>
+                                <td className="p-3">{r.userId.phone}</td>
+                                <td className="p-3">{r?.openDays || "-"}</td>
+                                <td className="p-3">
+                                    <Link to={`menu/${r._id}`}>
+                                        <button className="p-2 rounded hover:bg-gray-100">
+                                            <NotebookPenIcon className="size-6 text-orange-500" />
+                                        </button>
+                                    </Link>
+                                </td>
+                                <td className="p-3">
+                                    <Link to={`slot/${r._id}`}>
+                                        <button className="p-2 rounded hover:bg-gray-100">
+                                            <MenuSquareIcon className="size-6 text-orange-500" />
+                                        </button>
+                                    </Link>
+                                </td>
+                                <td className="p-3">
+                                    <Link to={`add/${r._id}`}>
+                                        <button className="p-2 rounded hover:bg-gray-100">
+                                            <PencilIcon className="size-6 text-orange-500" />
+                                        </button>
+                                    </Link>
+                                    <button onClick={() => deleteRestaurant(r._id)} className="p-2 rounded hover:bg-gray-100">
+                                        <TrashIcon className="size-6 text-red-500" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
+
+
                 </table>
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm">Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
-                    {[1, 2, 3, "...", 8, 9, 10].map((n, i) => (
-                        <button
-                            key={i}
-                            className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
-                        >
-                            {n}
-                        </button>
-                    ))}
+                    <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
 
-        </div>
+
+        </div >)
     );
 }
 
