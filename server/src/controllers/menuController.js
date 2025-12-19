@@ -32,8 +32,7 @@ exports.createMenuItem = async (req, res) => {
 
 exports.getAllMenusByRestaurant = async (req, res) => {
     try {
-        const { id } = req.params;
-        const result = await getAllMenusByRestaurant(id);
+        const result = await getAllMenusByRestaurant(req);
         return sendResponse(res, STATUS.OK, result.message, result.data);
     } catch (error) {
         console.error("Error in getAllRestaurantsWithOwners controller:", error);

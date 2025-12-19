@@ -96,20 +96,35 @@ const createMenu = async (req) => {
     }
 }
 
-const getAllMenusByRestaurant = async (restaurantId) => {
+const getAllMenusByRestaurant = async (req) => {
     try {
-        const menuData = await MenuItem.find({ restaurantId: restaurantId })
+        const limit = 2;
+        const { page } = req.query;
+
+        const skip = (page - 1) * limit;
+        const { id } = req.params;
+        const menuData = await MenuItem.find({ restaurantId: id })
             .populate({
                 path: "restaurantId",
                 select: "name categoryId.name "
             }).populate({ path: "categoryId" })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 })
             .exec();
 
+        const count = await MenuItem.countDocuments({ restaurantId: id });
+        console.log(count);
 
         return {
             success: true,
             message: "Menus Founded",
-            data: menuData,
+            data: {
+                menuData,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page * 1,
+                totalDocs: count
+            }
         };
     } catch (error) {
         if (!error.status) {

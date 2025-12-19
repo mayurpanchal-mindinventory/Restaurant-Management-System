@@ -8,26 +8,43 @@ import { ErrorMessage } from 'formik';
 import { toast } from 'react-hot-toast';
 import Loader from '../components/common/Loader';
 import { FiArrowLeft } from "react-icons/fi";
+import { useConfirm } from "../context/ConfirmationContext";
 const validationSchema = Yup.object({
     timeslot: Yup.string().required("Time Slot is required"),
     maxbooking: Yup.string().required("Maximum Booking is required"),
     discount: Yup.string().required("Discount is required"),
+    date: Yup.string().required("Date is required"),
+
 });
+
+
 function Slot() {
+
+    const { confirm } = useConfirm();
+
+    const handleDelete = async (id) => {
+        const isConfirmed = await confirm({
+            title: "Delete Slot?",
+            message: "This action is permanent and cannot be undone."
+        });
+
+        if (isConfirmed) {
+            await deleteSlotById(id);
+            getSlotList();
+        }
+    };
+
     const navigate = useNavigate();
     const { id } = useParams();
     const [slot, setSlotList] = useState([]);
     const [detail, setDetail] = useState(null)
     const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(false);
     const getSlotList = async () => {
         const res = await getSlotListByRestaurant(id);
         setSlotList(res.data.data);
-        setLoading(false)
     };
 
     useEffect(() => {
-        setLoading(true)
         getSlotList();
     }, [])
 
@@ -37,21 +54,36 @@ function Slot() {
     };
 
     const editSlot = async (id) => {
-        setLoading(true)
         const res = await getSlotById(id);
         setDetail(res.data);
-        setLoading(false);
         setShowModal(true)
     };
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const day = today.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
+    const todayDate = getTodayDateString();
+
+    const convertDate = (date) => {
+        if (!date) return "";
+        return new Date(date).toISOString().split('T')[0];
+    }
     const initialValues = {
+
         timeslot: detail?.timeSlot || "",
         maxbooking: detail?.maxBookings || "",
-        discount: detail?.discountPercent || ""
+        discount: detail?.discountPercent || "",
+        date: detail?.date ? convertDate(detail.date) : ""
+
     }
     return (
-        <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
-            <header className="bg-white border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+        <div className="w-full bg-white h-full text-black shadow-md rounded-xl p-4">
+            <header className={`${!showModal && `border-b bg-white `} sticky top-0 z-10 px-4 py-2 flex items-center justify-between`}>
+
                 <div className="flex text-orange-500 items-center">
                     <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
                         <FiArrowLeft size={20} />
@@ -61,14 +93,16 @@ function Slot() {
                     Add Slot
                 </Link>
             </header>
-            <div>
-                <h2 className="text-xl font-semibold p-4">Slot List</h2>
-            </div>
 
-            {loading ? <Loader loading={loading} size={60} /> : (<div className="mt-6 overflow-x-auto">
+
+            {slot?.length > 0 ? (<div className=" overflow-x-auto">
+                <div>
+                    <h2 className="text-xl font-semibold p-4">Slot List</h2>
+                </div>
                 <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-gray-100 text-gray-700">
+                            <th className="p-3">Date </th>
                             <th className="p-3">Time</th>
                             <th className="p-3">Max Bookings</th>
                             <th className="p-3">Discount</th>
@@ -78,8 +112,8 @@ function Slot() {
                     <tbody className="text-black">
                         {Array.isArray(slot) && slot.map((r) => (
                             <tr key={r?._id} className="border-b">
-                                <td className="p-3">{r?.timeSlot}</td>
-
+                                <td className="p-3">{r?.date ? convertDate(r.date) : "-"}</td>
+                                <td className="p-3 text-balance">{r?.timeSlot}</td>
                                 <td className="p-3">{r?.maxBookings} People</td>
                                 <td className="p-3"> {r?.discountPercent || "-"} %</td>
 
@@ -90,7 +124,7 @@ function Slot() {
                                         </button>
                                     </Link>
 
-                                    <button onClick={() => deleteSlot(r._id)} className="p-2 rounded hover:bg-gray-100">
+                                    <button onClick={() => handleDelete(r._id)} className="p-2 rounded hover:bg-gray-100">
                                         <TrashIcon className="size-6 text-red-500" />
                                     </button>
 
@@ -101,6 +135,10 @@ function Slot() {
 
 
                 </table>
+            </div>) : (<div className="h-lvh flex text-gray-800 items-center justify-center">
+                <p className="text-3xl font-bold">
+                    No Slot Yet
+                </p>
             </div>)}
             {showModal && (
                 <Formik
@@ -113,7 +151,8 @@ function Slot() {
                                 "restaurantId": id,
                                 "timeSlot": values.timeslot,
                                 "maxBookings": values.maxbooking,
-                                "discountPercent": Number(values.discount)
+                                "discountPercent": Number(values.discount),
+                                "date": values.date
                             }
 
 
@@ -143,6 +182,15 @@ function Slot() {
                             <h2 className="text-xl font-semibold mb-4">Add Time Slot</h2>
 
                             <div className="space-y-4">
+                                <Field
+                                    name="date"
+                                    type="date"
+                                    min={todayDate}
+                                    className="w-full border rounded-lg p-2"
+                                    placeholder="Slot Date"
+                                />
+                                <ErrorMessage name="date" component="p" className="text-red-500 text-sm" />
+
                                 <label className="block mb-2.5 text-sm font-medium text-heading">Select an option</label>
                                 <Field name="timeslot" as="select" className="block w-full px-3 bg-white py-2.5 border rounded-md text-heading text-sm focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                     <option value="">Choose a Time Slot</option>
@@ -151,6 +199,8 @@ function Slot() {
                                     <option key="12-13" value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
                                     <option key="13-14" value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
                                     <option key="14-15" value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                                    <option key="14-15" value="02:00 PM - 03:00 PM">03:00 PM - 04:00 PM</option>
+                                    <option key="14-15" value="02:00 PM - 03:00 PM">04:00 PM - 05:00 PM</option>
 
                                 </Field >
                                 <ErrorMessage name="timeslot" component="p" className="text-red-500 text-sm" />
@@ -162,6 +212,7 @@ function Slot() {
                                     className="w-full border rounded-lg p-2"
                                     placeholder="Max Bookings"
                                 />
+                                <ErrorMessage name="maxbooking" component="p" className="text-red-500 text-sm" />
 
                                 <Field
                                     name="discount"
@@ -169,6 +220,8 @@ function Slot() {
                                     className="w-full border rounded-lg p-2"
                                     placeholder="Discount %"
                                 />
+                                <ErrorMessage name="discount" component="p" className="text-red-500 text-sm" />
+
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">

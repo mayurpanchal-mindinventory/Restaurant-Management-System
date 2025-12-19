@@ -149,7 +149,7 @@ const createRestaurantAccount = async (req) => {
 const getAllRestaurantsWithOwners = async (req) => {
   try {
     const { page } = req.query;
-    const limit = 2;
+    const limit = 5;
     const skip = (page - 1) * limit;
     const restaurants = await Restaurant.find({}).populate({
       path: "userId",

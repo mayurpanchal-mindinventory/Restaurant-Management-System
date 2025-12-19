@@ -5,7 +5,6 @@ import { getAllBooking } from "../services/adminService";
 import Loader from "../components/common/Loader";
 function BookingList() {
     const [booking, setBooking] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [currentpage, setcurrentpage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const statusStyles = {
@@ -18,9 +17,7 @@ function BookingList() {
     const bookingList = async () => {
         const res = await getAllBooking(currentpage);
         setBooking(res?.data?.booking);
-        console.log(res.data);
         setTotalPages(res?.data?.totalPages)
-
     };
     useEffect(() => {
         bookingList();
@@ -37,7 +34,7 @@ function BookingList() {
         }
     };
     return (
-        loading ? <Loader loading={loading} size={60} /> : (booking.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        (booking.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -79,9 +76,9 @@ function BookingList() {
                                         />
                                     </div>
                                 </td>
-                                <td className="p-3"> {r?.restaurantId?.name}</td>
+                                <td className="p-3"> {r?.restaurantId?.name || "Restaurant Removed"}</td>
                                 <td className="p-3">{r?.userId?.name}</td>
-                                <td className="p-3">{r?.timeSlotId?.timeSlot}</td>
+                                <td className="p-3">{r?.timeSlotId?.timeSlot || "-"}</td>
                                 <td className="p-3">
                                     <p className={`w-fit px-4 py-1 text-center rounded-full text-xs font-medium ${statusStyles[r?.status] || "bg-gray-100 text-gray-700"}`}>
                                         {r?.status}

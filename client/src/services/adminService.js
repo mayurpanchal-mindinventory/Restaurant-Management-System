@@ -37,8 +37,8 @@ export const getAllCategories = async () => {
 export const createMenu = async (body) => {
   return await apiClient.post(`api/admin/menu`, body);
 };
-export const getMenuList = async (id) => {
-  return await apiClient.get(`api/admin/menulist/${id}`);
+export const getMenuList = async (page, id) => {
+  return await apiClient.get(`api/admin/menulist/${id}?page=${page}`);
 };
 export const deleteMenuById = async (id) => {
   const res = await apiClient.delete(`api/admin/delete-menu/${id}`);

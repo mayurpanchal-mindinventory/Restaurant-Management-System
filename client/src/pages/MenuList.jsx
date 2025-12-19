@@ -2,29 +2,43 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteMenuById, getMenuList } from "../services/adminService";
-import { IndianRupee, MenuSquareIcon } from 'lucide-react'
-import Menu from './Menu';
 import { FiArrowLeft } from "react-icons/fi";
 
 function MenuList() {
     const navigate = useNavigate();
     const { id } = useParams();
     const [menulist, setMenuList] = useState([]);
+    const [currentpage, setcurrentpage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const getmenus = async () => {
-        const res = await getMenuList(id);
-        setMenuList(res.data);
+        const res = await getMenuList(currentpage, id);
+
+        setMenuList(res?.data?.data?.menuData);
+        setTotalPages(res?.data?.data?.totalPages)
+
     };
     useEffect(() => {
         getmenus();
-    }, [])
+    }, [currentpage])
 
+    const goToNextPage = () => {
+        if (currentpage < totalPages) {
+            setcurrentpage(currentpage + 1);
+        }
+    };
+
+    const goToPrevpage = () => {
+        if (currentpage > 1) {
+            setcurrentpage(currentpage - 1);
+        }
+    };
     const deleteMenu = async (id) => {
         await deleteMenuById(id);
         getmenus();
     };
     return (
-        <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
-            <header className="bg-white border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+        menulist?.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+            <header className=" border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
                 <div className="flex text-orange-500 items-center">
                     <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
                         <FiArrowLeft size={20} />
@@ -62,7 +76,7 @@ function MenuList() {
                         </tr>
                     </thead>
                     <tbody className="text-black">
-                        {menulist?.data?.map((r) => (
+                        {menulist?.map((r) => (
 
                             <tr key={r._id} className="border-b">
                                 <td className="p-3">
@@ -100,23 +114,30 @@ function MenuList() {
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm">Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
-                    {[1, 2, 3, "...", 8, 9, 10].map((n, i) => (
-                        <button
-                            key={i}
-                            className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
-                        >
-                            {n}
-                        </button>
-                    ))}
+                    <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm">Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
 
-        </div>
+        </div>) : (<><header className="border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+            <div className="flex text-orange-500 items-center">
+                <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                    <FiArrowLeft size={20} />
+                </button>
+            </div>
+            <Link to={`/admin/addmenu/${id}`} className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
+                Add Menu
+            </Link>
+        </header>
+            <div className="h-full flex text-gray-800 items-center justify-center">
+                <p className="text-3xl font-bold">
+                    No Categories Yet
+                </p>
+            </div></>)
     );
 }
 

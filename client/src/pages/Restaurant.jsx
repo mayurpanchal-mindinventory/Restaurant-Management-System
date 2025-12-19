@@ -3,10 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
 import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
-import Loader from "../components/common/Loader";
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [currentpage, setcurrentpage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const restaurantList = async () => {
@@ -30,21 +28,19 @@ function Restaurant() {
         }
     };
     const deleteRestaurant = async (id) => {
-        setLoading(true)
         const res = await deleteRestaurantById(id);
         // if (res.status === 401) {
         //     logout();
         //     return;
         // }
-
+        restaurantList();
         toast.error("Restaurant Removed", {
             theme: "colored"
         });
         restaurantList();
-        setLoading(false);
     };
     return (
-        loading ? <Loader loading={loading} size={40} /> : (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        restaurant?.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
 
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -139,7 +135,13 @@ function Restaurant() {
             </div>
 
 
-        </div >)
+        </div >) : (<>
+            <div className="h-full flex text-gray-800 items-center justify-center">
+                <p className="text-3xl font-bold">
+                    No Restaurant Yet
+                </p>
+            </div>
+        </>)
     );
 }
 
