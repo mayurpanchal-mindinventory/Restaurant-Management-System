@@ -3,6 +3,18 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import { LogOut } from "lucide-react";
+import { useDispatch } from "react-redux";
+
+const navigation = [
+  { name: "Restaurants", href: "/admin", current: false },
+  { name: "Bookings", href: "/admin/bookingList", current: false },
+  { name: "Bills", href: "/admin/bills", current: false },
+  // { name: "Slots", href: "slot", current: false },
+];
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function AdminLayout() {
   const dispatch = useDispatch();

@@ -16,6 +16,7 @@ import MyBookings from "./pages/MyBookings";
 import RestaurantLayout from "./components/layout/Restaurant-Panal/RestaurantLayout";
 import MenuList from "./pages/MenuList";
 import Slot from "./pages/Slot";
+
 import BookingList from "./pages/BookingList";
 import HanldeBooking from "./pages/Restaurant-Panal/HandleBooking";
 import Menu from "./pages/Menu";
@@ -24,6 +25,7 @@ import { AxiosInterceptor } from "./services/apiClient";
 import Loader from "./components/common/Loader";
 import { ConfirmationProvider } from "./context/ConfirmationContext";
 
+import Bills from "./pages/Bills";
 function App() {
 
 
@@ -85,6 +87,37 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="restaurant" element={<RestoDetails />} />
                 <Route path="bookings" element={<MyBookings />} />
+              </Route>
+              <Route
+                path="admin/*"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="add" element={<AddRestaurant />} />
+                <Route index element={<Restaurant />} />
+                <Route path="add/:id" element={<AddRestaurant />} />
+                <Route path="menu/:id" element={<MenuList />} />
+                <Route path="addmenu/:id" element={<Menu />} />
+                <Route path="editmenu/:id" element={<Menu />} />
+
+                <Route path="slot/:id" element={<Slot />} />
+                <Route path="bookingList" element={<BookingList />} />
+                <Route path="bills" element={<Bills />} />
+              </Route>
+
+              <Route
+                path="restaurant"
+                element={
+                  <ProtectedRoute requiredRole="restaurant">
+                    <RestaurantLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="restaurant/booking" element={<HanldeBooking />} />
+                <Route path="restaurant/bills" element={<Bills />} />
               </Route>
 
               <Route path="/dashboard" element={<DashboardRedirect />} />

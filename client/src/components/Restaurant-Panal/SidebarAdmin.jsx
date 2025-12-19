@@ -33,8 +33,9 @@ function SidebarAdmin(params) {
                 Menu
               </NavLink>
             </li>
+
             <li>
-              <NavLink to="" className="hover:text-orange-400">
+              <NavLink to="restaurant/bills" className="hover:text-orange-400">
                 {" "}
                 Billing
               </NavLink>
