@@ -1,10 +1,12 @@
-import { ChevronDown, User } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import {
   getBookingsByRestaurantId,
   updateBookingStatus,
 } from "../../services/restaurantPanelService";
 import { useSelector } from "react-redux";
+import BillGeneration from "../../components/Restaurant-Panal/BillGeneration";
 
 function HanldeBooking(params) {
   const fieldHeaders = [
@@ -15,11 +17,15 @@ function HanldeBooking(params) {
     "Guests",
     "Current Status",
     "Change Status",
+    "Actions",
   ];
   const [dataList, setdataList] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
   const [ss, setss] = useState("");
+  const [showBillGeneration, setShowBillGeneration] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
       await updateBookingStatus(bookingId, newStatus);
@@ -29,11 +35,21 @@ function HanldeBooking(params) {
     }
   };
 
+  const handleGenerateBill = (booking) => {
+    setSelectedBooking(booking);
+    setShowBillGeneration(true);
+  };
+
+  const handleBillCreated = (newBill) => {
+    console.log("Bill created:", newBill);
+  };
+
   useEffect(() => {
     const fetchBookingById = async () => {
       try {
         setLoading(true);
         const result = await getBookingsByRestaurantId(user.id);
+        console.log(result);
         // console.log(result);
         setdataList(result || []);
       } catch (error) {
@@ -143,12 +159,25 @@ function HanldeBooking(params) {
                         ))}
                     </select>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex gap-2">
+                      {booking?.status === "Completed" && (
+                        <button
+                          onClick={() => handleGenerateBill(booking)}
+                          className="p-1 text-green-600 hover:text-green-800"
+                          title="Generate Bill"
+                        >
+                          <DocumentTextIcon className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-6 py-20 text-center text-gray-400 italic font-medium"
                 >
                   No Bookings found
@@ -158,6 +187,23 @@ function HanldeBooking(params) {
           </tbody>
         </table>
       </div>
+
+      {/* Bill Generation Modal */}
+      {showBillGeneration && selectedBooking && (
+        <BillGeneration
+          isOpen={showBillGeneration}
+          onClose={() => {
+            setShowBillGeneration(false);
+            setSelectedBooking(null);
+          }}
+          booking={selectedBooking}
+          restaurantId={
+            selectedBooking?.restaurantId?._id || selectedBooking?.restaurantId
+          }
+          userId={selectedBooking?.userId?._id || selectedBooking?.userId}
+          onBillCreated={handleBillCreated}
+        />
+      )}
     </>
   );
 }

@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 const navigation = [
   { name: "Restaurants", href: "/admin", current: false },
   { name: "Bookings", href: "/admin/bookingList", current: false },
+  { name: "Bills", href: "/admin/bills", current: false },
   // { name: "Slots", href: "slot", current: false },
 ];
 

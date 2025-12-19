@@ -335,7 +335,7 @@ function RestoDetails() {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        {/* Restaurant Name and Logo - Bottom Left */}
+        {/* Restaurant Name and Logo */}
         <div className="absolute bottom-6 left-6 flex items-center space-x-4">
           {resto.logoImage && (
             <img
@@ -509,13 +509,11 @@ function RestoDetails() {
 
               {activeTab === "reviews" && (
                 <div className="text-center py-12">
-                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  {/* <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" /> */}
                   <h3 className="text-xl font-semibold text-gray-600 mb-2">
                     Customer Reviews
                   </h3>
-                  <p className="text-gray-500">
-                    Reviews will be displayed here.
-                  </p>
+                  <p className="text-gray-500"></p>
                 </div>
               )}
             </div>

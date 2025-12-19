@@ -3,6 +3,10 @@ const { BookRestaurant, getBookings } = require("../services/userService.js");
 const {
   getBookingByRestaurent,
   updateStatusById,
+  createBill,
+  getBillsByRestaurant,
+  getBillById,
+  updateBillPaymentStatus,
 } = require("../services/RestaurantPanelService.js");
 exports.createBooking = async (req, res) => {
   try {
@@ -67,6 +71,62 @@ exports.updateBookingStatus = async (req, res) => {
       "Error in getError in updateBookingStatus controller:",
       error
     );
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.createBillForBooking = async (req, res) => {
+  try {
+    const result = await createBill(req);
+    return sendResponse(res, STATUS.CREATED, result.message, result.data);
+  } catch (error) {
+    console.error("Error creating bill:", error.message);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.getBillsForRestaurant = async (req, res) => {
+  try {
+    const result = await getBillsByRestaurant(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error getting bills:", error.message);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.getBillByIdController = async (req, res) => {
+  try {
+    const result = await getBillById(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error getting bill by ID:", error.message);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.updateBillPaymentStatusController = async (req, res) => {
+  try {
+    const result = await updateBillPaymentStatus(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error updating bill payment status:", error.message);
     return sendResponse(
       res,
       error.status || STATUS.INTERNAL_SERVER_ERROR,
