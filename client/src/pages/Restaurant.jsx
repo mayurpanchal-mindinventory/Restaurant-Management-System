@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
 import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
+import toast from "react-hot-toast";
 function Restaurant() {
     const [restaurant, setRestaurant] = useState([]);
     const [currentpage, setcurrentpage] = useState(1);
@@ -29,10 +30,6 @@ function Restaurant() {
     };
     const deleteRestaurant = async (id) => {
         const res = await deleteRestaurantById(id);
-        // if (res.status === 401) {
-        //     logout();
-        //     return;
-        // }
         restaurantList();
         toast.error("Restaurant Removed", {
             theme: "colored"

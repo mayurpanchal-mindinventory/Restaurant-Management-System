@@ -6,7 +6,6 @@ import { createSlot, deleteSlotById, getSlotById, getSlotListByRestaurant, updat
 import { Field, Form, Formik } from 'formik';
 import { ErrorMessage } from 'formik';
 import { toast } from 'react-hot-toast';
-import Loader from '../components/common/Loader';
 import { FiArrowLeft } from "react-icons/fi";
 import { useConfirm } from "../context/ConfirmationContext";
 const validationSchema = Yup.object({
