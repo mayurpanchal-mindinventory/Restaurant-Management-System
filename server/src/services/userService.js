@@ -1,5 +1,6 @@
+const { default: mongoose } = require("mongoose");
 const Booking = require("../models/Booking");
-
+const TimeSlot = require('../models/TimeSlot');
 const throwError = (msg, status = 400) => {
   const err = new Error(msg);
   err.status = status;
@@ -12,19 +13,31 @@ exports.BookRestaurant = async (req) => {
 
     if (!userId || !restaurantId || !timeSlotId || !date || !numberOfGuests)
       throwError("All fields are required for booking");
+    const numberOfSlotRemaining = await TimeSlot.findById(timeSlotId).select('maxBookings -_id');
+    const availableSlots = numberOfSlotRemaining?.maxBookings;
+
+    if (Number(availableSlots) < numberOfGuests)
+      throwError(`only ${availableSlots} are left`);
 
     if (new Date(date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0))
       throwError("Booking date cannot be in the past");
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    const result = await Booking.create({
+    const newBooking = new Booking({
       userId,
       restaurantId,
       timeSlotId,
       date,
       numberOfGuests,
     });
+    await newBooking.save({ session });
 
-    return { message: "Restaurant booked successfully", data: result };
+    await TimeSlot.findByIdAndUpdate(timeSlotId, { $inc: { maxBookings: -numberOfGuests } }).session(session);
+    await session.commitTransaction();
+    session.endSession();
+
+    return { message: "Restaurant booked successfully", data: newBooking };
   } catch (error) {
     if (error.status) throw error;
     // if (error.code === 11000) throwError("This booking already exists", 409);

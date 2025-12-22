@@ -31,7 +31,7 @@ const createMenu = async (req) => {
     console.log(req.body);
     console.log(req.files["image"]);
 
-    if (!name || !price) {
+    if (!name || !price || !categoryId || !restaurantId) {
         const error = new Error(
             "Missing required fields: name and Price are required."
         );
@@ -103,6 +103,13 @@ const getAllMenusByRestaurant = async (req) => {
 
         const skip = (page - 1) * limit;
         const { id } = req.params;
+        if (!id.trim()) {
+            const error = new Error(
+                "Restaurant ID cannot be empty or just whitespace."
+            );
+            error.status = STATUS.BAD_REQUEST;
+            throw error;
+        }
         const menuData = await MenuItem.find({ restaurantId: id })
             .populate({
                 path: "restaurantId",
@@ -137,6 +144,13 @@ const getAllMenusByRestaurant = async (req) => {
 
 const getMenuById = async (menuId) => {
     try {
+        if (!menuId.trim()) {
+            const error = new Error(
+                "Menu ID cannot be empty or just whitespace."
+            );
+            error.status = STATUS.BAD_REQUEST;
+            throw error;
+        }
         const menuData = await MenuItem.findById(menuId)
             .populate({
                 path: "restaurantId",

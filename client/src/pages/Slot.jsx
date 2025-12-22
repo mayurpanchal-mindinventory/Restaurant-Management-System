@@ -47,10 +47,10 @@ function Slot() {
         getSlotList();
     }, [])
 
-    const deleteSlot = async (id) => {
-        await deleteSlotById(id);
-        getSlotList();
-    };
+    // const deleteSlot = async (id) => {
+    //     await deleteSlotById(id);
+    //     getSlotList();
+    // };
 
     const editSlot = async (id) => {
         const res = await getSlotById(id);
@@ -203,7 +203,6 @@ function Slot() {
 
                                 </Field >
                                 <ErrorMessage name="timeslot" component="p" className="text-red-500 text-sm" />
-
 
                                 <Field
                                     name="maxbooking"

@@ -12,7 +12,7 @@ export const billService = {
   },
 
   // Get all bills for a restaurant
-  getBills: async (userId, page = 1, limit = 10) => {
+  getBills: async (userId, page = 1, limit = 5) => {
     try {
       const response = await apiClient.get(
         `/api/owner/bills/${userId}?page=${page}&limit=${limit}`

@@ -25,7 +25,7 @@ const BillGeneration = ({
   const fetchMenuItems = async () => {
     try {
       const response = await billService.getMenuItems(restaurantId);
-      setMenuItems(response.data || []);
+      setMenuItems(response.data.menuData || []);
     } catch (error) {
       console.error("Error fetching menu items:", error);
       setError("Failed to load menu items");
@@ -174,15 +174,15 @@ const BillGeneration = ({
             <div>
               <h3 className="font-medium mb-4">Select Menu Items</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {menuItems.map((item) => (
+                {menuItems?.map((item) => (
                   <div
-                    key={item._id}
+                    key={item?._id}
                     className="flex justify-between items-center p-3 border rounded-lg"
                   >
                     <div>
-                      <div className="font-medium">{item.name}</div>
+                      <div className="font-medium">{item?.name}</div>
 
-                      <div className="text-sm text-gray-600">₹{item.price}</div>
+                      <div className="text-sm text-gray-600">₹{item?.price}</div>
                     </div>
                     <button
                       onClick={() => addItemToBill(item)}

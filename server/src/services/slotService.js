@@ -3,6 +3,7 @@ const TimeSlot = require("../models/TimeSlot");
 exports.createSlot = async (data) => {
     const exists = await TimeSlot.findOne({
         timeSlot: data.timeSlot,
+        date: data.date,
         restaurantId: data.restaurantId
     });
     if (exists) throw new Error("Slot Already exist");

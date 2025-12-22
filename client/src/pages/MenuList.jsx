@@ -3,8 +3,23 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteMenuById, getMenuList } from "../services/adminService";
 import { FiArrowLeft } from "react-icons/fi";
+import { useConfirm } from "../context/ConfirmationContext";
 
 function MenuList() {
+
+
+    const { confirm } = useConfirm();
+
+    const handleDelete = async (id) => {
+        const isConfirmed = await confirm({
+            title: "Delete Menu?",
+            message: "This action is permanent and cannot be undone."
+        });
+        if (isConfirmed) {
+            await deleteMenuById(id);
+            getmenus();
+        }
+    };
     const navigate = useNavigate();
     const { id } = useParams();
     const [menulist, setMenuList] = useState([]);
@@ -12,10 +27,8 @@ function MenuList() {
     const [totalPages, setTotalPages] = useState(1);
     const getmenus = async () => {
         const res = await getMenuList(currentpage, id);
-
         setMenuList(res?.data?.data?.menuData);
         setTotalPages(res?.data?.data?.totalPages)
-
     };
     useEffect(() => {
         getmenus();
@@ -31,10 +44,6 @@ function MenuList() {
         if (currentpage > 1) {
             setcurrentpage(currentpage - 1);
         }
-    };
-    const deleteMenu = async (id) => {
-        await deleteMenuById(id);
-        getmenus();
     };
     return (
         menulist?.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
@@ -100,7 +109,7 @@ function MenuList() {
                                         </button>
                                     </Link>
 
-                                    <button onClick={() => deleteMenu(r._id)} className="p-2 rounded hover:bg-gray-100">
+                                    <button onClick={() => handleDelete(r._id)} className="p-2 rounded hover:bg-gray-100">
                                         <TrashIcon className="size-6 text-red-500" />
                                     </button>
 
@@ -135,7 +144,7 @@ function MenuList() {
         </header>
             <div className="h-full flex text-gray-800 items-center justify-center">
                 <p className="text-3xl font-bold">
-                    No Categories Yet
+                    No Menu Yet
                 </p>
             </div></>)
     );

@@ -116,6 +116,13 @@ const SuccessAnimation = ({ isVisible, onComplete }) => {
 };
 
 function RestoDetails() {
+
+
+  //for slot manage with date
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slotsForDate, setSlotsForDate] = useState([]);
+
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.state?.id;
@@ -126,7 +133,6 @@ function RestoDetails() {
   const [activeTab, setActiveTab] = useState("overview");
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-
   const userString = localStorage.getItem("user");
   const userData = JSON.parse(userString);
   const userId = userData.user.id;
@@ -138,7 +144,6 @@ function RestoDetails() {
     numberOfGuests: 2,
     date: "",
   });
-
   const validateBookingData = () => {
     if (!bookingData.date) {
       toast.error("Please select a booking date");
@@ -161,6 +166,20 @@ function RestoDetails() {
     }
     return true;
   };
+
+
+  useEffect(() => {
+    if (!selectedDate) {
+      setSlotsForDate([]);
+      setSelectedSlot(null)
+      return;
+    }
+
+    const slots = timeSlots.filter(slot => new Date(slot?.date).toISOString().split('T')[0] == selectedDate);
+    setSlotsForDate(slots);
+    setSelectedSlot(null);
+
+  }, [selectedDate, timeSlots]);
 
   const handleBooking = async () => {
     if (!validateBookingData()) {
@@ -204,6 +223,8 @@ function RestoDetails() {
       date: "",
     });
   };
+
+
   useEffect(() => {
     const fetchResto = async (id) => {
       try {
@@ -245,7 +266,6 @@ function RestoDetails() {
       day: "numeric",
     });
   };
-
   const formatClosedDates = (dates) => {
     if (!dates || dates.length === 0) return "No upcoming closures";
     return dates.map((date) => formatDate(date)).join(", ");
@@ -375,11 +395,10 @@ function RestoDetails() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-4 h-4 ${
-                      star <= staticRating
-                        ? "text-orange-500 fill-current"
-                        : "text-gray-300"
-                    }`}
+                    className={`w-4 h-4 ${star <= staticRating
+                      ? "text-orange-500 fill-current"
+                      : "text-gray-300"
+                      }`}
                   />
                 ))}
               </div>
@@ -401,11 +420,10 @@ function RestoDetails() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
-                          : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
-                      }`}
+                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${activeTab === tab.id
+                        ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
+                        : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
+                        }`}
                     >
                       <IconComponent className="w-5 h-5" />
                       <span>{tab.label}</span>
@@ -524,7 +542,6 @@ function RestoDetails() {
               <h3 className="text-xl font-bold text-gray-800 mb-6">
                 Book Restaurant
               </h3>
-
               {/* Date */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -535,8 +552,10 @@ function RestoDetails() {
                   <input
                     type="date"
                     value={bookingData.date}
-                    onChange={(e) =>
-                      setBookingData({ ...bookingData, date: e.target.value })
+                    onChange={(e) => {
+                      setBookingData({ ...bookingData, date: e.target.value }),
+                        setSelectedDate(e.target.value)
+                    }
                     }
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     min={new Date().toISOString().split("T")[0]}
@@ -544,34 +563,34 @@ function RestoDetails() {
                 </div>
               </div>
               {/* Time Slots */}
-              <div className="mb-6">
+              {selectedDate && slotsForDate.length > 0 ? <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Time Slots
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {/* {console.log(timeSlots)} */}
-                  {timeSlots?.map((time) => (
+                  {slotsForDate?.map((time) => (
                     <button
+                      disabled={time?.maxBookings < 1}
                       key={time.timeSlot}
-                      onClick={() =>
+                      onClick={() => {
                         setBookingData({
                           ...bookingData,
                           timeSlotId: time._id,
-                        })
+                        }, setSelectedSlot(slotsForDate.find(s => s._id === time._id) || null))
                       }
-                      className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
-                        bookingData.timeSlotId === time._id
-                          ? "bg-orange-500 text-white border-orange-500"
-                          : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
-                      }`}
+                      }
+                      className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${bookingData.timeSlotId === time._id
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                        }`}
                     >
                       {time.timeSlot}
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> : <div className="text-center text-red-600">No slot available</div>}
               {/* Number of People */}
-              <div className="mb-4">
+              {(selectedSlot && selectedSlot?.maxBookings > 0) && <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Number of People
                 </label>
@@ -597,6 +616,7 @@ function RestoDetails() {
                     </span>
                   </div>
                   <button
+                    disabled={bookingData.numberOfGuests + 1 > selectedSlot?.maxBookings}
                     onClick={() =>
                       setBookingData({
                         ...bookingData,
@@ -607,8 +627,10 @@ function RestoDetails() {
                   >
                     +
                   </button>
+                  {selectedSlot ? <p className={selectedSlot?.maxBookings <= 10 ? "text-red-600" : "text-green-600"}> {selectedSlot?.maxBookings} slot left</p> : <p></p>}
+
                 </div>
-              </div>
+              </div>}
 
               <button
                 disabled={
@@ -635,7 +657,7 @@ function RestoDetails() {
         isVisible={showSuccessAnimation}
         onComplete={handleSuccessAnimationComplete}
       />
-    </div>
+    </div >
   );
 }
 

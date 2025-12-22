@@ -1,41 +1,44 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 import ConfirmationModal from './ConfirmationModal';
 
 const ConfirmationContext = createContext(null);
 
-export const useConfirmation = () => useContext(ConfirmationContext);
-
 export const ConfirmationProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState({});
-  const [handler, setHandler] = useState(null);
+  const [content, setContent] = useState({ title: "", message: "" });
+  const [resolveCallback, setResolveCallback] = useState(null);
 
-  const confirm = (message, onConfirm) => {
-    setContent({ message });
-    setHandler(() => onConfirm); // Use a function wrapper to store the callback
-    setIsOpen(true);
-
+  const confirm = (config) => {
+    return new Promise((resolve) => {
+      if (typeof config === 'string') {
+        setContent({ title: "Confirm", message: config });
+      } else {
+        setContent({
+          title: config.title || "Confirm",
+          message: config.message || ""
+        });
+      }
+      setResolveCallback(() => resolve);
+      setIsOpen(true);
+    });
   };
 
   const handleConfirm = () => {
-    if (handler) {
-      handler(); // Execute the stored handler
-    }
     setIsOpen(false);
-    setHandler(null);
+    if (resolveCallback) resolveCallback(true);
   };
 
   const handleCancel = () => {
     setIsOpen(false);
-    setHandler(null);
+    if (resolveCallback) resolveCallback(false);
   };
 
   return (
     <ConfirmationContext.Provider value={{ confirm }}>
       {children}
-
       {isOpen && (
         <ConfirmationModal
+          title={content.title}
           message={content.message}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
@@ -44,4 +47,11 @@ export const ConfirmationProvider = ({ children }) => {
     </ConfirmationContext.Provider>
   );
 };
-export const useConfirm = () => useContext(ConfirmationContext);
+
+export const useConfirm = () => {
+  const context = useContext(ConfirmationContext);
+  if (!context) {
+    throw new Error("useConfirm must be used within a ConfirmationProvider");
+  }
+  return context;
+};

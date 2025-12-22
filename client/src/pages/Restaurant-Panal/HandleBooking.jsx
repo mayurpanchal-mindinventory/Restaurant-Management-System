@@ -128,21 +128,21 @@ function HanldeBooking(params) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-3 py-1 rounded-full text-[11px] uppercase tracking-wider   ${
-                        booking.status === "Completed"
-                          ? "bg-green-100 text-green-700 border border-green-200"
-                          : booking.status === "Accepted"
+                      className={`px-3 py-1 rounded-full text-[11px] uppercase tracking-wider   ${booking.status === "Completed"
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : booking.status === "Accepted"
                           ? "bg-blue-100 text-blue-700 border border-blue-200"
                           : booking.status === "Cancelled"
-                          ? "bg-red-100 text-red-700 border border-red-200"
-                          : "bg-amber-100 text-amber-700 border border-amber-200"
-                      }`}
+                            ? "bg-red-100 text-red-700 border border-red-200"
+                            : "bg-amber-100 text-amber-700 border border-amber-200"
+                        }`}
                     >
                       {booking.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select
+                      disabled={booking.status == "Cancelled"}
                       className="text-[11px] font-bold bg-gray-50 border border-gray-200 text-gray-600 py-1 px-2 rounded-md outline-none hover:border-orange-400 appearance-none cursor-pointer"
                       value={booking.status}
                       onChange={(e) =>
