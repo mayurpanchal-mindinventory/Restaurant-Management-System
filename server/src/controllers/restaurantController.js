@@ -7,6 +7,7 @@ const {
   getRestaurantWithOwnerById,
   allBooking,
 } = require("../services/adminService.js");
+const { getRestaurantMenu } = require("../services/RestaurantPanelService.js");
 
 exports.createRestaurantAccount = async (req, res) => {
   try {
@@ -39,7 +40,7 @@ exports.getAllRestaurantsWithOwners = async (req, res) => {
 exports.getRestaurantsWithOwnerById = async (req, res) => {
   try {
     const Id = req.params.Id;
-    console.log(Id);
+    //console.log(Id);
     const result = await getRestaurantWithOwnerById(Id);
 
     return sendResponse(res, STATUS.OK, result.message, result.data);
@@ -89,6 +90,20 @@ exports.getAllBookingswithDetails = async (req, res) => {
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error in getRestaurantsWithOwnerById controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.getAllMenu = async (req, res) => {
+  try {
+    const result = await getRestaurantMenu(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in getAllMenu controller:", error);
     return sendResponse(
       res,
       error.status || STATUS.INTERNAL_SERVER_ERROR,

@@ -47,9 +47,10 @@ function HanldeBooking(params) {
   useEffect(() => {
     const fetchBookingById = async () => {
       try {
+
         setLoading(true);
         const result = await getBookingsByRestaurantId(user.id);
-        console.log(result);
+        //   console.log(result);
         // console.log(result);
         setdataList(result || []);
       } catch (error) {

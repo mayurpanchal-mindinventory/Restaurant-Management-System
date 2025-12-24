@@ -16,13 +16,13 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      let redirectPath = "/Home";
+      let redirectPath = "/home";
       console.log("User object:", user);
 
       if (user.role === "admin") {
         redirectPath = "/admin";
       } else if (user.role === "restaurant") {
-        redirectPath = "/restaurant";
+        redirectPath = "/restaurant/restaurant/booking";
       }
 
       navigate(redirectPath);
@@ -120,11 +120,10 @@ function Login() {
               value={loginValue.email}
               onChange={handleLogin}
               placeholder="Enter your email"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
-                errors.email
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                  : "focus:border-orange-500 focus:ring-orange-200"
-              } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.email
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : "focus:border-orange-500 focus:ring-orange-200"
+                } focus:ring-2`}
               required
             />
             {errors.email && (
@@ -146,11 +145,10 @@ function Login() {
               value={loginValue.password}
               onChange={handleLogin}
               placeholder="Enter your password"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
-                errors.password
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                  : "focus:border-orange-500 focus:ring-orange-200"
-              } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.password
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : "focus:border-orange-500 focus:ring-orange-200"
+                } focus:ring-2`}
               required
             />
             {errors.password && (

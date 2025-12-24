@@ -26,6 +26,7 @@ import Loader from "./components/common/Loader";
 import { ConfirmationProvider } from "./context/ConfirmationContext";
 
 import Bills from "./pages/Bills";
+import MenuByRestaurant from "./components/Restaurant-Panal/MenuByRestaurant";
 function App() {
 
 
@@ -77,7 +78,7 @@ function App() {
               </Route>
 
               <Route
-                path="Home/*"
+                path="home/*"
                 element={
                   <ProtectedRoute>
                     <HomeLayout />
@@ -105,7 +106,7 @@ function App() {
 
                 <Route path="slot/:id" element={<Slot />} />
                 <Route path="bookingList" element={<BookingList />} />
-                <Route path="bills" element={<Bills />} />
+                {/* <Route path="bills" element={<Bills />} /> */}
               </Route>
 
               <Route
@@ -116,7 +117,10 @@ function App() {
                   </ProtectedRoute>
                 }
               >
-                <Route path="restaurant/booking" element={<HanldeBooking />} />
+                <Route path="addmenu/:id" element={<Menu />} />
+                <Route path="editmenu/:id" element={<Menu />} />
+                <Route path="" element={<MenuByRestaurant />} />
+                <Route index path="restaurant/booking" element={<HanldeBooking />} />
                 <Route path="restaurant/bills" element={<Bills />} />
               </Route>
 

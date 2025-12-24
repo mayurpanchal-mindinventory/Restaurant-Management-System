@@ -19,8 +19,6 @@ export default function Menu() {
 
     const updateLocation = location.pathname;
     const navigate = useNavigate();
-
-
     const { id } = useParams();
 
     const [categories, setCategories] = useState(null);
@@ -50,7 +48,7 @@ export default function Menu() {
     const getMenuDetail = async (id) => {
         try {
             const res = await getMenuById(id);
-            console.log(res.data);
+            // console.log(res.data);
             setMenuDetail(res.data);
             setImagePreviewUrl(res?.data?.image)
         } catch (e) {
@@ -63,8 +61,11 @@ export default function Menu() {
         MenuImage: menuDetail?.image || null,
         categories: menuDetail?.categoryId?._id || ""
     }
+
     useEffect(() => {
-        updateLocation.includes("/admin/editmenu") ? setEdit(true) : setEdit(false)
+        updateLocation.includes("/admin/editmenu") || updateLocation.includes('/restaurant/editmenu') ? setEdit(true) : setEdit(false)
+        //console.log(edit);
+
         if (edit) {
             getMenuDetail(id);
         }

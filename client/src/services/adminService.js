@@ -4,10 +4,7 @@ export const createRestaurant = async (body) => {
   return await apiClient.post(`api/admin/create-restaurant`, body);
 };
 export const getAllRestaurants = async (currentpage) => {
-  const res = await apiClient.get(
-    `api/admin/display-restaurant?page=${currentpage}`
-  );
-
+  const res = await apiClient.get(`api/admin/display-restaurant?page=${currentpage}`);
   return res.data;
 };
 
@@ -51,7 +48,9 @@ export const getMenuById = async (id) => {
 export const updateMenuById = async (menuId, body) => {
   return await apiClient.put(`api/admin/update-menu/${menuId}`, body);
 };
-
+export const getRestaurantMenu = async (page, id) => {
+  return await apiClient.get(`api/owner/menulist/${id}?page=${page}`);
+};
 //Slot Api's
 
 export const createSlot = async (body) => {
@@ -74,7 +73,7 @@ export const updateSlot = async (slotId, body) => {
 };
 
 //Booking Api
-export const getAllBooking = async (page) => {
-  const res = await apiClient.get(`api/admin/viewbooking?page=${page}`);
+export const getAllBooking = async (page, search) => {
+  const res = await apiClient.get(`api/admin/viewbooking?page=${page}&search=${search}`);
   return res.data;
 };

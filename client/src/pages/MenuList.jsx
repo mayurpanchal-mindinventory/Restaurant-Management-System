@@ -7,7 +7,12 @@ import { useConfirm } from "../context/ConfirmationContext";
 
 function MenuList() {
 
-
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const [menulist, setMenuList] = useState([]);
+    const [currentpage, setcurrentpage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
     const { confirm } = useConfirm();
 
     const handleDelete = async (id) => {
@@ -20,11 +25,13 @@ function MenuList() {
             getmenus();
         }
     };
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const [menulist, setMenuList] = useState([]);
-    const [currentpage, setcurrentpage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const filteredMenu = menulist.filter((item) => {
+        const searchStr = searchTerm.toLowerCase();
+        return (
+            item?.categoryId?.categoryName.toLowerCase().includes(searchStr) ||
+            item?.name.toLowerCase().includes(searchStr)
+        );
+    });
     const getmenus = async () => {
         const res = await getMenuList(currentpage, id);
         setMenuList(res?.data?.data?.menuData);
@@ -46,7 +53,7 @@ function MenuList() {
         }
     };
     return (
-        menulist?.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+        menulist?.length > 0 || searchTerm !== "" ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
             <header className=" border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
                 <div className="flex text-orange-500 items-center">
                     <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
@@ -66,6 +73,8 @@ function MenuList() {
                 <div className="flex items-center gap-2 w-full md:w-auto">
                     <input
                         type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search..."
                         className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
                     />
@@ -85,37 +94,43 @@ function MenuList() {
                         </tr>
                     </thead>
                     <tbody className="text-black">
-                        {menulist?.map((r) => (
+                        {filteredMenu.length > 0 ? (
+                            filteredMenu?.map((r) => (
 
-                            <tr key={r._id} className="border-b">
-                                <td className="p-3">
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src={r.image}
-                                            className="h-11 w-11 rounded-full border"
-                                            alt="restaurant"
-                                        />
-                                    </div>
-                                </td>
-                                <td className="p-3">{r?.categoryId.categoryName}</td>
+                                <tr key={r._id} className="border-b">
+                                    <td className="p-3">
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={r.image}
+                                                className="h-11 w-11 rounded-full border"
+                                                alt="restaurant"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="p-3">{r?.categoryId.categoryName}</td>
 
-                                <td className="p-3">{r?.name}</td>
-                                <td className="p-3">Rs. {r?.price || "-"}</td>
+                                    <td className="p-3">{r?.name}</td>
+                                    <td className="p-3">Rs. {r?.price || "-"}</td>
 
-                                <td className="p-3">
-                                    <Link to={`/admin/editmenu/${r._id}`}>
-                                        <button className="p-2 rounded hover:bg-gray-100">
-                                            <PencilIcon className="size-6 text-orange-500" />
+                                    <td className="p-3">
+                                        <Link to={`/admin/editmenu/${r._id}`}>
+                                            <button className="p-2 rounded hover:bg-gray-100">
+                                                <PencilIcon className="size-6 text-orange-500" />
+                                            </button>
+                                        </Link>
+
+                                        <button onClick={() => handleDelete(r._id)} className="p-2 rounded hover:bg-gray-100">
+                                            <TrashIcon className="size-6 text-red-500" />
                                         </button>
-                                    </Link>
 
-                                    <button onClick={() => handleDelete(r._id)} className="p-2 rounded hover:bg-gray-100">
-                                        <TrashIcon className="size-6 text-red-500" />
-                                    </button>
-
-                                </td>
-                            </tr>
-                        ))}
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (<tr>
+                            <td colSpan="3" className="p-10 text-center text-gray-500">
+                                No matching menu found on this page.
+                            </td>
+                        </tr>)}
                     </tbody>
 
 
@@ -123,13 +138,13 @@ function MenuList() {
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
                     <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
 
         </div>) : (<><header className="border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">

@@ -1,6 +1,6 @@
 const Booking = require("../models/Booking.js");
 const Restaurant = require("../models/Restaurant.js");
-const { STATUS } = require("../utils/constants.js");
+const { STATUS, MESSAGES } = require("../utils/constants.js");
 const MenuItem = require("../models/MenuItem.js");
 exports.getBookingByRestaurent = async (req) => {
   try {
@@ -160,7 +160,56 @@ exports.createBill = async (req) => {
     throw error;
   }
 };
+exports.getRestaurantMenu = async (req) => {
+  try {
+    const limit = 2;
+    const { page } = req.query;
 
+    const skip = (page - 1) * limit;
+    const { id } = req.params;
+    if (!id.trim()) {
+      const error = new Error(
+        "Restaurant ID cannot be empty or just whitespace."
+      );
+      error.status = STATUS.BAD_REQUEST;
+      throw error;
+    }
+
+    const user = await Restaurant.find({ userId: id })
+
+    if (!user)
+      throw new Error("No user is found");
+    const menuData = await MenuItem.find({ restaurantId: user[0]._id })
+      .populate({
+        path: "restaurantId",
+        select: "name categoryId.name "
+      }).populate({ path: "categoryId" })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const count = await MenuItem.countDocuments({ restaurantId: user[0]._id });
+    // console.log(count);
+
+    return {
+      success: true,
+      message: "Menus Founded",
+      data: {
+        menuData,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page * 1,
+        totalDocs: count
+      }
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message = MESSAGES.SERVER_ERROR;
+    }
+    throw error;
+  }
+}
 exports.getBillsByRestaurant = async (req) => {
   try {
     const userId = req.params.userId || req.user?.id;

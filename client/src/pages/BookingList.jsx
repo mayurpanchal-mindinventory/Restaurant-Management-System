@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getAllBooking } from "../services/adminService";
 
 function BookingList() {
@@ -6,6 +6,7 @@ function BookingList() {
   const [currentpage, setcurrentpage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const isInitialMount = useRef(true);
 
   const statusStyles = {
     Pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
@@ -15,23 +16,34 @@ function BookingList() {
   };
 
   const bookingList = async () => {
-    const res = await getAllBooking(currentpage);
+    const res = await getAllBooking(currentpage, searchTerm);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
   };
 
   useEffect(() => {
-    bookingList();
-  }, [currentpage]);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      const debouncedSearch = setTimeout(() => {
+        bookingList();
+      }, 1500);
 
-  const filteredBookings = booking.filter((item) => {
-    const searchStr = searchTerm.toLowerCase();
-    return (
-      item?.restaurantId?.name?.toLowerCase().includes(searchStr) ||
-      item?.userId?.name?.toLowerCase().includes(searchStr) ||
-      item?.status?.toLowerCase().includes(searchStr)
-    );
-  });
+      return () => clearTimeout(debouncedSearch)
+    }
+  }, [searchTerm]);
+
+  useEffect(() => {
+    bookingList();
+  }, [currentpage])
+  // const filteredBookings = booking.filter((item) => {
+  //   const searchStr = searchTerm.toLowerCase();
+  //   return (
+  //     item?.restaurantId?.name?.toLowerCase().includes(searchStr) ||
+  //     item?.userId?.name?.toLowerCase().includes(searchStr) ||
+  //     item?.status?.toLowerCase().includes(searchStr)
+  //   );
+  // });
 
   const goToNextPage = () => {
     if (currentpage < totalPages) setcurrentpage(currentpage + 1);
@@ -63,6 +75,7 @@ function BookingList() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
+              <th className="p-3">Date</th>
               <th className="p-3">Restaurant</th>
               <th className="p-3">Restaurant Name</th>
               <th className="p-3">Username</th>
@@ -71,9 +84,11 @@ function BookingList() {
             </tr>
           </thead>
           <tbody className="text-black">
-            {filteredBookings.length > 0 ? (
-              filteredBookings.map((r) => (
+            {booking.length > 0 ? (
+              booking.map((r) => (
                 <tr key={r._id} className="border-b">
+                  <td className="p-3">{r?.date ? new Date(r.date).toLocaleString().split(',')[0] : "Date is not available"}</td>
+
                   <td className="p-3">
                     <div className="flex items-center gap-3">
                       <img
@@ -103,7 +118,6 @@ function BookingList() {
           </tbody>
         </table>
       </div>
-
       <div className="flex justify-between items-center mt-4">
         <button
           className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"

@@ -159,7 +159,7 @@ const getAllRestaurantsWithOwners = async (req) => {
       .sort({ createdAt: -1 })
       .exec();
 
-    const count = await Restaurant.countDocuments();;
+    const count = await Restaurant.countDocuments();
 
     return {
       success: true,
@@ -239,9 +239,7 @@ const updateRestaurant = async (req) => {
     }
 
     // Find the associated user
-    const existingUser = await User.findById(existingRestaurant.userId).session(
-      session
-    );
+    const existingUser = await User.findById(existingRestaurant.userId).session(session);
     if (!existingUser) {
       const error = new Error("Associated user not found.");
       error.status = STATUS.NOT_FOUND;
@@ -276,7 +274,7 @@ const updateRestaurant = async (req) => {
           : existingRestaurant.description,
       logoImage: logoImageUrl,
       mainImage: mainImageUrl,
-      openDays: openDays || existingRestaurant.openDays,
+      openDays: openDays,
       closedDates: closedDates || existingRestaurant.closedDates,
     };
 
@@ -423,7 +421,15 @@ const deleteRestaurant = async (req) => {
 };
 const allBooking = async (req) => {
   try {
-    const { page } = req.query;
+    let { page, search } = req.query;
+    if (search) {
+      page = 1;
+      console.log(page);
+
+      const searchTerm = search;
+      const regex = new RegExp(searchTerm, 'i');
+    }
+
     const limit = 5;
     const skip = (page - 1) * limit;
     const booking = await Booking.find()

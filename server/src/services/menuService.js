@@ -98,6 +98,7 @@ const createMenu = async (req) => {
 
 const getAllMenusByRestaurant = async (req) => {
     try {
+        let menuData;
         const limit = 2;
         const { page } = req.query;
 
@@ -110,7 +111,9 @@ const getAllMenusByRestaurant = async (req) => {
             error.status = STATUS.BAD_REQUEST;
             throw error;
         }
-        const menuData = await MenuItem.find({ restaurantId: id })
+
+
+        menuData = await MenuItem.find({ restaurantId: id })
             .populate({
                 path: "restaurantId",
                 select: "name categoryId.name "
@@ -121,7 +124,7 @@ const getAllMenusByRestaurant = async (req) => {
             .exec();
 
         const count = await MenuItem.countDocuments({ restaurantId: id });
-        console.log(count);
+        //console.log(count);
 
         return {
             success: true,

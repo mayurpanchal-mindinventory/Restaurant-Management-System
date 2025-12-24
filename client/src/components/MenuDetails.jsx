@@ -6,7 +6,6 @@ function MenuDetails({ id }) {
   useEffect(() => {
     const fetchMenu = async (id) => {
       const response = await getMenuList(id);
-      console.log(response.data.data);
       setItem(response.data.data);
     };
     fetchMenu(id);

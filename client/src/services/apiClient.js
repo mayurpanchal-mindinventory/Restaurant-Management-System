@@ -29,9 +29,11 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useLoading } from "../context/LoadingContext";
+import { toast } from 'react-hot-toast';
 
 export const apiClient = axios.create({
   baseURL: "http://localhost:5000",
+  timeout: 5000
 });
 
 export const AxiosInterceptor = ({ children }) => {
@@ -55,11 +57,37 @@ export const AxiosInterceptor = ({ children }) => {
     // Response Interceptor
     const responseInterceptor = apiClient.interceptors.response.use(
       (response) => {
-        hideLoader(); // Decrement request count
+        hideLoader();
         return response;
       },
       (error) => {
         hideLoader();
+        const status = error.response?.status;
+        console.log(status);
+
+        const message = error.response?.data?.message || error.message || "An unexpected error occurred";
+        switch (status) {
+          case 401:
+            toast.error("Session expired. Please login again.");
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            break;
+          case 403:
+            toast.error("You do not have permission to perform this action.");
+            break;
+          case 404:
+            toast.error("Resource not found.");
+            break;
+          case 500:
+            toast.error("Server error. Please try again later.");
+            break;
+          default:
+            if (!error.response) {
+              toast.error("Network error. Please check your connection.");
+            } else {
+              //  toast.error(message);
+            }
+        }
         return Promise.reject(error);
       }
     );

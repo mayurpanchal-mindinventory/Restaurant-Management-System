@@ -7,13 +7,11 @@ import toast from "react-hot-toast";
 import { useConfirm } from "../context/ConfirmationContext";
 function Restaurant() {
 
-
-
+    const { confirm } = useConfirm();
     const [restaurant, setRestaurant] = useState([]);
     const [currentpage, setcurrentpage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
-
 
     const filteredrestaurant = restaurant.filter((item) => {
         const searchStr = searchTerm.toLowerCase();
@@ -23,7 +21,6 @@ function Restaurant() {
             item?.userId?.phone?.toLowerCase().includes(searchStr)
         );
     });
-    const { confirm } = useConfirm();
     const deleteRestaurant = async (id) => {
         const isConfirmed = await confirm({
             title: "Delete Restaurant?",
@@ -154,13 +151,13 @@ function Restaurant() {
             </div>
 
             <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
+                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
                 <div className="flex gap-2">
                     <span>page {currentpage} of {totalPages}</span>
                 </div>
 
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
+                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
             </div>
 
 

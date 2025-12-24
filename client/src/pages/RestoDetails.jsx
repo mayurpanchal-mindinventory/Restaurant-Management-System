@@ -588,7 +588,7 @@ function RestoDetails() {
                     </button>
                   ))}
                 </div>
-              </div> : <div className="text-center text-red-600">No slot available</div>}
+              </div> : selectedDate != "" ? <div className="text-center text-red-600">No slot available</div> : <div />}
               {/* Number of People */}
               {(selectedSlot && selectedSlot?.maxBookings > 0) && <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">

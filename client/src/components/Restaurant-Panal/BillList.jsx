@@ -131,10 +131,9 @@ const BillList = ({ userId }) => {
                       </td>
                       <td className="p-3">
                         <span
-                          className={`w-fit px-3 py-1 text-center rounded-full text-xs font-medium ${
-                            paymentStatusStyles[bill?.paymentStatus] ||
+                          className={`w-fit px-3 py-1 text-center rounded-full text-xs font-medium ${paymentStatusStyles[bill?.paymentStatus] ||
                             "bg-gray-100 text-gray-700"
-                          }`}
+                            }`}
                         >
                           {bill?.paymentStatus || "Unpaid"}
                         </span>
