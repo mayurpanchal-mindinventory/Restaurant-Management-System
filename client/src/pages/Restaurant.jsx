@@ -5,6 +5,8 @@ import { deleteRestaurantById, getAllRestaurants } from "../services/adminServic
 import { MenuSquareIcon, NotebookPenIcon } from 'lucide-react'
 import toast from "react-hot-toast";
 import { useConfirm } from "../context/ConfirmationContext";
+import { FiFilter } from "react-icons/fi";
+import Highlighter from "react-highlight-words";
 function Restaurant() {
 
     const { confirm } = useConfirm();
@@ -12,15 +14,8 @@ function Restaurant() {
     const [currentpage, setcurrentpage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortby, setSortBy] = useState("");
 
-    const filteredrestaurant = restaurant.filter((item) => {
-        const searchStr = searchTerm.toLowerCase();
-        return (
-            item?.userId?.name?.toLowerCase().includes(searchStr) ||
-            item?.userId?.email?.toLowerCase().includes(searchStr) ||
-            item?.userId?.phone?.toLowerCase().includes(searchStr)
-        );
-    });
     const deleteRestaurant = async (id) => {
         const isConfirmed = await confirm({
             title: "Delete Restaurant?",
@@ -37,13 +32,13 @@ function Restaurant() {
     };
 
     const restaurantList = async () => {
-        const res = await getAllRestaurants(currentpage);
+        const res = await getAllRestaurants(currentpage, searchTerm, sortby);
         setRestaurant(res?.data?.restaurants);
         setTotalPages(res?.data?.totalPages)
     };
     useEffect(() => {
         restaurantList();
-    }, [currentpage])
+    }, [currentpage, searchTerm, sortby])
 
     const goToNextPage = () => {
         if (currentpage < totalPages) {
@@ -58,17 +53,57 @@ function Restaurant() {
     };
     return (
         restaurant?.length > 0 || searchTerm !== "" ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+            < div className="my-4 text-end">  <Link to={'add'} className="bg-gray-900 text-white px-4 py-2 rounded-lg  font-bold ">
+                Add Restaurant
+            </Link></div>
 
+            <div className="flex md:flex-row gap-4 flex-col w-full justify-between mb-5 p-4  border-b">
+                <div className="flex md:flex-row gap-4 flex-col justify-start items-center">
+                    <div className="bg-white grid gap-2"> <select
+                        id="sortby"
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="h-10 px-2 py-2 border rounded-lg">
+                        <option value="1">Sort by: Name (A-Z)</option>
+                        <option value="2">Sort by: Name (Z-A)</option>
+                    </select>
+                    </div>
+                </div>
+                {/* <div className="flex md:flex-row gap-4 flex-col justify-end">
+                    <div className="flex items-center justify-center">
+                        <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
+                    </div>
+                    <div>
+                        <label for="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="status" name="status"
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="">All Statuses</option>
+                            <option value="active">Accepted</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="date-range" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="date-range" name="date-range" placeholder="Select date range"
+                            className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" />
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button"
+                            className="w-full md:w-auto px-4 py-2 border  rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Apply Filters
+                        </button>
+                    </div>
+                </div> */}
+            </div>
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <Link to={'add'} className="bg-gray-900 text-white px-4 py-2 rounded-lg  justify-items-end font-bold ">
-                    Add Restaurant
-                </Link>
+            <div className="flex flex-col md:flex-row w-full md:items-center md:justify-center gap-4">
+
                 <div>
-                    <h2 className="text-xl font-semibold"> Restaurants</h2>
+                    <h2 className="text-xl font-semibold "> Restaurants</h2>
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="flex items-center w-full md:w-auto">
                     <input
                         type="text"
                         value={searchTerm}
@@ -95,8 +130,8 @@ function Restaurant() {
                     </thead>
 
                     <tbody className="text-black">
-                        {filteredrestaurant.length > 0 ? (
-                            filteredrestaurant?.map((r) => (
+                        {restaurant.length > 0 ? (
+                            restaurant?.map((r) => (
 
                                 <tr key={r._id} className="border-b">
                                     <td className="p-3">
@@ -106,13 +141,26 @@ function Restaurant() {
                                                 className="h-11 w-11 rounded-full border"
                                                 alt="restaurant"
                                             />
-                                            <span className="font-semibold">{r.name}</span>
+                                            <span className="font-semibold">
+                                                <Highlighter
+                                                    highlightStyle={{
+                                                        backgroundColor: '#ffd54f', // Custom yellow background
+                                                        color: '#d32f2f',           // Red text color
+                                                        fontWeight: 'bold',         // Bold matches
+                                                        padding: '0 2px',           // Add spacing around match
+                                                        borderRadius: '4px'         // Rounded corners
+                                                    }}
+                                                    searchWords={searchTerm ? [searchTerm] : []}
+                                                    autoEscape={true}
+                                                    textToHighlight={r.name}
+
+                                                /></span>
                                         </div>
                                     </td>
 
                                     <td className="p-3">{r.userId.email}</td>
                                     <td className="p-3">{r.userId.phone}</td>
-                                    <td className="p-3">{r?.openDays || "-"}</td>
+                                    <td className="p-3">{r?.openDays.length > 1 ? r.openDays : "-"} </td>
                                     <td className="p-3">
                                         <Link to={`menu/${r._id}`}>
                                             <button className="p-2 rounded hover:bg-gray-100">
@@ -140,25 +188,36 @@ function Restaurant() {
                                 </tr>
                             ))
                         ) : (<tr>
-                            <td colSpan="5" className="p-10 text-center text-gray-500">
-                                No matching restaurant found on this page.
+                            <td colSpan="7" className="p-10 text-center text-gray-500">
+                                <div className="text-center py-20">
+                                    <FiFilter className="mx-auto mb-4" size={48} color="gray" />
+                                    <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                                        No Restaurant found
+                                    </h3>
+                                    <p className="text-gray-500">
+                                        Try adjusting your filters or search terms
+                                    </p>
+                                </div>
                             </td>
-                        </tr>)}
+                        </tr>
+                        )}
                     </tbody>
 
 
                 </table>
             </div>
 
-            <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
+            {
+                restaurant.length > 0 && <div className="flex justify-between items-center mt-4">
+                    <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
 
-                <div className="flex gap-2">
-                    <span>page {currentpage} of {totalPages}</span>
+                    <div className="flex gap-2">
+                        <span>page {currentpage} of {totalPages}</span>
+                    </div>
+
+                    <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
                 </div>
-
-                <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
-            </div>
+            }
 
 
         </div >) : (<>

@@ -3,8 +3,8 @@ import apiClient from "./apiClient.js";
 export const createRestaurant = async (body) => {
   return await apiClient.post(`api/admin/create-restaurant`, body);
 };
-export const getAllRestaurants = async (currentpage) => {
-  const res = await apiClient.get(`api/admin/display-restaurant?page=${currentpage}`);
+export const getAllRestaurants = async (currentpage, search, sortby) => {
+  const res = await apiClient.get(`api/admin/display-restaurant?page=${currentpage}&search=${search}&sortby=${sortby}`);
   return res.data;
 };
 
@@ -34,8 +34,8 @@ export const getAllCategories = async () => {
 export const createMenu = async (body) => {
   return await apiClient.post(`api/admin/menu`, body);
 };
-export const getMenuList = async (page, id) => {
-  return await apiClient.get(`api/admin/menulist/${id}?page=${page}`);
+export const getMenuList = async (page, id, category, sortby, search) => {
+  return await apiClient.get(`api/admin/menulist/${id}?page=${page}&category=${category}&sortby=${sortby}&search=${search}`);
 };
 export const deleteMenuById = async (id) => {
   const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
@@ -56,8 +56,8 @@ export const getRestaurantMenu = async (page, id) => {
 export const createSlot = async (body) => {
   return await apiClient.post(`api/admin/slot`, body);
 };
-export const getSlotListByRestaurant = async (id) => {
-  return await apiClient.get(`api/admin/slotlist/${id}`);
+export const getSlotListByRestaurant = async (id, page, sortby, timeslot) => {
+  return await apiClient.get(`api/admin/slotlist/${id}?page=${page}&sortby=${sortby}&timeslot=${timeslot}`);
 };
 export const deleteSlotById = async (id) => {
   const res = await apiClient.delete(`api/admin/delete-slot/${id}`);
@@ -73,7 +73,7 @@ export const updateSlot = async (slotId, body) => {
 };
 
 //Booking Api
-export const getAllBooking = async (page, search) => {
-  const res = await apiClient.get(`api/admin/viewbooking?page=${page}&search=${search}`);
+export const getAllBooking = async (page, search, sortby, status, date) => {
+  const res = await apiClient.get(`api/admin/viewbooking?page=${page}&search=${search}&sortby=${sortby}&status=${status}&date=${date}`);
   return res.data;
 };

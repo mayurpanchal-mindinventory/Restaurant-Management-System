@@ -100,8 +100,11 @@ const getAllMenusByRestaurant = async (req) => {
     try {
         let menuData;
         const limit = 2;
-        const { page } = req.query;
+        let { page, sortby, category, search } = req.query;
 
+        if (search, category) {
+            page = 1;
+        }
         const skip = (page - 1) * limit;
         const { id } = req.params;
         if (!id.trim()) {
@@ -111,35 +114,88 @@ const getAllMenusByRestaurant = async (req) => {
             error.status = STATUS.BAD_REQUEST;
             throw error;
         }
+        const restaurantObjectId = new mongoose.Types.ObjectId(id);
 
 
-        menuData = await MenuItem.find({ restaurantId: id })
-            .populate({
-                path: "restaurantId",
-                select: "name categoryId.name "
-            }).populate({ path: "categoryId" })
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 })
-            .exec();
 
-        const count = await MenuItem.countDocuments({ restaurantId: id });
-        //console.log(count);
+        const pipeline = [
+            {
+                $match: {
+                    'restaurantId': restaurantObjectId
+                }
+            },
+            {
+                $lookup: {
+                    from: 'restaurants',
+                    localField: 'restaurantId',
+                    foreignField: '_id',
+                    as: 'restaurants'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'categoryId',
+                    foreignField: '_id',
+                    as: 'categories'
+                }
+            }
+            ,
+            { $unwind: { path: '$restaurants', preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: '$categories', preserveNullAndEmptyArrays: true } },
+            {
+                $match: search ? {
+                    $or: [
+                        { name: { $regex: search, $options: 'i' } },
+                        { 'categories.categoryName': { $regex: search, $options: 'i' } },
+                    ]
+                } : {}
+            },
 
+        ];
+        const countData = await MenuItem.aggregate([...pipeline, { $count: 'total' }]);
+        const totalDocs = countData.length > 0 ? countData[0].total : 0;
+
+        menuData = await MenuItem.aggregate([
+            ...pipeline,
+            sortby === "1"
+                ? { $sort: { price: -1 } }
+                : sortby === "2"
+                    ? { $sort: { price: 1 } }
+
+                    : sortby === "3" ? { $sort: { name: 1 } } :
+                        { $sort: { name: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $project: {
+                    name: 1,
+                    price: 1,
+                    image: 1,
+                    categoryId: {
+                        _id: '$categories._id',
+                        categoryName: '$categories.categoryName'
+                    }
+                }
+            },
+            ...(category ? [{
+                $match: { 'categoryId._id': new mongoose.Types.ObjectId(category) }
+            }] : [])
+        ]);
         return {
             success: true,
             message: "Menus Founded",
             data: {
                 menuData,
-                totalPages: Math.ceil(count / limit),
+                totalPages: Math.ceil(totalDocs / limit),
                 currentPage: page * 1,
-                totalDocs: count
+                totalDocs
             }
         };
     } catch (error) {
         if (!error.status) {
             error.status = STATUS.INTERNAL_SERVER_ERROR;
-            error.message = MESSAGES.SERVER_ERROR;
+            error.message;
         }
         throw error;
     }
