@@ -81,11 +81,11 @@ function BookingList() {
             <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
           </div> */}
           <div>
-            <label for="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select id="status" name="status"
               onChange={(e) => setStatus(e.target.value)}
               value={status}
-              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
               <option value="">All Statuses</option>
               <option value="Accepted">Accepted</option>
               <option value="Pending">Pending</option>
@@ -94,7 +94,7 @@ function BookingList() {
             </select>
           </div>
           <div>
-            <label for="date-range" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <label htmlFor="date-range" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
             <input type="date" id="date-range" name="date-range" value={date}
               onChange={(e) => setDate(e.target.value)} placeholder="Select date range"
               className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md" />

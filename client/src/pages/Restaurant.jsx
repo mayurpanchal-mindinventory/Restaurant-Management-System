@@ -68,33 +68,7 @@ function Restaurant() {
                     </select>
                     </div>
                 </div>
-                {/* <div className="flex md:flex-row gap-4 flex-col justify-end">
-                    <div className="flex items-center justify-center">
-                        <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
-                    </div>
-                    <div>
-                        <label for="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="status" name="status"
-                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <option value="">All Statuses</option>
-                            <option value="active">Accepted</option>
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="date-range" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                        <input type="date" id="date-range" name="date-range" placeholder="Select date range"
-                            className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" />
-                    </div>
-                    <div class="flex items-end">
-                        <button type="button"
-                            className="w-full md:w-auto px-4 py-2 border  rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Apply Filters
-                        </button>
-                    </div>
-                </div> */}
+
             </div>
 
             <div className="flex flex-col md:flex-row w-full md:items-center justify-between gap-4">
@@ -144,11 +118,11 @@ function Restaurant() {
                                             <span className="font-semibold">
                                                 <Highlighter
                                                     highlightStyle={{
-                                                        backgroundColor: '#ffd54f', // Custom yellow background
-                                                        color: '#d32f2f',           // Red text color
-                                                        fontWeight: 'bold',         // Bold matches
-                                                        padding: '0 2px',           // Add spacing around match
-                                                        borderRadius: '4px'         // Rounded corners
+                                                        backgroundColor: '#ffd54f',
+                                                        color: '#d32f2f',
+                                                        fontWeight: 'bold',
+                                                        padding: '0 2px',
+                                                        borderRadius: '4px'
                                                     }}
                                                     searchWords={searchTerm ? [searchTerm] : []}
                                                     autoEscape={true}

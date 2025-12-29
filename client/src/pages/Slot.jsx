@@ -106,7 +106,7 @@ function Slot() {
                     Add Slot
                 </Link>
             </header>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
 
                 <div className="bg-white grid gap-2">
                     <select
@@ -126,7 +126,7 @@ function Slot() {
                         <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
                     </div> */}
                     <div>
-                        <label for="category" className="block text-sm font-medium text-gray-700 mb-1">Time Slots</label>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Time Slots</label>
                         <select id="category" name="category"
                             onChange={(e) => setSelectedSlot(e.target.value)}
                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -279,8 +279,8 @@ function Slot() {
                                         <option key="12-13" value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
                                         <option key="13-14" value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
                                         <option key="14-15" value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                                        <option key="14-15" value="02:00 PM - 03:00 PM">03:00 PM - 04:00 PM</option>
-                                        <option key="14-15" value="02:00 PM - 03:00 PM">04:00 PM - 05:00 PM</option>
+                                        <option key="15-16" value="02:00 PM - 03:00 PM">03:00 PM - 04:00 PM</option>
+                                        <option key="16-17" value="02:00 PM - 03:00 PM">04:00 PM - 05:00 PM</option>
 
                                     </Field >
                                     <ErrorMessage name="timeslot" component="p" className="text-red-500 text-sm" />
