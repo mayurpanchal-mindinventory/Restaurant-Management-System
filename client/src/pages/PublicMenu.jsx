@@ -42,6 +42,9 @@ const PublicMenu = () => {
         limit: pagination.limit,
       };
       const response = await getAllMenu(filters);
+
+      console.log("new", response);
+
       if (response) {
         setMenuData(response.data.data.groupedData || []);
         setAllMenuItems(response.data.data.flatData || []);

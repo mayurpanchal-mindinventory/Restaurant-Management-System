@@ -251,8 +251,10 @@ function RestoDetails() {
     const fetchSlots = async () => {
       const response = await getSlotListByRestaurant(id, "", "", "");
 
-      setTimeSlots(response.data.data.data?.slots);
-      console.log("heloooooooooooooo", response);
+      console.log(response);
+
+      setTimeSlots(response.data.data.data.slots);
+      // console.log("heloooooooooooooo", response.data.data);
     };
     fetchSlots();
   }, []);

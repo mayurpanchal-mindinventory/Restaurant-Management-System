@@ -16,7 +16,7 @@ export default function AdminLayout() {
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-gray-100">
       {/* Sidebar */}
-      <nav className="md:w-64 bg-gray-800 text-white flex flex-col w-full">
+      <nav className="md:w-64 bg-gray-800 text-white flex flex-col text-center w-full">
         <div className="p-6 text-xl font-bold border-b border-gray-700">Admin Panel</div>
 
         <div className="flex-1 px-4 py-6 space-y-2">

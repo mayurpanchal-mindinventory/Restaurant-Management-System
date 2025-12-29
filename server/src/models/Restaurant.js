@@ -16,7 +16,7 @@ const restaurantSchema = new mongoose.Schema(
 
     openDays: [
       {
-        type: String,
+        type: String
       },
     ],
 

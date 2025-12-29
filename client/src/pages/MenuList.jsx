@@ -72,41 +72,34 @@ function MenuList() {
       setcurrentpage(currentpage - 1);
     }
   };
-  return menulist?.length > 0 ||
-    searchTerm !== "" ||
-    selectedCategory != null ? (
-    <div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
+  return (
+    menulist?.length > 0 || searchTerm !== "" || selectedCategory != null ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
       <header className=" border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
         <div className="flex text-orange-500 items-center">
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="p-2 hover:bg-orange-500 hover:text-white rounded-full"
-          >
+          <button type="button" onClick={() => navigate('/admin')} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
             <FiArrowLeft size={20} />
           </button>
         </div>
-        <Link
-          to={`/admin/addmenu/${id}`}
-          className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold"
-        >
+        <Link to={`/admin/addmenu/${id}`} className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
           Add Menu
         </Link>
       </header>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
-        <div className="bg-white grid gap-2">
+
+        <div className="bg-white grid">
           <select
             id="sortby"
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-10 px-2 py-2 border rounded-lg"
-          >
+            className="h-10 px-2 py-2 border rounded-lg">
             <option value="1">Sort by: Price (Des)</option>
             <option value="2">Sort by: Price (Asc)</option>
             <option value="3">Sort by: Name (A - Z)</option>
-            <option value="4">Sort by: Name (Z - A)</option>
+            <option value="4">Sort by: Name  (Z - A)</option>
+
           </select>
         </div>
         <div className="flex md:flex-row gap-4 flex-col">
+
           {/* <div className="flex items-center justify-center">
                         <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
                     </div> */}
@@ -145,12 +138,13 @@ function MenuList() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center mt-2 justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center text-center justify-between gap-4 p-4">
+
         <div>
           <h2 className="text-xl font-semibold">Menu List</h2>
         </div>
 
-        <div className="flex items-center w-full md:w-auto">
+        <div className="flex items-center md:items-center w-full md:w-auto">
           <input
             type="text"
             value={searchTerm}
@@ -158,10 +152,11 @@ function MenuList() {
             placeholder="Search..."
             className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
           />
+
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
@@ -175,6 +170,7 @@ function MenuList() {
           <tbody className="text-black">
             {menulist.length > 0 ? (
               menulist?.map((r) => (
+
                 <tr key={r._id} className="border-b">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
@@ -251,38 +247,39 @@ function MenuList() {
         </div>
       )}
     </div>
-  ) : (
-    <>
-      <header className="border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
-        <div className="flex text-orange-500 items-center">
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="p-2 hover:bg-orange-500 hover:text-white rounded-full"
+    ) : (
+      <>
+        <header className="border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
+          <div className="flex text-orange-500 items-center">
+            <button
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="p-2 hover:bg-orange-500 hover:text-white rounded-full"
+            >
+              <FiArrowLeft size={20} />
+            </button>
+          </div>
+          <Link
+            to={`/admin/addmenu/${id}`}
+            className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold"
           >
-            <FiArrowLeft size={20} />
-          </button>
+            Add Menu
+          </Link>
+        </header>
+        <div className="h-full flex text-gray-800 items-center justify-center">
+          <div className="text-center py-20">
+            <FiFilter className="mx-auto mb-4" size={48} color="gray" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              No Menu found
+            </h3>
+            <p className="text-gray-500">
+              Try adjusting your filters or search terms
+            </p>
+          </div>
         </div>
-        <Link
-          to={`/admin/addmenu/${id}`}
-          className="bg-gray-900 text-white px-4 py-2 rounded-lg justify-items-end font-bold"
-        >
-          Add Menu
-        </Link>
-      </header>
-      <div className="h-full flex text-gray-800 items-center justify-center">
-        <div className="text-center py-20">
-          <FiFilter className="mx-auto mb-4" size={48} color="gray" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">
-            No Menu found
-          </h3>
-          <p className="text-gray-500">
-            Try adjusting your filters or search terms
-          </p>
-        </div>
-      </div>
-    </>
-  );
+      </>
+    )
+  )
 }
 
 export default MenuList;
