@@ -10,3 +10,11 @@ export const getBookings = async (userId) => {
   }
   return await apiClient.get(`api/user/bookings`);
 };
+
+export const getBillByUser = async (userId) => {
+  return await apiClient.get(`api/user/bill/${userId}`);
+};
+
+export const updateSharedWithUserByBookingid = async (bookingid) => {
+  return await apiClient.patch(`api/user/bill/${bookingid}`);
+};

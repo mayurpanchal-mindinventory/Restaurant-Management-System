@@ -1,5 +1,10 @@
 const { STATUS, MESSAGES, sendResponse } = require("../utils/constants.js");
-const { BookRestaurant, getBookings } = require("../services/userService.js");
+const {
+  BookRestaurant,
+  getBookings,
+  getBillByuserId,
+  UpdateSharedWithUser,
+} = require("../services/userService.js");
 const {
   getBookingByRestaurent,
   updateStatusById,
@@ -47,7 +52,7 @@ exports.getUserBookings = async (req, res) => {
 exports.getAllbookingByRestaurant = async (req, res) => {
   try {
     const result = await getBookingByRestaurent(req);
-
+    // console.log(result);
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error(
@@ -127,6 +132,37 @@ exports.updateBillPaymentStatusController = async (req, res) => {
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error updating bill payment status:", error.message);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.desiplayBillByUserid = async (req, res) => {
+  try {
+    const result = await getBillByuserId(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in desiplayBillByUserid controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+exports.updateSharedWithUserByBookingid = async (req, res) => {
+  try {
+    const result = await UpdateSharedWithUser(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error(
+      "Error in updateSharedWithUserByBookingid controller:",
+      error
+    );
+
     return sendResponse(
       res,
       error.status || STATUS.INTERNAL_SERVER_ERROR,

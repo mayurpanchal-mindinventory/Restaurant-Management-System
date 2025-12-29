@@ -29,11 +29,11 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useLoading } from "../context/LoadingContext";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 
 export const apiClient = axios.create({
   baseURL: "http://localhost:5000",
-  timeout: 5000
+  timeout: 5000,
 });
 
 export const AxiosInterceptor = ({ children }) => {
@@ -65,11 +65,15 @@ export const AxiosInterceptor = ({ children }) => {
         const status = error.response?.status;
         console.log(status);
 
-        const message = error.response?.data?.message || error.message || "An unexpected error occurred";
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "An unexpected error occurred";
         switch (status) {
           case 401:
             toast.error("Session expired. Please login again.");
             localStorage.removeItem("token");
+
             window.location.href = "/";
             break;
           case 403:

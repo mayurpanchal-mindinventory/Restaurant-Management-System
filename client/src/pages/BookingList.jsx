@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getAllBooking } from "../services/adminService";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import Loader from "../components/common/Loader";
 
 function BookingList() {
   const [booking, setBooking] = useState([]);
   const [currentpage, setcurrentpage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
   const isInitialMount = useRef(true);
 
   const statusStyles = {
@@ -16,9 +19,16 @@ function BookingList() {
   };
 
   const bookingList = async () => {
-    const res = await getAllBooking(currentpage, searchTerm);
-    setBooking(res?.data?.booking || []);
-    setTotalPages(res?.data?.totalPages || 1);
+    setLoading(true);
+    try {
+      const res = await getAllBooking(currentpage, searchTerm);
+      setBooking(res?.data?.booking || []);
+      setTotalPages(res?.data?.totalPages || 1);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -29,21 +39,13 @@ function BookingList() {
         bookingList();
       }, 1500);
 
-      return () => clearTimeout(debouncedSearch)
+      return () => clearTimeout(debouncedSearch);
     }
   }, [searchTerm]);
 
   useEffect(() => {
     bookingList();
-  }, [currentpage])
-  // const filteredBookings = booking.filter((item) => {
-  //   const searchStr = searchTerm.toLowerCase();
-  //   return (
-  //     item?.restaurantId?.name?.toLowerCase().includes(searchStr) ||
-  //     item?.userId?.name?.toLowerCase().includes(searchStr) ||
-  //     item?.status?.toLowerCase().includes(searchStr)
-  //   );
-  // });
+  }, [currentpage]);
 
   const goToNextPage = () => {
     if (currentpage < totalPages) setcurrentpage(currentpage + 1);
@@ -53,13 +55,12 @@ function BookingList() {
     if (currentpage > 1) setcurrentpage(currentpage - 1);
   };
 
-  return booking.length > 0 || searchTerm !== "" ? (
-    <div className="w-full bg-white text-black shadow-md rounded-xl p-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  return (
+    <div className="w-full bg-white text-black shadow-md rounded-xl p-4 min-h-[600px]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="w-full text-center">
-          <h2 className="text-xl font-semibold"> Booking List</h2>
+          <h2 className="text-xl font-semibold">Booking List</h2>
         </div>
-
         <div className="flex items-center gap-2 w-full md:w-auto">
           <input
             type="text"
@@ -71,76 +72,118 @@ function BookingList() {
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
-              <th className="p-3">Date</th>
-              <th className="p-3">Restaurant</th>
-              <th className="p-3">Restaurant Name</th>
-              <th className="p-3">Username</th>
-              <th className="p-3">Slot Time</th>
-              <th className="p-3">Status</th>
-            </tr>
-          </thead>
-          <tbody className="text-black">
-            {booking.length > 0 ? (
-              booking.map((r) => (
-                <tr key={r._id} className="border-b">
-                  <td className="p-3">{r?.date ? new Date(r.date).toLocaleString().split(',')[0] : "Date is not available"}</td>
-
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={r?.restaurantId?.logoImage ? r.restaurantId.logoImage : "https://placehold.co/800?text=logo&font=roboto"}
-                        className="h-11 w-11 rounded-full border"
-                        alt="restaurant"
-                      />
-                    </div>
-                  </td>
-                  <td className="p-3">{r?.restaurantId?.name || "Restaurant Removed"}</td>
-                  <td className="p-3">{r?.userId?.name}</td>
-                  <td className="p-3">{r?.timeSlotId?.timeSlot || "-"}</td>
-                  <td className="p-3">
-                    <p className={`w-fit px-4 py-1 text-center rounded-full text-xs font-medium ${statusStyles[r?.status] || "bg-gray-100 text-gray-700"}`}>
-                      {r?.status}
-                    </p>
-                  </td>
+      {loading ? (
+        <Loader loading={loading} size={60} />
+      ) : booking.length > 0 || searchTerm !== "" ? (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
+                  <th className="p-3">Date</th>
+                  <th className="p-3">Restaurant</th>
+                  <th className="p-3">Restaurant Name</th>
+                  <th className="p-3">Username</th>
+                  <th className="p-3">Slot Time</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Actions</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-10 text-center text-gray-500">
-                  No matching bookings found on this page.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-between items-center mt-4">
-        <button
-          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-          disabled={currentpage === 1}
-          onClick={goToPrevpage}
-        >
-          Previous
-        </button>
-        <span className="text-sm">
-          Page {currentpage} of {totalPages}
-        </span>
-        <button
-          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-          disabled={currentpage === totalPages}
-          onClick={goToNextPage}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="h-full flex text-gray-800 items-center justify-center">
-      <p className="text-3xl font-bold">No Booking Yet</p>
+              </thead>
+              <tbody className="text-black">
+                {booking.length > 0 ? (
+                  booking.map((r) => (
+                    <tr key={r._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        {r?.date
+                          ? new Date(r.date).toLocaleString().split(",")[0]
+                          : "Date is not available"}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              r?.restaurantId?.logoImage
+                                ? r.restaurantId.logoImage
+                                : "https://placehold.co/800?text=logo&font=roboto"
+                            }
+                            className="h-11 w-11 rounded-full border"
+                            alt="restaurant"
+                          />
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        {r?.restaurantId?.name || "Restaurant Removed"}
+                      </td>
+                      <td className="p-3">
+                        <div>
+                          <div className="font-medium">{r?.userId?.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {r?.userId?.email || ""}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">{r?.timeSlotId?.timeSlot || "-"}</td>
+                      <td className="p-3">
+                        <span
+                          className={`w-fit px-3 py-1 text-center rounded-full text-xs font-medium ${
+                            statusStyles[r?.status] ||
+                            "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {r?.status}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-2">
+                          <button
+                            className="p-1 text-blue-600 hover:text-blue-800"
+                            title="View Details"
+                          >
+                            <EyeIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="p-10 text-center text-gray-500">
+                      No matching bookings found on this page.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-4">
+            <button
+              className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+              disabled={currentpage === 1}
+              onClick={goToPrevpage}
+            >
+              Previous
+            </button>
+            <div className="flex gap-2">
+              <span>
+                page {currentpage} of {totalPages}
+              </span>
+            </div>
+            <button
+              className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+              disabled={currentpage === totalPages}
+              onClick={goToNextPage}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="h-full flex text-gray-800 items-center justify-center">
+          <p className="text-3xl font-bold">No Booking Yet</p>
+        </div>
+      )}
     </div>
   );
 }

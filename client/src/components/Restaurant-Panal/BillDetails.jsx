@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
   XMarkIcon,
@@ -8,6 +8,7 @@ import {
 
 const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
   if (!bill) return null;
+  // const [show, setShow] = useState(true);
 
   const paymentStatusStyles = {
     Unpaid: "bg-red-100 text-red-700 border border-red-300",
@@ -216,14 +217,14 @@ const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
             </div>
           </div>
 
-          {bill.isSharedWithUser && (
+          {/* {bill.isSharedWithUser && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="text-sm text-blue-800">
                 <strong>Note:</strong> This bill has been shared with the
                 customer.
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">

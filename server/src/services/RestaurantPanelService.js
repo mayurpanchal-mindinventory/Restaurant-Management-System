@@ -1,4 +1,6 @@
 const Booking = require("../models/Booking.js");
+const User = require("../models/User.js");
+
 const Restaurant = require("../models/Restaurant.js");
 const { STATUS, MESSAGES } = require("../utils/constants.js");
 const MenuItem = require("../models/MenuItem.js");
@@ -18,11 +20,31 @@ exports.getBookingByRestaurent = async (req) => {
 
     const restaurantId = restaurant._id;
 
-    // const { page } = req.query;
-    const page = 1;
+    const page = parseInt(req.query.page) || 1;
+
+    const query = { restaurantId };
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+    if (req.query.date) {
+      query.date = req.query.date;
+    }
+    if (req.query.search) {
+      //Find users matching the search string first very complex
+      //coz we dont have user name in booking so we need to get from user
+      const users = await User.find({
+        $or: [
+          { name: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }).select("_id"); // We only need the IDs to filter the Bookings
+      const userIds = users.map((u) => u._id);
+      query.userId = { $in: userIds };
+    }
+
     const limit = 5;
     const skip = (page - 1) * limit;
-    const booking = await Booking.find({ restaurantId })
+    const booking = await Booking.find(query)
       .populate("userId", "name email _id")
       .populate("restaurantId", "name logoImage _id")
       .populate("timeSlotId", "timeSlot _id")
@@ -32,8 +54,17 @@ exports.getBookingByRestaurent = async (req) => {
       .sort({ createdAt: -1 })
       .exec();
 
-    const count = await Booking.countDocuments({ restaurantId });
+    const count = await Booking.countDocuments(query);
+    const count2 = await Booking.find({
+      restaurantId,
+      status: "Pending",
+    }).countDocuments();
+    const count3 = await Booking.find({
+      restaurantId,
+      status: "Completed",
+    }).countDocuments();
 
+    //console.log({ search, status, date });
     return {
       success: true,
       message: "Bookings retrieved successfully",
@@ -42,6 +73,8 @@ exports.getBookingByRestaurent = async (req) => {
         totalPages: Math.ceil(count / limit),
         currentPage: page * 1,
         totalDocs: count,
+        totalPending: count2,
+        totalCompleted: count3,
       },
     };
   } catch (error) {
@@ -175,15 +208,15 @@ exports.getRestaurantMenu = async (req) => {
       throw error;
     }
 
-    const user = await Restaurant.find({ userId: id })
+    const user = await Restaurant.find({ userId: id });
 
-    if (!user)
-      throw new Error("No user is found");
+    if (!user) throw new Error("No user is found");
     const menuData = await MenuItem.find({ restaurantId: user[0]._id })
       .populate({
         path: "restaurantId",
-        select: "name categoryId.name "
-      }).populate({ path: "categoryId" })
+        select: "name categoryId.name ",
+      })
+      .populate({ path: "categoryId" })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -199,8 +232,8 @@ exports.getRestaurantMenu = async (req) => {
         menuData,
         totalPages: Math.ceil(count / limit),
         currentPage: page * 1,
-        totalDocs: count
-      }
+        totalDocs: count,
+      },
     };
   } catch (error) {
     if (!error.status) {
@@ -209,7 +242,7 @@ exports.getRestaurantMenu = async (req) => {
     }
     throw error;
   }
-}
+};
 exports.getBillsByRestaurant = async (req) => {
   try {
     const userId = req.params.userId || req.user?.id;

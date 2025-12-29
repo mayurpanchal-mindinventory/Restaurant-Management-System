@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const Booking = require("../models/Booking");
-const TimeSlot = require('../models/TimeSlot');
+const TimeSlot = require("../models/TimeSlot");
+const Bill = require("../models/Bill");
 const throwError = (msg, status = 400) => {
   const err = new Error(msg);
   err.status = status;
@@ -13,7 +14,9 @@ exports.BookRestaurant = async (req) => {
 
     if (!userId || !restaurantId || !timeSlotId || !date || !numberOfGuests)
       throwError("All fields are required for booking");
-    const numberOfSlotRemaining = await TimeSlot.findById(timeSlotId).select('maxBookings -_id');
+    const numberOfSlotRemaining = await TimeSlot.findById(timeSlotId).select(
+      "maxBookings -_id"
+    );
     const availableSlots = numberOfSlotRemaining?.maxBookings;
 
     if (Number(availableSlots) < numberOfGuests)
@@ -33,7 +36,9 @@ exports.BookRestaurant = async (req) => {
     });
     await newBooking.save({ session });
 
-    await TimeSlot.findByIdAndUpdate(timeSlotId, { $inc: { maxBookings: -numberOfGuests } }).session(session);
+    await TimeSlot.findByIdAndUpdate(timeSlotId, {
+      $inc: { maxBookings: -numberOfGuests },
+    }).session(session);
     await session.commitTransaction();
     session.endSession();
 
@@ -62,5 +67,57 @@ exports.getBookings = async (userId) => {
   } catch (error) {
     if (error.status) throw error;
     throwError("Failed to retrieve bookings", 500);
+  }
+};
+
+exports.getBillByuserId = async (req) => {
+  try {
+    const { userId } = req.params;
+    // console.log(userId);
+
+    const result = await Bill.find({
+      userId: userId,
+      isSharedWithUser: true,
+    })
+      .populate({
+        path: "bookingId",
+        populate: {
+          path: "timeSlotId",
+        },
+      })
+      .populate("restaurantId userId");
+    return {
+      success: true,
+      message: "Bill retrive Successfully",
+      data: result,
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message;
+    }
+    throw error;
+  }
+};
+
+exports.UpdateSharedWithUser = async (req) => {
+  try {
+    const { bookingid } = req.params;
+    const { isSharedWithUser } = req.body;
+
+    const result = await Bill.findByIdAndUpdate(bookingid, {
+      isSharedWithUser,
+    });
+    return {
+      success: true,
+      message: "Update shared with user in Bill sucessfully",
+      data: result,
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message;
+    }
+    throw error;
   }
 };

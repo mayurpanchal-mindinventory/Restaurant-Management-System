@@ -52,6 +52,21 @@ export const billService = {
     }
   },
 
+  // Update shared with user status for a bill
+  updateSharedWithUser: async (billId, isSharedWithUser) => {
+    try {
+      const response = await apiClient.patch(`/api/user/bill/${billId}`, {
+        isSharedWithUser,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Failed to update shared with user status"
+      );
+    }
+  },
+
   // Get menu items for bill generation (this would use existing menu service)
   getMenuItems: async (id) => {
     try {

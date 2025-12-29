@@ -1,155 +1,236 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
-import { deleteMenuById, getMenuList, getRestaurantMenu } from '../../services/adminService';
-import { Link } from 'react-router-dom';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { useConfirm } from '../../context/ConfirmationContext';
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { getRestaurantMenu, deleteMenuById } from "../../services/adminService";
+import { Link } from "react-router-dom";
+import { useConfirm } from "../../context/ConfirmationContext";
+import {
+  UtensilsCrossed,
+  Plus,
+  Edit3,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  Tag,
+  Image as ImageIcon,
+} from "lucide-react";
 
 function MenuByRestaurant() {
+  const { user } = useSelector((state) => state.auth);
+  const userId = user?.id || user?._id;
+  const [menulist, setMenuList] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setcurrentpage] = useState(1);
+  const { confirm } = useConfirm();
 
-    const { user } = useSelector((state) => state.auth);
-    const userId = user?.id || user?._id;
-    const [menulist, setMenuList] = useState([]);
-    const [totalPages, setTotalPages] = useState(1);
-    const [currentPage, setcurrentpage] = useState(1);
-    const { confirm } = useConfirm();
+  const getmenus = async () => {
+    const res = await getRestaurantMenu(currentPage, userId);
+    setMenuList(res?.data?.data?.menuData || []);
+    setTotalPages(res?.data?.data?.totalPages || 1);
+  };
 
-    const getmenus = async () => {
-        const res = await getRestaurantMenu(currentPage, userId);
-        setMenuList(res?.data?.data?.menuData);
-        setTotalPages(res?.data?.data?.totalPages)
-    };
-    useEffect(() => {
-        getmenus();
-    }, [currentPage])
-    const goToNextPage = () => {
-        if (currentPage < totalPages) {
-            setcurrentpage(currentPage + 1);
-        }
-    };
+  useEffect(() => {
+    getmenus();
+  }, [currentPage]);
 
-    const goToPrevpage = () => {
-        if (currentPage > 1) {
-            setcurrentpage(currentPage - 1);
-        }
-    };
-    const handleDelete = async (id) => {
-        const isConfirmed = await confirm({
-            title: "Delete Menu?",
-            message: "This action is permanent and cannot be undone."
-        });
-        if (isConfirmed) {
-            await deleteMenuById(id);
-            getmenus();
-        }
-    };
-    return (
+  const handleDelete = async (id) => {
+    const isConfirmed = await confirm({
+      title: "Delete Menu?",
+      message: "This action is permanent and cannot be undone.",
+    });
+    if (isConfirmed) {
+      await deleteMenuById(id);
+      getmenus();
+    }
+  };
 
-        <div className="container mx-auto p-4">
-            <div className="mb-6">
+  const totalMenuItems = menulist.length;
+  const averagePrice =
+    menulist.length > 0
+      ? menulist.reduce((sum, item) => sum + (item.price || 0), 0) /
+        menulist.length
+      : 0;
+  const categoriesCount = new Set(
+    menulist.map((item) => item?.categoryId?.categoryName)
+  ).size;
 
-
-            </div>
-            <div className="w-full bg-white text-black shadow-md rounded-xl p-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div className="w-full text-center">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                            Restaurant Menu's
-                        </h1>                    </div>
-                </div>
-
-                {menulist?.length > 0 ? (
-                    <>
-                        <header className=" border-b sticky top-0 z-10 px-4 py-2 flex items-center justify-between">
-                            <Link to={`/restaurant/addmenu/${menulist[0]?.restaurantId?._id}`} className="bg-orange-500 text-white px-4 py-2 rounded-lg justify-items-end font-bold">
-                                Add Menu
-                            </Link>
-                        </header>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
-                                        <th className="p-3">Menu</th>
-                                        <th className="p-3">Menu Category</th>
-                                        <th className="p-3">Menu Item</th>
-                                        <th className="p-3">Price</th>
-                                        <th className="p-3">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-black">
-                                    {menulist.length > 0 ? (
-                                        menulist?.map((r) => (
-
-                                            <tr key={r._id} className="border-b">
-                                                <td className="p-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <img
-                                                            src={r.image}
-                                                            className="h-11 w-11 rounded-full border"
-                                                            alt="restaurant"
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="p-3">{r?.categoryId.categoryName}</td>
-
-                                                <td className="p-3">{r?.name}</td>
-                                                <td className="p-3">Rs. {r?.price || "-"}</td>
-
-                                                <td className="p-3">
-                                                    <Link to={`/restaurant/editmenu/${r._id}`}>
-                                                        <button className="p-2 rounded hover:bg-gray-100">
-                                                            <PencilIcon className="size-6 text-orange-500" />
-                                                        </button>
-                                                    </Link>
-
-                                                    <button onClick={() => handleDelete(r._id)} className="p-2 rounded hover:bg-gray-100">
-                                                        <TrashIcon className="size-6 text-red-500" />
-                                                    </button>
-
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (<tr>
-                                        <td colSpan="3" className="p-10 text-center text-gray-500">
-                                            No matching menu found on this page.
-                                        </td>
-                                    </tr>)}
-                                </tbody>
-
-                            </table>
-                        </div>
-
-                        {/* Pagination */}
-                        <div className="flex justify-between items-center mt-4">
-                            <button
-                                className="border px-4 py-2 rounded-lg text-sm"
-                                disabled={currentPage === 1}
-                                onClick={goToPrevpage}
-                            >
-                                Previous
-                            </button>
-                            <div className="flex gap-2">
-                                <span>
-                                    page {currentPage} of {totalPages}
-                                </span>
-                            </div>
-                            <button
-                                className="border px-4 py-2 rounded-lg text-sm"
-                                disabled={currentPage === totalPages}
-                                onClick={goToNextPage}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </>
-                ) : (
-                    <div className="h-full flex text-gray-800 items-center justify-center">
-                        <p className="text-3xl font-bold">No Menu  Yet</p>
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="max-w-7xl mx-auto p-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+            <UtensilsCrossed size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Menu Management
+            </h1>
+            <p className="text-sm text-gray-500">
+              Manage your restaurant items
+            </p>
+          </div>
         </div>
-    )
+
+        {menulist?.length > 0 && (
+          <Link
+            to={`/restaurant/addmenu/${menulist[0]?.restaurantId?._id}`}
+            className="flex items-center justify-center gap-2 bg-orange-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+          >
+            <Plus size={18} />
+            Add Menu Item
+          </Link>
+        )}
+      </div>
+
+      {/* Stats Section - Minimal Style */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {[
+          {
+            label: "Total Items",
+            value: totalMenuItems,
+            icon: UtensilsCrossed,
+            color: "text-orange-600",
+            bg: "bg-orange-50",
+          },
+          {
+            label: "Categories",
+            value: categoriesCount,
+            icon: Tag,
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+          },
+          {
+            label: "Avg. Price",
+            value: `₹${averagePrice.toFixed(0)}`,
+            icon: DollarSign,
+            color: "text-green-600",
+            bg: "bg-green-50",
+          },
+        ].map((stat, idx) => (
+          <div
+            key={idx}
+            className="bg-white p-5 rounded-xl border border-gray-100 flex items-center justify-between"
+          >
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            </div>
+            <div
+              className={`w-10 h-10 ${stat.bg} rounded-lg flex items-center justify-center`}
+            >
+              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table Section - Clean & Minimal */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/50">
+                <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                  Image
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                  Item Details
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-center">
+                  Category
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">
+                  Price
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {menulist.map((item) => (
+                <tr
+                  key={item._id}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-6 py-4">
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden border border-gray-100">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          className="w-full h-full object-cover"
+                          alt=""
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon size={16} className="text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 font-medium text-gray-900">
+                    {item.name}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-sm text-gray-500 font-medium">
+                      {item?.categoryId?.categoryName || "—"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right font-bold text-gray-900">
+                    ₹{item.price}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-end gap-3">
+                      <Link
+                        to={`/restaurant/editmenu/${item._id}`}
+                        className="text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        <Edit3 size={18} />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
+          <p className="text-xs text-gray-500">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setcurrentpage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-md border border-gray-200 bg-white disabled:opacity-50 hover:bg-gray-50"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={() =>
+                setcurrentpage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-md border border-gray-200 bg-white disabled:opacity-50 hover:bg-gray-50"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default MenuByRestaurant
+export default MenuByRestaurant;
