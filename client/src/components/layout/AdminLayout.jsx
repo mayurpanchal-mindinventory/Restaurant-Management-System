@@ -31,7 +31,7 @@ export default function AdminLayout() {
 
         <button
           onClick={() => dispatch(logout())}
-          className="m-4 flex items-center gap-3 px-4 py-2 text-red-400 hover:bg-gray-700 rounded-md transition"
+          className="m-4 flex items-center justify-center gap-3 px-4 text-center py-2 text-red-400 hover:bg-gray-700 rounded-md transition"
         >
           <LogOut size={18} /> Logout
         </button>

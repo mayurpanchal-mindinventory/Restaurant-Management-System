@@ -210,7 +210,7 @@ export default function RestaurantForm() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-600 mb-3">Weekly Off Days</label>
+                                            <label className="block text-sm font-medium text-gray-600 mb-3">Operational Days</label>
                                             <div className="flex flex-wrap gap-3">
                                                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                                                     <label key={day} className="flex items-center px-3 py-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">

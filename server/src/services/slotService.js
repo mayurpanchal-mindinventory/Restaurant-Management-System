@@ -59,40 +59,40 @@ exports.slotList = async (req) => {
         $match:
           sortby && sortby == "1"
             ? {
-                date: {
-                  $gte: startOfDay,
-                  $lt: nextDay,
-                },
-              }
+              date: {
+                $gte: startOfDay,
+                $lt: nextDay,
+              },
+            }
             : {},
       },
       {
         $match:
           sortby && sortby == "2"
             ? {
-                date: {
-                  $gte: startOfDay,
-                  $lt: nextDay,
-                },
-              }
+              date: {
+                $gte: startOfDay,
+                $lt: nextDay,
+              },
+            }
             : {},
       },
       {
         $match:
           sortby && sortby == "3"
             ? {
-                date: {
-                  $gte: startOfDay,
-                  $lt: nextDay,
-                },
-              }
+              date: {
+                $gte: startOfDay,
+                $lt: nextDay,
+              },
+            }
             : {},
       },
       {
         $match: timeslot
           ? {
-              timeSlot: timeslot,
-            }
+            timeSlot: timeslot,
+          }
           : {},
       },
     ];
@@ -144,6 +144,8 @@ exports.updateSlot = async (req) => {
       timeSlot: req.body.timeSlot,
       date: req.body.date,
       restaurantId: req.body.restaurantId,
+      discountPercent: req.body.discountPercent,
+      maxBookings: req.body.maxBookings
     });
     if (exists) throw new Error("Slot Already exist");
     const { id } = req.params;
