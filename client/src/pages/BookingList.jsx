@@ -20,13 +20,13 @@ function BookingList() {
     Cancelled: "bg-red-100 text-red-700 border border-red-300",
   };
 
-  const bookingList = async () => {
+  const bookingList = async (s = status, d = date) => {
 
-    const res = await getAllBooking(currentpage, searchTerm, sortby, status, date);
+    const res = await getAllBooking(currentpage, searchTerm, sortby, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
-    prevStatusRef.current = status;
-    prevDateRef.current = date;
+    prevStatusRef.current = s;
+    prevDateRef.current = d;
 
   };
 
@@ -40,7 +40,7 @@ function BookingList() {
 
       return () => clearTimeout(debouncedSearch)
     }
-  }, [searchTerm, sortby,]);
+  }, [searchTerm, sortby]);
 
   useEffect(() => {
     bookingList();
@@ -50,7 +50,7 @@ function BookingList() {
     if (prevStatusRef.current !== "" || prevDateRef.current !== "") {
       setStatus("");
       setDate("");
-      bookingList();
+      bookingList("", "");
     }
   }
   const goToNextPage = () => {
@@ -70,8 +70,9 @@ function BookingList() {
             id="sortby"
             onChange={(e) => setSortBy(e.target.value)}
             className="h-10 px-2 py-2 border rounded-lg">
-            <option value="1">Sort by: Date</option>
-            <option value="2">Sort by: Restaurant Name</option>
+            <option value="1">Sort by: Booking Date</option>
+            <option value="2">Sort by: Restaurant (A-Z)</option>
+            <option value="3">Sort by: Restaurant (Z-A)</option>
           </select>
         </div>
         <div className="flex md:flex-row gap-4 flex-col">
@@ -105,7 +106,7 @@ function BookingList() {
               Apply Filters
             </button>
             <button type="button"
-              onClick={() => clearfilter()}
+              onClick={() => clearfilter({})}
               className="w-full md:w-auto px-4 py-2  rounded-md shadow-sm text-sm font-medium text-gray-600   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
               Clear Filters
             </button>

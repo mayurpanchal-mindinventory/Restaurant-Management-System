@@ -97,7 +97,7 @@ function Restaurant() {
                 </div> */}
             </div>
 
-            <div className="flex flex-col md:flex-row w-full md:items-center md:justify-center gap-4">
+            <div className="flex flex-col md:flex-row w-full md:items-center justify-between gap-4">
 
                 <div>
                     <h2 className="text-xl font-semibold "> Restaurants</h2>

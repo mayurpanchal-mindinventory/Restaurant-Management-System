@@ -77,7 +77,7 @@ function MenuList() {
             </header>
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
 
-                <div className="bg-white grid gap-2">
+                <div className="bg-white grid">
                     <select
                         id="sortby"
                         onChange={(e) => setSortBy(e.target.value)}
@@ -120,13 +120,13 @@ function MenuList() {
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row md:items-center mt-2 justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center text-center justify-between gap-4 p-4">
 
                 <div>
                     <h2 className="text-xl font-semibold">Menu List</h2>
                 </div>
 
-                <div className="flex items-center w-full md:w-auto">
+                <div className="flex items-center md:items-center w-full md:w-auto">
                     <input
                         type="text"
                         value={searchTerm}
@@ -138,7 +138,7 @@ function MenuList() {
                 </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto">
+            <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-gray-100 text-gray-700">
