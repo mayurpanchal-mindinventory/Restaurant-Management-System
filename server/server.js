@@ -11,33 +11,34 @@ const verifyToken = require("../server/src/middleware/authMiddleware.js");
 
 const cookieParser = require("cookie-parser");
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://192.168.1.213:5173", // Your network IP
-];
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "http://192.168.1.213:5173", // Your network IP
+// ];
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl)
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      // This dynamically allows whatever URL is hitting your API
+      // (Great for localhost, network IPs, and localtunnel)
+      callback(null, true);
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true, // Required for cookieParser()
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
   })
 );
-app.options(
-  /.*/,
-  cors({
-    origin: "http://localhost:5174",
-    credentials: true,
-  })
-);
+
+// Explicitly handle Preflight requests for all routes
+app.options(/.*/, cors());
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -55,6 +56,12 @@ mongoose
 app.use((req, res) => {
   res.status(404).send("Sorry, that page cannot be found!");
 });
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
-);
+// app.listen(, () =>
+//   console.log(`Server running on port ${process.env.PORT}`)
+// );
+app.listen(process.env.PORT, "0.0.0.0", () => {
+  console.log(`Server is running on http://0.0.0.0:${process.env.PORT}`);
+  console.log(
+    `Accessible on network at: http://192.168.1.213:${process.env.PORT}`
+  );
+});
