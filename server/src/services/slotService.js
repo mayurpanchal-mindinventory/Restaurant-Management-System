@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const { STATUS, MESSAGES } = require('../utils/constants');
 const TimeSlot = require("../models/TimeSlot");
 exports.createSlot = async (data) => {
     try {
@@ -13,7 +14,7 @@ exports.createSlot = async (data) => {
     catch (error) {
         if (!error.status) {
             error.status = STATUS.INTERNAL_SERVER_ERROR;
-            error.message = MESSAGES.SERVER_ERROR;
+            error.message;
         }
         throw error;
     }
@@ -26,6 +27,7 @@ exports.slotList = async (req) => {
         limit = 5;
         if (!id) throw new Error("Resaurant Id Required");
         let { page, sortby, timeslot } = req.query;
+        if (!page) page = 1;
         if (sortby) {
             if (sortby == "2") {
                 startOfDay = new Date(new Date().toISOString().split('T')[0]);
@@ -129,13 +131,21 @@ exports.deleteSlot = async (req) => {
 };
 
 exports.updateSlot = async (req) => {
+
+    console.log(req.body);
     try {
+        const exists = await TimeSlot.findOne({
+            timeSlot: req.body.timeSlot,
+            date: req.body.date,
+            restaurantId: req.body.restaurantId
+        });
+        if (exists) throw new Error("Slot Already exist");
         const { id } = req.params;
         await TimeSlot.findByIdAndUpdate(id, req.body);
     } catch (error) {
         if (!error.status) {
             error.status = STATUS.INTERNAL_SERVER_ERROR;
-            error.message = MESSAGES.SERVER_ERROR;
+            error.message;
         }
         throw error;
     }

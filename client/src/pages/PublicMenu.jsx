@@ -3,7 +3,7 @@ import { Search, Filter, MapPin, ArrowLeft, ChevronDown } from "lucide-react";
 import { getAllMenu } from "../services/adminService";
 import { toast } from "react-hot-toast";
 import bookingImg from "../assets/booking.jpg";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const PublicMenu = () => {
   const navigate = useNavigate();
@@ -42,9 +42,12 @@ const PublicMenu = () => {
         limit: pagination.limit,
       };
       const response = await getAllMenu(filters);
+
+      console.log("new", response);
+
       if (response) {
-        setMenuData(response.data.groupedData || []);
-        setAllMenuItems(response.data.flatData || []);
+        setMenuData(response.data.data.groupedData || []);
+        setAllMenuItems(response.data.data.flatData || []);
 
         if (response.data.pagination) {
           setPagination((prev) => ({ ...prev, ...response.data.pagination }));
@@ -294,9 +297,13 @@ const PublicMenu = () => {
                   </div>
                   <div className="text-right flex flex-col items-end">
                     <p className="text-xl font-bold mb-2">₹{item.price}</p>
-                    <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm transition">
-                      View Restaurant
-                    </button>
+                    <NavLink to="/Home/restaurant" state={{ id: item.restaurantId }}>
+                      <button
+                        className={`text-sm font-semibold text-orange-500 hover:text-orange-600 transition duration-200`}
+                      >
+                        View Details
+                      </button>
+                    </NavLink>
                   </div>
                 </div>
               </div>
@@ -333,11 +340,10 @@ const PublicMenu = () => {
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
                     disabled={loading}
-                    className={`px-3 py-2 border rounded-lg text-sm transition ${
-                      pageNum === pagination.currentPage
-                        ? "bg-orange-500 text-white border-orange-500"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`px-3 py-2 border rounded-lg text-sm transition ${pageNum === pagination.currentPage
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
                   >
                     {pageNum}
                   </button>

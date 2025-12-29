@@ -278,7 +278,8 @@ function MenuList() {
           </div>
         </div>
       </>
-    );
+    )
+  )
 }
 
 export default MenuList;

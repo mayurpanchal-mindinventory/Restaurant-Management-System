@@ -7,10 +7,9 @@ function SidebarAdmin() {
   const dispatch = useDispatch();
 
   const navLinkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${
-      isActive
-        ? "bg-gray-100 text-gray-900"
-        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${isActive
+      ? "bg-gray-100 text-gray-900"
+      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
     }`;
 
   return (
@@ -30,10 +29,7 @@ function SidebarAdmin() {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-3 py-6 space-y-2">
-        <NavLink to="/restaurant/dashboard" className={navLinkClasses}>
-          <Home size={18} />
-          Dashboard
-        </NavLink>
+
 
         <NavLink to="restaurant/booking" className={navLinkClasses}>
           <Calendar size={18} />
