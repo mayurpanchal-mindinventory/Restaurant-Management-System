@@ -83,6 +83,7 @@ exports.getBillByuserId = async (req) => {
         path: "bookingId",
         populate: {
           path: "timeSlotId",
+          model: "TimeSlot"
         },
       })
       .populate("restaurantId userId");

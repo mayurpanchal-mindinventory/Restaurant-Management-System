@@ -5,7 +5,7 @@ import DatePicker from "react-multi-date-picker";
 import { createRestaurant, getRestaurantsById, updateRestaurant } from "../services/adminService";
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
-import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi"; // Optional: npm install react-icons
+import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi";
 
 
 export default function RestaurantForm() {
@@ -87,7 +87,6 @@ export default function RestaurantForm() {
             >
                 {({ setFieldValue, values, isSubmitting }) => (
                     <Form className="flex-1 flex flex-col">
-                        {/* HEADER STICKY BAR */}
                         <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
                             <div className="flex text-orange-500 items-center gap-4">
                                 <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
@@ -108,12 +107,10 @@ export default function RestaurantForm() {
 
                         <main className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                            {/* LEFT COLUMN: Media & Branding */}
                             <div className="lg:col-span-1 space-y-6  text-black">
                                 <div className="bg-white p-6 rounded-xl shadow-sm border">
                                     <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Branding</h2>
 
-                                    {/* Cover Image */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium mb-2">Cover Photo</label>
                                         <div className="relative h-40 w-full bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group">
@@ -134,7 +131,6 @@ export default function RestaurantForm() {
                                         <ErrorMessage name="mainImage" component="p" className="text-red-500 text-xs mt-1" />
                                     </div>
 
-                                    {/* Logo Image */}
                                     <div className="flex flex-col items-center">
                                         <label className="block text-sm font-medium mb-2 w-full text-left">Logo</label>
                                         <div className="relative h-24 w-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100 group">
@@ -154,7 +150,6 @@ export default function RestaurantForm() {
                                 </div>
                             </div>
 
-                            {/* RIGHT COLUMN: Form Details */}
                             <div className="lg:col-span-2 space-y-6  text-black">
                                 <div className="bg-white p-8 rounded-xl shadow-sm border">
                                     <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">General Information</h2>
@@ -194,7 +189,6 @@ export default function RestaurantForm() {
                                     </div>
                                 </div>
 
-                                {/* Operations Section */}
                                 <div className="bg-white p-8 rounded-xl shadow-sm border">
                                     <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">Operational Hours</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
