@@ -41,6 +41,9 @@ export const getMenuList = async (page, id, category, sortby, search) => {
     `api/admin/menulist/${id}?page=${page}&category=${category}&sortby=${sortby}&search=${search}`
   );
 };
+export const getMenuList1 = async (id) => {
+  return await apiClient.get(`api/admin/menulist/${id}`);
+};
 export const deleteMenuById = async (id) => {
   const res = await apiClient.delete(`api/admin/delete-menu/${id}`);
   return res.data;
@@ -77,6 +80,52 @@ export const updateSlot = async (slotId, body) => {
   return await apiClient.put(`api/admin/update-slot/${slotId}`, body);
 };
 
+export const getAllMenu = async (filters = {}) => {
+  const params = new URLSearchParams();
+
+  if (filters.search) {
+    params.append("search", filters.search);
+  }
+
+  if (filters.category) {
+    params.append("category", filters.category);
+  }
+
+  if (filters.restaurant) {
+    params.append("restaurant", filters.restaurant);
+  }
+
+  if (filters.minPrice !== undefined && filters.minPrice !== "") {
+    params.append("minPrice", filters.minPrice);
+  }
+
+  if (filters.maxPrice !== undefined && filters.maxPrice !== "") {
+    params.append("maxPrice", filters.maxPrice);
+  }
+
+  if (filters.sortBy) {
+    params.append("sortBy", filters.sortBy);
+  }
+
+  if (filters.sortOrder) {
+    params.append("sortOrder", filters.sortOrder);
+  }
+
+  if (filters.page) {
+    params.append("page", filters.page);
+  }
+
+  if (filters.limit) {
+    params.append("limit", filters.limit);
+  }
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `api/admin/allmenu?${queryString}`
+    : "api/admin/allmenu";
+
+  const res = await apiClient.get(url);
+};
 //Booking Api
 export const getAllBooking = async (page, search, sortby, status, date) => {
   const res = await apiClient.get(

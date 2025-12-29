@@ -47,7 +47,7 @@ exports.getAllMenusByRestaurant = async (req, res) => {
     return sendResponse(
       res,
       error.status || STATUS.INTERNAL_SERVER_ERROR,
-      error.message || MESSAGES.SERVER_ERROR
+      error.message
     );
   }
 };

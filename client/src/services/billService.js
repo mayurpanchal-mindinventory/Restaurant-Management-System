@@ -70,6 +70,7 @@ export const billService = {
   // Get menu items for bill generation (this would use existing menu service)
   getMenuItems: async (id) => {
     try {
+      console.log(id);
       const response = await apiClient.get(`/api/admin/menulist/${id}`);
       console.log(response);
       return response.data;

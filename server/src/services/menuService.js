@@ -96,7 +96,7 @@ const getAllMenusByRestaurant = async (req) => {
     const limit = 2;
     let { page, sortby, category, search } = req.query;
 
-    if ((search, category)) {
+    if ((search, category, !page)) {
       page = 1;
     }
     const skip = (page - 1) * limit;
