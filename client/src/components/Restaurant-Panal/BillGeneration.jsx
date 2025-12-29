@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { billService } from "../../services/billService";
+import {
+  FileText,
+  Calendar,
+  Users,
+  Plus,
+  Minus,
+  Trash2,
+  ShoppingCart,
+  Percent,
+  DollarSign,
+} from "lucide-react";
 
 const BillGeneration = ({
   isOpen,
@@ -130,166 +141,261 @@ const BillGeneration = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-semibold">Generate Bill</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600">
+              <FileText size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Generate Bill
+              </h2>
+              <p className="text-sm text-gray-600">
+                Create a new bill for this booking
+              </p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="w-8 h-8 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium mb-2">Booking Details</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium">Customer:</span>{" "}
-                {booking?.userId?.name}
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
+          {/* Booking Details */}
+          <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar size={20} className="text-gray-600" />
+              <h3 className="font-medium text-gray-900">Booking Details</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded p-3 border border-gray-200">
+                <p className="text-xs font-medium text-gray-600 mb-1">
+                  Customer
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {booking?.userId?.name}
+                </p>
               </div>
-              <div>
-                <span className="font-medium">Date:</span>{" "}
-                {new Date(booking?.date).toLocaleDateString()}
+              <div className="bg-white rounded p-3 border border-gray-200">
+                <p className="text-xs font-medium text-gray-600 mb-1">Date</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {new Date(booking?.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
-              <div>
-                <span className="font-medium">Guests:</span>{" "}
-                {booking?.numberOfGuests}
+              <div className="bg-white rounded p-3 border border-gray-200">
+                <p className="text-xs font-medium text-gray-600 mb-1">Guests</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {booking?.numberOfGuests}
+                </p>
               </div>
-              <div>
-                <span className="font-medium">Status:</span> {booking?.status}
+              <div className="bg-white rounded p-3 border border-gray-200">
+                <p className="text-xs font-medium text-gray-600 mb-1">Status</p>
+                <span
+                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                    booking?.status === "Completed"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {booking?.status}
+                </span>
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-              {error}
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 font-medium">{error}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium mb-4">Select Menu Items</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {menuItems?.map((item) => (
-                  <div
-                    key={item?._id}
-                    className="flex justify-between items-center p-3 border rounded-lg"
-                  >
-                    <div>
-                      <div className="font-medium">{item?.name}</div>
-
-                      <div className="text-sm text-gray-600">₹{item?.price}</div>
-                    </div>
-                    <button
-                      onClick={() => addItemToBill(item)}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Menu Items Selection */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <ShoppingCart size={20} className="text-gray-600" />
+                <h3 className="font-medium text-gray-900">Select Menu Items</h3>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                {menuItems?.length > 0 ? (
+                  <div className="space-y-2">
+                    {menuItems.map((item) => (
+                      <div
+                        key={item?._id}
+                        className="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">
+                            {item?.name}
+                          </div>
+                          <div className="text-sm text-gray-600 font-medium">
+                            ₹{item?.price}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => addItemToBill(item)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
+                        >
+                          <Plus size={14} />
+                          Add
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-gray-500">
+                      No menu items available
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div>
-              <h3 className="font-medium mb-4">Bill Summary</h3>
-
-              <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
-                {selectedItems.map((item) => (
-                  <div
-                    key={item.itemId}
-                    className="flex justify-between items-center p-3 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
-
-                      <div className="text-sm text-gray-600">
-                        ₹{item.price} each
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() =>
-                          updateItemQuantity(item.itemId, item.quantity - 1)
-                        }
-                        className="w-6 h-6 bg-gray-200 rounded text-sm hover:bg-gray-300"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() =>
-                          updateItemQuantity(item.itemId, item.quantity + 1)
-                        }
-                        className="w-6 h-6 bg-gray-200 rounded text-sm hover:bg-gray-300"
-                      >
-                        +
-                      </button>
-
-                      <div className="w-16 text-right font-medium">
-                        ₹{item.total.toFixed(2)}
-                      </div>
-                      <button
-                        onClick={() => removeItem(item.itemId)}
-                        className="text-red-500 hover:text-red-700 text-sm"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            {/* Bill Summary */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <FileText size={20} className="text-gray-600" />
+                <h3 className="font-medium text-gray-900">Bill Summary</h3>
               </div>
 
-              <div className="border-t pt-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>₹{calculateSubtotal().toFixed(2)}</span>
+              <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
+                {selectedItems.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedItems.map((item) => (
+                      <div
+                        key={item.itemId}
+                        className="flex items-center justify-between p-3 bg-white rounded border border-gray-200"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">
+                            {item.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            ₹{item.price} each
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              updateItemQuantity(item.itemId, item.quantity - 1)
+                            }
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded text-gray-600 hover:bg-gray-200 transition-colors"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="w-8 text-center font-medium">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateItemQuantity(item.itemId, item.quantity + 1)
+                            }
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded text-gray-600 hover:bg-gray-200 transition-colors"
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <div className="w-20 text-right font-medium text-gray-900">
+                            ₹{item.total.toFixed(2)}
+                          </div>
+                          <button
+                            onClick={() => removeItem(item.itemId)}
+                            className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="flex justify-between items-center">
-                    <span>Discount (%):</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={discountPercent}
-                      onChange={(e) =>
-                        setDiscountPercent(Number(e.target.value))
-                      }
-                      className="w-16 border rounded px-2 py-1 text-right"
-                    />
+                ) : (
+                  <div className="text-center py-8">
+                    <ShoppingCart className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No items selected</p>
                   </div>
+                )}
+              </div>
 
-                  <div className="flex justify-between">
-                    <span>Discount Amount:</span>
-                    <span>-₹{calculateDiscountAmount().toFixed(2)}</span>
-                  </div>
+              {/* Totals */}
+              {selectedItems.length > 0 && (
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Subtotal:</span>
+                      <span className="font-medium">
+                        ₹{calculateSubtotal().toFixed(2)}
+                      </span>
+                    </div>
 
-                  <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                    <span>Total:</span>
-                    <span>₹{calculateGrandTotal().toFixed(2)}</span>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Percent size={16} className="text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          Discount (%):
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={discountPercent}
+                        onChange={(e) =>
+                          setDiscountPercent(Number(e.target.value))
+                        }
+                        className="w-16 px-2 py-1 border border-gray-300 rounded text-right text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">
+                        Discount Amount:
+                      </span>
+                      <span className="font-medium text-red-600">
+                        -₹{calculateDiscountAmount().toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <DollarSign size={18} className="text-gray-600" />
+                          <span className="font-medium text-gray-900">
+                            Total:
+                          </span>
+                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                          ₹{calculateGrandTotal().toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="mt-6 flex gap-3">
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
                 <button
                   onClick={onClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateBill}
                   disabled={loading || selectedItems.length === 0}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? "Creating..." : "Create Bill"}
+                  {loading ? "Creating Bill..." : "Create Bill"}
                 </button>
               </div>
             </div>

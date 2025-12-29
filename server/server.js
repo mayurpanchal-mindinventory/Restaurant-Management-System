@@ -7,36 +7,42 @@ const adminRoutes = require("./src/routes/adminRoutes.js");
 const userRoutes = require("./src/routes/userRoutes.js");
 const restaurantPanelRoutes = require("./src/routes/restaurantPanelRoutes.js");
 dotenv.config();
-const verifyToken = require('../server/src/middleware/authMiddleware.js')
+const verifyToken = require("../server/src/middleware/authMiddleware.js");
 
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const app = express();
 
-app.use(cors({
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
-app.options(/.*/, cors({
-  origin: "http://localhost:5174",
-  credentials: true
-}));
+app.options(
+  /.*/,
+  cors({
+    origin: "http://localhost:5174",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", verifyToken, adminRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/owner", restaurantPanelRoutes);
+app.use("/api/user", verifyToken, userRoutes);
+app.use("/api/owner", verifyToken, restaurantPanelRoutes);
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
 app.use((req, res) => {
-  res.status(404).send('Sorry, that page cannot be found!');
+  res.status(404).send("Sorry, that page cannot be found!");
 });
 app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)

@@ -1,8 +1,14 @@
 import apiClient from "./apiClient.js";
 
-export const getBookingsByRestaurantId = async (userId) => {
-  const res = await apiClient.get(`api/owner/bookingList/${userId}`);
-  return res.data.data.booking; // Extract the booking array from the response
+export const getBookingsByRestaurantId = async (
+  userId,
+  currentpage,
+  tempFilters
+) => {
+  const res = await apiClient.get(`api/owner/bookingList/${userId}`, {
+    params: { page: currentpage, ...tempFilters },
+  });
+  return res.data.data; // Extract the booking array from the response
 };
 
 export const updateBookingStatus = async (id, status) => {

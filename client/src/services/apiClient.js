@@ -29,8 +29,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useLoading } from "../context/LoadingContext";
-import { toast } from 'react-hot-toast';
-
+import { toast } from "react-hot-toast";
 
 export const apiClient = axios.create({
   baseURL: "http://localhost:5000",
@@ -42,7 +41,6 @@ const refreshAxios = axios.create({
   baseURL: "http://localhost:5000/api/auth",
   withCredentials: true,
 });
-
 
 let isRefreshing = false;
 let failedRequestsQueue = [];
@@ -58,9 +56,8 @@ const processQueue = (error, token = null) => {
 const logoutAndRedirect = () => {
   localStorage.clear();
   toast.success("Logged out");
-  window.location.href = '/';
+  window.location.href = "/";
 };
-
 
 apiClient.interceptors.request.use(
   (config) => {
@@ -78,10 +75,12 @@ export const AxiosInterceptor = ({ children }) => {
 
   useEffect(() => {
     // A) Request Interceptor for Loading UI
-    const loadingRequestInterceptor = apiClient.interceptors.request.use((config) => {
-      showLoader();
-      return config;
-    });
+    const loadingRequestInterceptor = apiClient.interceptors.request.use(
+      (config) => {
+        showLoader();
+        return config;
+      }
+    );
 
     // B) Response Interceptor for Loading UI and Auth Errors
     const responseInterceptor = apiClient.interceptors.response.use(
@@ -98,7 +97,10 @@ export const AxiosInterceptor = ({ children }) => {
         const message = error?.response?.data?.message;
         const type = error?.response?.data?.type;
 
-        if (isAuthError && (message === "Token missing" || type === "TOKEN_INVALID")) {
+        if (
+          isAuthError &&
+          (message === "Token missing" || type === "TOKEN_INVALID")
+        ) {
           logoutAndRedirect();
           return Promise.reject(error);
         }

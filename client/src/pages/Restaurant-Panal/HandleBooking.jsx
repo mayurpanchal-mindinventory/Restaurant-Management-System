@@ -1,4 +1,13 @@
-import { ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  Calendar,
+  Clock,
+  Users,
+  FileText,
+  Search,
+  Filter,
+  Check,
+} from "lucide-react";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import {
@@ -9,22 +18,26 @@ import { useSelector } from "react-redux";
 import BillGeneration from "../../components/Restaurant-Panal/BillGeneration";
 
 function HanldeBooking(params) {
-  const fieldHeaders = [
-    "#",
-    "Customer Name",
-    "Date of Reservation",
-    "Time Slots",
-    "Guests",
-    "Current Status",
-    "Change Status",
-    "Actions",
-  ];
   const [dataList, setdataList] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
   const [ss, setss] = useState("");
   const [showBillGeneration, setShowBillGeneration] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [currentpage, setcurrentpage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalrecord, setTotalrecord] = useState(0);
+  const [countStatus, setCountStatus] = useState({
+    totalPending: "",
+    totalCompleted: "",
+  });
+  const [tempFilters, setTempFilters] = useState({
+    search: "",
+    date: "",
+    status: "",
+    timeslot: "",
+  });
+  const [bookings, setBookings] = useState([]);
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
@@ -43,152 +56,392 @@ function HanldeBooking(params) {
   const handleBillCreated = (newBill) => {
     console.log("Bill created:", newBill);
   };
-
   useEffect(() => {
-    const fetchBookingById = async () => {
-      try {
-
-        setLoading(true);
-        const result = await getBookingsByRestaurantId(user.id);
-        //   console.log(result);
-        // console.log(result);
-        setdataList(result || []);
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-        setdataList([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user?.id) {
       fetchBookingById();
     }
-  }, [user?.id, ss]);
+  }, [user?.id, ss, currentpage]);
+  const goToNextPage = () => {
+    if (currentpage < totalPages) setcurrentpage(currentpage + 1);
+  };
+
+  const goToPrevpage = () => {
+    if (currentpage > 1) setcurrentpage(currentpage - 1);
+  };
+
+  const fetchBookingById = async (filtersToUse = tempFilters) => {
+    try {
+      setLoading(true);
+      const result = await getBookingsByRestaurantId(
+        user.id,
+        currentpage,
+        filtersToUse
+      );
+      setdataList(result?.booking || []);
+
+      setTotalPages(result?.totalPages || 1);
+      setTotalrecord(result?.totalDocs);
+      setCountStatus({
+        totalCompleted: result?.totalPending,
+        totalPending: result?.totalCompleted,
+      });
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      setdataList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          <p className="text-gray-600 font-medium">Loading bookings...</p>
+        </div>
       </div>
     );
   }
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTempFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyClick = () => {
+    fetchBookingById();
+  };
+
+  const handleResetClick = () => {
+    const empty = { search: "", date: "", status: "", timeslot: "" };
+    setTempFilters(empty);
+
+    fetchBookingById(empty);
+  };
   return (
     <>
-      <div className="overflow-x-auto bg-white rounded-xl shadow-xl border border-gray-100">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {fieldHeaders.map((header) => (
-                <th
-                  key={header}
-                  className="px-4 py-4 text-left text-xs font-bold text-orange-600 uppercase tracking-widest"
-                >
-                  <div className="flex items-center">
-                    {header}
-                    <ChevronDown className="ml-1 h-3 w-3 opacity-50" />
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {dataList.length > 0 ? (
-              dataList.map((booking, index) => (
-                <tr
-                  key={booking._id || index}
-                  className="hover:bg-orange-50/50 transition-colors group"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-400">
-                    {String(index + 1).padStart(2, "0")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-bold text-gray-800 group-hover:text-orange-600 transition-colors">
-                      {booking.userId?.name || "N/A"}
-                    </div>
-                    <div className="text-[13px] text-gray-500">
-                      {booking.userId?.email}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                    {booking.date
-                      ? new Date(booking.date).toLocaleDateString()
-                      : "N/A"}
-                  </td>
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white">
+            <Calendar size={20} />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">
+              Booking Management
+            </h1>
+            <p className="text-sm text-gray-600">
+              Manage restaurant reservations and bookings
+            </p>
+          </div>
+        </div>
+      </div>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <div className="flex items-center">
-                      {booking.timeSlotId?.timeSlot || "N/A"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs  border border-blue-100">
-                      {booking.numberOfGuests} Guests
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[11px] uppercase tracking-wider   ${booking.status === "Completed"
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : booking.status === "Accepted"
-                          ? "bg-blue-100 text-blue-700 border border-blue-200"
-                          : booking.status === "Cancelled"
-                            ? "bg-red-100 text-red-700 border border-red-200"
-                            : "bg-amber-100 text-amber-700 border border-amber-200"
-                        }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      disabled={booking.status == "Cancelled"}
-                      className="text-[11px] font-bold bg-gray-50 border border-gray-200 text-gray-600 py-1 px-2 rounded-md outline-none hover:border-orange-400 appearance-none cursor-pointer"
-                      value={booking.status}
-                      onChange={(e) =>
-                        handleStatusChange(booking._id, e.target.value)
-                      }
-                    >
-                      <option value={booking.status}>{booking.status}</option>
-                      {["Pending", "Accepted", "Cancelled", "Completed"]
-                        .filter((s) => s !== booking.status)
-                        .map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex gap-2">
-                      {booking?.status === "Completed" && (
-                        <button
-                          onClick={() => handleGenerateBill(booking)}
-                          className="p-1 text-green-600 hover:text-green-800"
-                          title="Generate Bill"
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">
+                Total Bookings
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {totalrecord}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-orange-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {countStatus.totalPending}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-5 h-5 text-red-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {countStatus.totalCompleted}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">
+                Bills Generated
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {dataList.filter((b) => b.status === "Completed").length}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-5 h-5 text-green-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* filtering  */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex items-center gap-3">
+          {/* Search */}
+          <div className="flex-grow relative lg:max-w-xs">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              name="search"
+              type="text"
+              placeholder="Search name..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-orange-500 outline-none"
+              value={tempFilters.search}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Date */}
+          <div className="relative">
+            <Calendar
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <input
+              name="date"
+              type="date"
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-orange-500 outline-none"
+              value={tempFilters.date}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Status */}
+          <div className="relative">
+            <Filter
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <select
+              name="status"
+              className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:border-orange-500 outline-none"
+              value={tempFilters.status}
+              onChange={handleChange}
+            >
+              <option value="">All Status</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+
+          {/* Apply Button - THE TRIGGER */}
+          <button
+            onClick={handleApplyClick}
+            className="flex items-center justify-center gap-2 px-6 py-2 bg-orange-600 text-white text-sm font-bold rounded-lg hover:bg-orange-700 transition-all shadow-sm active:scale-95"
+          >
+            <Check size={16} />
+            Apply Filters
+          </button>
+
+          {/* Reset */}
+          <button
+            onClick={handleResetClick}
+            className="text-xs font-bold text-gray-400 hover:text-orange-600 px-2 transition-colors"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+      {/* Bookings Table */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">Recent Bookings</h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  #
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Time
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Guests
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {dataList.length > 0 ? (
+                dataList.map((booking, index) => (
+                  <tr
+                    key={booking._id || index}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                        <span className="text-xs font-medium text-gray-600">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.userId?.name || "N/A"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.userId?.email}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.date
+                          ? new Date(booking.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600 font-medium">
+                        {booking.timeSlotId?.timeSlot || "N/A"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                        <Users size={12} className="mr-1" />
+                        {booking.numberOfGuests} Guests
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                            booking.status === "Completed"
+                              ? "bg-green-100 text-green-700"
+                              : booking.status === "Accepted"
+                              ? "bg-blue-100 text-blue-700"
+                              : booking.status === "Cancelled"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
                         >
-                          <DocumentTextIcon className="h-5 w-5" />
-                        </button>
-                      )}
+                          {booking.status}
+                        </span>
+                        {booking.status !== "Cancelled" && (
+                          <select
+                            className="text-xs font-medium bg-white border border-gray-300 text-gray-600 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
+                            value={booking.status}
+                            onChange={(e) =>
+                              handleStatusChange(booking._id, e.target.value)
+                            }
+                          >
+                            {["Pending", "Accepted", "Cancelled", "Completed"]
+                              .filter((s) => s !== booking.status)
+                              .map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                          </select>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        {booking?.status === "Completed" && (
+                          <button
+                            onClick={() => handleGenerateBill(booking)}
+                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                            title="Generate Bill"
+                          >
+                            <FileText size={14} className="mr-1" />
+                            Generate Bill
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Calendar size={24} className="text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-gray-900">
+                          No Bookings Found
+                        </p>
+                        <p className="text-gray-500">
+                          Bookings will appear here once customers make
+                          reservations.
+                        </p>
+                      </div>
                     </div>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-20 text-center text-gray-400 italic font-medium"
-                >
-                  No Bookings found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+          disabled={currentpage === 1}
+          onClick={goToPrevpage}
+        >
+          Previous
+        </button>
+        <div className="flex gap-2">
+          <span>
+            page {currentpage} of {totalPages}
+          </span>
+        </div>
+        <button
+          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+          disabled={currentpage === totalPages}
+          onClick={goToNextPage}
+        >
+          Next
+        </button>
+      </div>
       {/* Bill Generation Modal */}
       {showBillGeneration && selectedBooking && (
         <BillGeneration

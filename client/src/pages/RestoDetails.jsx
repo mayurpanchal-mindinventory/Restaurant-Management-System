@@ -116,8 +116,6 @@ const SuccessAnimation = ({ isVisible, onComplete }) => {
 };
 
 function RestoDetails() {
-
-
   //for slot manage with date
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -167,18 +165,18 @@ function RestoDetails() {
     return true;
   };
 
-
   useEffect(() => {
     if (!selectedDate) {
       setSlotsForDate([]);
-      setSelectedSlot(null)
+      setSelectedSlot(null);
       return;
     }
 
-    const slots = timeSlots.filter(slot => new Date(slot?.date).toISOString().split('T')[0] == selectedDate);
+    const slots = timeSlots.filter(
+      (slot) => new Date(slot?.date).toISOString().split("T")[0] == selectedDate
+    );
     setSlotsForDate(slots);
     setSelectedSlot(null);
-
   }, [selectedDate, timeSlots]);
 
   const handleBooking = async () => {
@@ -223,7 +221,6 @@ function RestoDetails() {
       date: "",
     });
   };
-
 
   useEffect(() => {
     const fetchResto = async (id) => {
@@ -330,7 +327,6 @@ function RestoDetails() {
     { id: "overview", label: "Restaurant Details ", icon: LayoutDashboard },
     { id: "menu", label: "Menu Items", icon: Utensils },
     { id: "photos", label: "Photos", icon: Camera },
-    { id: "reviews", label: "Reviews", icon: MessageSquare },
   ];
 
   return (
@@ -395,10 +391,11 @@ function RestoDetails() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-4 h-4 ${star <= staticRating
-                      ? "text-orange-500 fill-current"
-                      : "text-gray-300"
-                      }`}
+                    className={`w-4 h-4 ${
+                      star <= staticRating
+                        ? "text-orange-500 fill-current"
+                        : "text-gray-300"
+                    }`}
                   />
                 ))}
               </div>
@@ -420,10 +417,11 @@ function RestoDetails() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${activeTab === tab.id
-                        ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
-                        : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
-                        }`}
+                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
+                          : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
+                      }`}
                     >
                       <IconComponent className="w-5 h-5" />
                       <span>{tab.label}</span>
@@ -524,16 +522,6 @@ function RestoDetails() {
                   </p>
                 </div>
               )}
-
-              {activeTab === "reviews" && (
-                <div className="text-center py-12">
-                  {/* <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" /> */}
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                    Customer Reviews
-                  </h3>
-                  <p className="text-gray-500"></p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -554,83 +542,113 @@ function RestoDetails() {
                     value={bookingData.date}
                     onChange={(e) => {
                       setBookingData({ ...bookingData, date: e.target.value }),
-                        setSelectedDate(e.target.value)
-                    }
-                    }
+                        setSelectedDate(e.target.value);
+                    }}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     min={new Date().toISOString().split("T")[0]}
                   />
                 </div>
               </div>
               {/* Time Slots */}
-              {selectedDate && slotsForDate.length > 0 ? <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time Slots
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {slotsForDate?.map((time) => (
+              {selectedDate && slotsForDate.length > 0 ? (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Time Slots
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {slotsForDate?.map((time) => (
+                      <button
+                        disabled={time?.maxBookings < 1}
+                        key={time.timeSlot}
+                        onClick={() => {
+                          setBookingData(
+                            {
+                              ...bookingData,
+                              timeSlotId: time._id,
+                            },
+                            setSelectedSlot(
+                              slotsForDate.find((s) => s._id === time._id) ||
+                                null
+                            )
+                          );
+                        }}
+                        className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
+                          bookingData.timeSlotId === time._id
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                        }`}
+                      >
+                        {time.timeSlot}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : selectedDate != "" ? (
+                <div className="text-center text-red-600">
+                  No slot available
+                </div>
+              ) : (
+                <div />
+              )}
+              {/* Number of People */}
+              {selectedSlot && selectedSlot?.maxBookings > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Number of People
+                  </label>
+                  <div className="flex items-center space-x-3">
                     <button
-                      disabled={time?.maxBookings < 1}
-                      key={time.timeSlot}
-                      onClick={() => {
+                      onClick={() =>
                         setBookingData({
                           ...bookingData,
-                          timeSlotId: time._id,
-                        }, setSelectedSlot(slotsForDate.find(s => s._id === time._id) || null))
+                          numberOfGuests: Math.max(
+                            1,
+                            bookingData.numberOfGuests - 1
+                          ),
+                        })
                       }
-                      }
-                      className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${bookingData.timeSlotId === time._id
-                        ? "bg-orange-500 text-white border-orange-500"
-                        : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
-                        }`}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
                     >
-                      {time.timeSlot}
+                      -
                     </button>
-                  ))}
-                </div>
-              </div> : selectedDate != "" ? <div className="text-center text-red-600">No slot available</div> : <div />}
-              {/* Number of People */}
-              {(selectedSlot && selectedSlot?.maxBookings > 0) && <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Number of People
-                </label>
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() =>
-                      setBookingData({
-                        ...bookingData,
-                        numberOfGuests: Math.max(
-                          1,
-                          bookingData.numberOfGuests - 1
-                        ),
-                      })
-                    }
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
-                  >
-                    -
-                  </button>
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-5 h-5 text-gray-500" />
-                    <span className="text-lg font-semibold">
-                      {bookingData.numberOfGuests}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <Users className="w-5 h-5 text-gray-500" />
+                      <span className="text-lg font-semibold">
+                        {bookingData.numberOfGuests}
+                      </span>
+                    </div>
+                    <button
+                      disabled={
+                        bookingData.numberOfGuests + 1 >
+                        selectedSlot?.maxBookings
+                      }
+                      onClick={() =>
+                        setBookingData({
+                          ...bookingData,
+                          numberOfGuests: bookingData.numberOfGuests + 1,
+                        })
+                      }
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
+                    >
+                      +
+                    </button>
+                    {selectedSlot ? (
+                      <p
+                        className={
+                          selectedSlot?.maxBookings <= 10
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }
+                      >
+                        {" "}
+                        {selectedSlot?.maxBookings} slot left
+                      </p>
+                    ) : (
+                      <p></p>
+                    )}
                   </div>
-                  <button
-                    disabled={bookingData.numberOfGuests + 1 > selectedSlot?.maxBookings}
-                    onClick={() =>
-                      setBookingData({
-                        ...bookingData,
-                        numberOfGuests: bookingData.numberOfGuests + 1,
-                      })
-                    }
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
-                  >
-                    +
-                  </button>
-                  {selectedSlot ? <p className={selectedSlot?.maxBookings <= 10 ? "text-red-600" : "text-green-600"}> {selectedSlot?.maxBookings} slot left</p> : <p></p>}
-
                 </div>
-              </div>}
+              )}
 
               <button
                 disabled={
@@ -657,7 +675,7 @@ function RestoDetails() {
         isVisible={showSuccessAnimation}
         onComplete={handleSuccessAnimationComplete}
       />
-    </div >
+    </div>
   );
 }
 

@@ -2,17 +2,16 @@ import React from "react";
 
 const PizzaCard = ({ name, quantity, imageUrl }) => {
   return (
-    <div className=" flex-shrink-0 w-[150px] h-[144px] bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition duration-300 ">
-      <div className="h-[100px] w-full overflow-hidden ">
+    <div className="bg-white rounded-lg shadow-md border border-gray-200 cursor-pointer hover:shadow-lg transition duration-300 w-[150px] flex-shrink-0">
+      <div className="h-[100px] w-full overflow-hidden rounded-t-lg">
         <img
           src={imageUrl}
           alt={name}
-          className=" object-contain w-full h-full "
+          className="object-contain w-full h-full"
         />
       </div>
-
-      <div className="p-2 flex flex-col justify-center items-center h-[44px] ">
-        <p className="text-xs font-semibold text-gray-800 truncate w-full text-center">
+      <div className="p-2 flex flex-col justify-center items-center h-[44px]">
+        <p className="text-xs font-semibold text-gray-800 text-center truncate w-full">
           {name}
         </p>
       </div>
@@ -42,7 +41,7 @@ const PizzaRow = () => {
     },
     {
       id: 4,
-      name: "chinize",
+      name: "Chinize",
       quantity: 5,
       img: "https://media.istockphoto.com/id/1470114571/photo/instant-noodles.webp?a=1&b=1&s=612x612&w=0&k=20&c=xsUQkF89T5KWU85JaqVfigMbkeYvdZliZraGy6sRCRo=",
     },
@@ -56,7 +55,7 @@ const PizzaRow = () => {
       id: 6,
       name: "Feels Home Made",
       quantity: 5,
-      img: "https://images.unsplash.com/photo-1742599361489-a29ca87f92a9?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzR8fHZlZyUyMHdpdGglMjB3aGl0ZSUyMGJhY2tncm91bmQlMjBpbmRpYW58ZW58MHx8MHx8fDA%3D",
+      img: "https://images.unsplash.com/photo-1742599361489-a29ca87f92a9?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzR8fHZlZyUyMHdpdGglMjB3aGl0ZSUyMGJhY2tncm91bmQlMjBpbiUyMGluZGlhbnxlbnwfh8w8MHx8fA%3D",
     },
     {
       id: 7,
@@ -67,22 +66,17 @@ const PizzaRow = () => {
   ];
 
   return (
-    <div>
-      <div className="  overflow-x-scroll p-4 rounded-lg items-center justify-center bg-gray-50  ">
-        <div className="flex space-x-4 overflow-x-auto pb-4">
-          {pizzas.map((pizza) => (
-            <PizzaCard
-              key={pizza.id}
-              name={pizza.name}
-              quantity={pizza.quantity}
-              imageUrl={pizza.img}
-            />
-          ))}
-        </div>
+    <div className="overflow-x-hidden p-4 bg-gray-50 rounded-lg">
+      <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+        {pizzas.map((pizza) => (
+          <PizzaCard
+            key={pizza.id}
+            name={pizza.name}
+            quantity={pizza.quantity}
+            imageUrl={pizza.img}
+          />
+        ))}
       </div>
-      {/* <div>
-        <h1 className="text-3xl">Today's Deal</h1>{" "}
-      </div> */}
     </div>
   );
 };

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { getMenuList } from "../services/adminService";
+import { getMenuList, getMenuList1 } from "../services/adminService";
 
 function MenuDetails({ id }) {
   const [item, setItem] = useState(null);
   useEffect(() => {
     const fetchMenu = async (id) => {
-      const response = await getMenuList(id);
-      setItem(response.data.data);
+      const response = await getMenuList1(id);
+      console.log(response);
+      setItem(response.data.data.menuData);
     };
     fetchMenu(id);
   }, []);

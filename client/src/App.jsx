@@ -19,18 +19,20 @@ import Slot from "./pages/Slot";
 import BookingList from "./pages/BookingList";
 import HanldeBooking from "./pages/Restaurant-Panal/HandleBooking";
 import Menu from "./pages/Menu";
-import { LoadingProvider, useLoading } from './context/LoadingContext';
+import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import { AxiosInterceptor } from "./services/apiClient";
 import Loader from "./components/common/Loader";
 import { ConfirmationProvider } from "./context/ConfirmationContext";
 import Bills from "./pages/Bills";
 import MenuByRestaurant from "./components/Restaurant-Panal/MenuByRestaurant";
+import PublicMenu from "./pages/PublicMenu";
 function App() {
-
   const GlobalLoader = () => {
     const { isLoading } = useLoading();
     // Using your existing Loader component
-    return <Loader loading={isLoading} className="fixed inset-0 z-50 bg-white/50" />;
+    return (
+      <Loader loading={isLoading} className="fixed inset-0 z-50 bg-white/50" />
+    );
   };
   return (
     <>
@@ -44,6 +46,8 @@ function App() {
                 <Route index element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Route>
+
+              <Route path="/menu" element={<PublicMenu />} />
 
               <Route
                 path="admin/*"
@@ -85,6 +89,7 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="restaurant" element={<RestoDetails />} />
                 <Route path="bookings" element={<MyBookings />} />
+                <Route path="menu" element={<PublicMenu />} />
               </Route>
               <Route
                 path="admin/*"
@@ -117,7 +122,11 @@ function App() {
                 <Route path="addmenu/:id" element={<Menu />} />
                 <Route path="editmenu/:id" element={<Menu />} />
                 <Route path="" element={<MenuByRestaurant />} />
-                <Route index path="restaurant/booking" element={<HanldeBooking />} />
+                <Route
+                  index
+                  path="restaurant/booking"
+                  element={<HanldeBooking />}
+                />
                 <Route path="restaurant/bills" element={<Bills />} />
               </Route>
 
@@ -128,7 +137,6 @@ function App() {
           </AxiosInterceptor>
         </ConfirmationProvider>
       </LoadingProvider>
-
     </>
   );
 }
