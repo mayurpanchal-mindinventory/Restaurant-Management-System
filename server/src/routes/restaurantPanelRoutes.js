@@ -7,7 +7,7 @@ const {
   getBillByIdController,
   updateBillPaymentStatusController,
 } = require("../controllers/bookingController");
-const restaurantController = require('../controllers/restaurantController')
+const restaurantController = require("../controllers/restaurantController");
 const router = express.Router();
 
 // Booking routes

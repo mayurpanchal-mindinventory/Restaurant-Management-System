@@ -47,8 +47,10 @@ exports.getBookingByRestaurent = async (req) => {
     const booking = await Booking.find(query)
       .populate("userId", "name email _id")
       .populate("restaurantId", "name logoImage _id")
-      .populate("timeSlotId", "timeSlot _id")
-      .select("numberOfGuests date status createdAt _id")
+      .populate("timeSlotId", "timeSlot discountPercent _id")
+      .select(
+        "numberOfGuests date status createdAt hasGeneratedBill billId _id"
+      )
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -134,6 +136,20 @@ exports.createBill = async (req) => {
       throw new Error("Missing required fields for bill creation");
     }
 
+    // Check if bill already exists for this booking
+    const existingBooking = await Booking.findById(bookingId);
+    if (existingBooking.hasGeneratedBill) {
+      throw new Error("Bill has already been generated for this booking");
+    }
+
+    // Get time slot discount from the booking
+    const timeSlot = await Booking.findById(bookingId)
+      .populate("timeSlotId")
+      .select("timeSlotId");
+
+    const autoDiscountPercent = timeSlot?.timeSlotId?.discountPercent || 0;
+    const finalDiscountPercent = discountPercent || autoDiscountPercent;
+
     const menuItems = await MenuItem.find({
       _id: { $in: items.map((item) => item.itemId) },
     });
@@ -161,7 +177,7 @@ exports.createBill = async (req) => {
 
     const subtotal = billItems.reduce((sum, item) => sum + item.total, 0);
 
-    const discountAmount = (subtotal * discountPercent) / 100;
+    const discountAmount = (subtotal * finalDiscountPercent) / 100;
     const grandTotal = subtotal - discountAmount;
 
     const Bill = require("../models/Bill.js");
@@ -171,7 +187,7 @@ exports.createBill = async (req) => {
       userId,
       items: billItems,
       subtotal,
-      discountPercent,
+      discountPercent: finalDiscountPercent,
       discountAmount,
       grandTotal,
       isSharedWithUser,
@@ -179,6 +195,12 @@ exports.createBill = async (req) => {
     });
 
     const savedBill = await bill.save();
+
+    // Update booking to mark bill as generated
+    await Booking.findByIdAndUpdate(bookingId, {
+      hasGeneratedBill: true,
+      billId: savedBill._id,
+    });
 
     return {
       success: true,

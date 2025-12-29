@@ -23,6 +23,7 @@ import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import { AxiosInterceptor } from "./services/apiClient";
 import Loader from "./components/common/Loader";
 import { ConfirmationProvider } from "./context/ConfirmationContext";
+import { ToastProvider } from "./components/common/ToastProvider";
 import Bills from "./pages/Bills";
 import MenuByRestaurant from "./components/Restaurant-Panal/MenuByRestaurant";
 import PublicMenu from "./pages/PublicMenu";
@@ -38,103 +39,108 @@ function App() {
     <>
       <LoadingProvider>
         <ConfirmationProvider>
-          <AxiosInterceptor>
-            <GlobalLoader />
-            <Toaster />
-            <Routes>
-              <Route path="/" element={<LoginLayout />}>
-                <Route index element={<Login />} />
-                <Route path="/register" element={<Register />} />
-              </Route>
+          <ToastProvider>
+            <AxiosInterceptor>
+              <GlobalLoader />
+              <Toaster />
+              <Routes>
+                <Route path="/" element={<LoginLayout />}>
+                  <Route index element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                </Route>
 
-              <Route path="/menu" element={<PublicMenu />} />
+                <Route path="/menu" element={<PublicMenu />} />
 
-              <Route
-                path="admin/*"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="add" element={<AddRestaurant />} />
-                <Route index element={<Restaurant />} />
-                <Route path="add/:id" element={<AddRestaurant />} />
-                <Route path="menu/:id" element={<MenuList />} />
-                <Route path="addmenu/:id" element={<Menu />} />
-                <Route path="editmenu/:id" element={<Menu />} />
-                <Route path="slot/:id" element={<Slot />} />
-                <Route path="bookingList" element={<BookingList />} />
-              </Route>
-
-              <Route
-                path="restaurant"
-                element={
-                  <ProtectedRoute requiredRole="restaurant">
-                    <RestaurantLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="restaurant/booking" element={<HanldeBooking />} />
-              </Route>
-
-              <Route
-                path="home/*"
-                element={
-                  <ProtectedRoute>
-                    <HomeLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Home />} />
-                <Route path="restaurant" element={<RestoDetails />} />
-                <Route path="bookings" element={<MyBookings />} />
-                <Route path="menu" element={<PublicMenu />} />
-              </Route>
-              <Route
-                path="admin/*"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="add" element={<AddRestaurant />} />
-                <Route index element={<Restaurant />} />
-                <Route path="add/:id" element={<AddRestaurant />} />
-                <Route path="menu/:id" element={<MenuList />} />
-                <Route path="addmenu/:id" element={<Menu />} />
-                <Route path="editmenu/:id" element={<Menu />} />
-
-                <Route path="slot/:id" element={<Slot />} />
-                <Route path="bookingList" element={<BookingList />} />
-                {/* <Route path="bills" element={<Bills />} /> */}
-              </Route>
-
-              <Route
-                path="restaurant"
-                element={
-                  <ProtectedRoute requiredRole="restaurant">
-                    <RestaurantLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="addmenu/:id" element={<Menu />} />
-                <Route path="editmenu/:id" element={<Menu />} />
-                <Route path="" element={<MenuByRestaurant />} />
                 <Route
-                  index
-                  path="restaurant/booking"
-                  element={<HanldeBooking />}
-                />
-                <Route path="restaurant/bills" element={<Bills />} />
-              </Route>
+                  path="admin/*"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="add" element={<AddRestaurant />} />
+                  <Route index element={<Restaurant />} />
+                  <Route path="add/:id" element={<AddRestaurant />} />
+                  <Route path="menu/:id" element={<MenuList />} />
+                  <Route path="addmenu/:id" element={<Menu />} />
+                  <Route path="editmenu/:id" element={<Menu />} />
+                  <Route path="slot/:id" element={<Slot />} />
+                  <Route path="bookingList" element={<BookingList />} />
+                </Route>
 
-              <Route path="/dashboard" element={<DashboardRedirect />} />
+                <Route
+                  path="restaurant"
+                  element={
+                    <ProtectedRoute requiredRole="restaurant">
+                      <RestaurantLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route
+                    path="restaurant/booking"
+                    element={<HanldeBooking />}
+                  />
+                </Route>
 
-              <Route path="*" element={<DashboardRedirect />} />
-            </Routes>
-          </AxiosInterceptor>
+                <Route
+                  path="home/*"
+                  element={
+                    <ProtectedRoute>
+                      <HomeLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Home />} />
+                  <Route path="restaurant" element={<RestoDetails />} />
+                  <Route path="bookings" element={<MyBookings />} />
+                  <Route path="menu" element={<PublicMenu />} />
+                </Route>
+                <Route
+                  path="admin/*"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="add" element={<AddRestaurant />} />
+                  <Route index element={<Restaurant />} />
+                  <Route path="add/:id" element={<AddRestaurant />} />
+                  <Route path="menu/:id" element={<MenuList />} />
+                  <Route path="addmenu/:id" element={<Menu />} />
+                  <Route path="editmenu/:id" element={<Menu />} />
+
+                  <Route path="slot/:id" element={<Slot />} />
+                  <Route path="bookingList" element={<BookingList />} />
+                  {/* <Route path="bills" element={<Bills />} /> */}
+                </Route>
+
+                <Route
+                  path="restaurant"
+                  element={
+                    <ProtectedRoute requiredRole="restaurant">
+                      <RestaurantLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="addmenu/:id" element={<Menu />} />
+                  <Route path="editmenu/:id" element={<Menu />} />
+                  <Route path="" element={<MenuByRestaurant />} />
+                  <Route
+                    index
+                    path="restaurant/booking"
+                    element={<HanldeBooking />}
+                  />
+                  <Route path="restaurant/bills" element={<Bills />} />
+                </Route>
+
+                <Route path="/dashboard" element={<DashboardRedirect />} />
+
+                <Route path="*" element={<DashboardRedirect />} />
+              </Routes>
+            </AxiosInterceptor>
+          </ToastProvider>
         </ConfirmationProvider>
       </LoadingProvider>
     </>

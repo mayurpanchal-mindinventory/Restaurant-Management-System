@@ -166,6 +166,7 @@ function RestoDetails() {
   };
 
   useEffect(() => {
+    console.log(timeSlots);
     if (!selectedDate) {
       setSlotsForDate([]);
       setSelectedSlot(null);
@@ -393,10 +394,11 @@ function RestoDetails() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-4 h-4 ${star <= staticRating
-                      ? "text-orange-500 fill-current"
-                      : "text-gray-300"
-                      }`}
+                    className={`w-4 h-4 ${
+                      star <= staticRating
+                        ? "text-orange-500 fill-current"
+                        : "text-gray-300"
+                    }`}
                   />
                 ))}
               </div>
@@ -418,10 +420,11 @@ function RestoDetails() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${activeTab === tab.id
-                        ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
-                        : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
-                        }`}
+                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
+                          : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
+                      }`}
                     >
                       <IconComponent className="w-5 h-5" />
                       <span>{tab.label}</span>
@@ -568,14 +571,15 @@ function RestoDetails() {
                             },
                             setSelectedSlot(
                               slotsForDate.find((s) => s._id === time._id) ||
-                              null
+                                null
                             )
                           );
                         }}
-                        className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${bookingData.timeSlotId === time._id
-                          ? "bg-orange-500 text-white border-orange-500"
-                          : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
-                          }`}
+                        className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
+                          bookingData.timeSlotId === time._id
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                        }`}
                       >
                         {time.timeSlot}
                       </button>
