@@ -125,6 +125,7 @@ export const getAllMenu = async (filters = {}) => {
     : "api/admin/allmenu";
 
   const res = await apiClient.get(url);
+  return res;
 };
 //Booking Api
 export const getAllBooking = async (page, search, sortby, status, date) => {

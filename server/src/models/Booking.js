@@ -28,6 +28,11 @@ const bookingSchema = new mongoose.Schema(
     },
 
     discountApplied: { type: Number, default: 0 },
+    hasGeneratedBill: { type: Boolean, default: false },
+    billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bill",
+    },
   },
   { timestamps: true }
 );

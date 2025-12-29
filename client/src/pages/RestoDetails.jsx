@@ -166,6 +166,7 @@ function RestoDetails() {
   };
 
   useEffect(() => {
+    console.log(timeSlots);
     if (!selectedDate) {
       setSlotsForDate([]);
       setSelectedSlot(null);
@@ -248,10 +249,10 @@ function RestoDetails() {
   }, [id, timeSlots]);
   useEffect(() => {
     const fetchSlots = async () => {
-      const response = await getSlotListByRestaurant(id);
+      const response = await getSlotListByRestaurant(id, "", "", "");
 
-      setTimeSlots(response.data.data);
-      // console.log("heloooooooooooooo", response.data.data);
+      setTimeSlots(response.data.data.data?.slots);
+      console.log("heloooooooooooooo", response);
     };
     fetchSlots();
   }, []);

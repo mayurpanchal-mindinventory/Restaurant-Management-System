@@ -15,7 +15,8 @@ import {
   updateBookingStatus,
 } from "../../services/restaurantPanelService";
 import { useSelector } from "react-redux";
-import BillGeneration from "../../components/Restaurant-Panal/BillGeneration";
+import { useToast } from "../../components/common/ToastProvider";
+import BillGeneration from "../../components/Restaurant-Panel/BillGeneration";
 
 function HanldeBooking(params) {
   const [dataList, setdataList] = useState([]);
@@ -39,12 +40,17 @@ function HanldeBooking(params) {
   });
   const [bookings, setBookings] = useState([]);
 
+  // Toast notification hook
+  const { showSuccess, showError, showInfo } = useToast();
+
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
       await updateBookingStatus(bookingId, newStatus);
       setss(newStatus);
+      showSuccess("Booking status updated successfully");
     } catch (error) {
       console.error("Failed to update status", error);
+      showError("Failed to update booking status");
     }
   };
 
@@ -55,12 +61,28 @@ function HanldeBooking(params) {
 
   const handleBillCreated = (newBill) => {
     console.log("Bill created:", newBill);
+    showSuccess("Bill generated successfully!");
+
+    // Refresh the booking list to update bill generation status
+    fetchBookingById();
   };
+
+  const handleToastMessage = (message, type) => {
+    if (type === "success") {
+      showSuccess(message);
+    } else if (type === "error") {
+      showError(message);
+    } else {
+      showInfo(message);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       fetchBookingById();
     }
   }, [user?.id, ss, currentpage]);
+
   const goToNextPage = () => {
     if (currentpage < totalPages) setcurrentpage(currentpage + 1);
   };
@@ -88,6 +110,7 @@ function HanldeBooking(params) {
     } catch (error) {
       console.error("Error fetching bookings:", error);
       setdataList([]);
+      showError("Failed to load bookings");
     } finally {
       setLoading(false);
     }
@@ -119,6 +142,29 @@ function HanldeBooking(params) {
 
     fetchBookingById(empty);
   };
+
+  // Check if a booking has already generated a bill
+  const isBillGenerated = (booking) => {
+    return booking.hasGeneratedBill || false;
+  };
+
+  // Get button text based on bill generation status
+  const getGenerateBillButtonText = (booking) => {
+    return isBillGenerated(booking) ? "Bill Generated" : "Generate Bill";
+  };
+
+  // Get button style based on bill generation status
+  const getGenerateBillButtonStyle = (booking) => {
+    const baseStyle =
+      "inline-flex items-center px-3 py-1.5 text-xs font-medium rounded transition-colors";
+
+    if (isBillGenerated(booking)) {
+      return `${baseStyle} bg-gray-400 text-white cursor-not-allowed`;
+    }
+
+    return `${baseStyle} bg-blue-600 text-white hover:bg-blue-700`;
+  };
+
   return (
     <>
       {/* Page Header */}
@@ -191,7 +237,7 @@ function HanldeBooking(params) {
                 Bills Generated
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-                {dataList.filter((b) => b.status === "Completed").length}
+                {dataList.filter((b) => b.hasGeneratedBill).length}
               </p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -200,6 +246,7 @@ function HanldeBooking(params) {
           </div>
         </div>
       </div>
+
       {/* filtering  */}
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:flex items-center gap-3">
@@ -270,6 +317,7 @@ function HanldeBooking(params) {
           </button>
         </div>
       </div>
+
       {/* Bookings Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
@@ -297,6 +345,9 @@ function HanldeBooking(params) {
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Status
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Bill Status
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Actions
@@ -337,9 +388,16 @@ function HanldeBooking(params) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600 font-medium">
-                        {booking.timeSlotId?.timeSlot || "N/A"}
-                      </span>
+                      <div>
+                        <div className="text-sm text-gray-600 font-medium">
+                          {booking.timeSlotId?.timeSlot || "N/A"}
+                        </div>
+                        {booking.timeSlotId?.discountPercent > 0 && (
+                          <div className="text-xs text-blue-600">
+                            {booking.timeSlotId.discountPercent}% discount
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
@@ -382,15 +440,34 @@ function HanldeBooking(params) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                          isBillGenerated(booking)
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {isBillGenerated(booking) ? "Generated" : "Pending"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
                         {booking?.status === "Completed" && (
                           <button
-                            onClick={() => handleGenerateBill(booking)}
-                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
-                            title="Generate Bill"
+                            onClick={() =>
+                              !isBillGenerated(booking) &&
+                              handleGenerateBill(booking)
+                            }
+                            disabled={isBillGenerated(booking)}
+                            className={getGenerateBillButtonStyle(booking)}
+                            title={
+                              isBillGenerated(booking)
+                                ? "Bill already generated"
+                                : "Generate Bill"
+                            }
                           >
                             <FileText size={14} className="mr-1" />
-                            Generate Bill
+                            {getGenerateBillButtonText(booking)}
                           </button>
                         )}
                       </div>
@@ -399,7 +476,7 @@ function HanldeBooking(params) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-20 text-center">
+                  <td colSpan={8} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                         <Calendar size={24} className="text-gray-400" />
@@ -421,6 +498,7 @@ function HanldeBooking(params) {
           </table>
         </div>
       </div>
+
       <div className="flex justify-between items-center mt-4">
         <button
           className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
@@ -442,6 +520,7 @@ function HanldeBooking(params) {
           Next
         </button>
       </div>
+
       {/* Bill Generation Modal */}
       {showBillGeneration && selectedBooking && (
         <BillGeneration
@@ -456,9 +535,11 @@ function HanldeBooking(params) {
           }
           userId={selectedBooking?.userId?._id || selectedBooking?.userId}
           onBillCreated={handleBillCreated}
+          showToast={handleToastMessage}
         />
       )}
     </>
   );
 }
+
 export default HanldeBooking;

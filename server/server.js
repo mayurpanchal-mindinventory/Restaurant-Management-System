@@ -11,11 +11,23 @@ const verifyToken = require("../server/src/middleware/authMiddleware.js");
 
 const cookieParser = require("cookie-parser");
 const app = express();
-
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://192.168.1.213:5173", // Your network IP
+];
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
 );
