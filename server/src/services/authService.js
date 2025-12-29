@@ -28,7 +28,7 @@ exports.loginService = async ({ email, password }) => {
   if (!user) throw new Error("Invalid Username or password");
   const match = await comparePassword(password, user.passwordHash);
   if (!match) throw new Error("Invalid Username or password");
-  const accessToken = generateAccessToken();
+  const accessToken = generateAccessToken(user);
   // const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
   await Token.findOneAndUpdate(
@@ -38,22 +38,60 @@ exports.loginService = async ({ email, password }) => {
   );
   return { user, accessToken, refreshToken };
 };
+exports.refreshTokenService = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) return res.status(401).json({ message: "No refresh token" });
 
-exports.refreshTokenService = async (refreshToken) => {
-  const tokenData = await Token.findOne({ refreshToken });
-  if (!tokenData) throw new Error("Invalid refresh token");
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const tokenDoc = await Token.findOne({ userId: decoded.id });
 
-  const user = await User.findById(decoded._id);
-  if (!user) throw new Error("User not found");
+    if (!tokenDoc || tokenDoc.refreshToken !== token) {
+      throw new Error("Invalid refresh token");
+    }
 
-  const newAccessToken = generateAccessToken(user);
+    const user = await User.findById(decoded.id);
+    const accessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
 
-  return { accessToken: newAccessToken };
+    tokenDoc.refreshToken = newRefreshToken;
+
+    const savedDoc = await tokenDoc.save();
+
+    console.log("Updated Token in DB:", savedDoc.refreshToken);
+
+    return { accessToken, newRefreshToken };
+  } catch (e) {
+    return { error: e.message };
+  }
 };
 
-exports.logoutService = async (refreshToken) => {
-  await Token.findOneAndDelete({ refreshToken });
-  return true;
+exports.logoutService = async (req, res) => {
+  const token = req.cookies.refreshToken;
+
+  if (!token) {
+    return res.status(204).json({ message: "Already logged out" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    await Token.findOneAndDelete({ userId: decoded.id });
+
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      path: "/"
+    });
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+
+    res.clearCookie("refreshToken", { path: "/" });
+    return res.status(401).json({ message: "Session expired" });
+  }
+
 };
+

@@ -43,9 +43,11 @@ export default function RestaurantForm() {
         description: apiData?.description || "",
         phone: apiData?.userId?.phone || "",
         closedDates: apiData?.closedDates || [],
-        openDays: apiData?.openDays || [],
         mainImage: apiData?.mainImage || null,
         logoImage: apiData?.logoImage || null,
+        openDays: typeof apiData?.openDays === 'string'
+            ? apiData.openDays.split(',')
+            : apiData?.openDays || [],
     };
 
     const handleFileChange = (e, setFieldValue, fieldName) => {

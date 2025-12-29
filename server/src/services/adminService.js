@@ -148,26 +148,70 @@ const createRestaurantAccount = async (req) => {
 
 const getAllRestaurantsWithOwners = async (req) => {
   try {
-    const { page } = req.query;
+    let { page = 1, search, sortby, date } = req.query;
     const limit = 5;
-    const skip = (page - 1) * limit;
-    const restaurants = await Restaurant.find({}).populate({
-      path: "userId",
-      select: "name email phone",
-    }).skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    const skip = (Math.max(1, page) - 1) * limit;
 
-    const count = await Restaurant.countDocuments();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'owner'
+        }
+      },
+      { $unwind: { path: '$owner', preserveNullAndEmptyArrays: true } },
+
+      {
+        $match: search ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { 'owner.name': { $regex: search, $options: 'i' } },
+            { 'owner.email': { $regex: search, $options: 'i' } },
+            { 'owner.phone': { $regex: search, $options: 'i' } }
+          ]
+        } : {}
+      }
+    ];
+
+    const countData = await Restaurant.aggregate([...pipeline, { $count: 'total' }]);
+    const totalDocs = countData.length > 0 ? countData[0].total : 0;
+
+    const restaurants = await Restaurant.aggregate([
+      ...pipeline,
+      sortby === "1"
+        ? { $sort: { name: 1 } }
+        : sortby === "2"
+          ? { $sort: { name: -1 } }
+          : { $sort: { createdAt: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          name: 1,
+          address: 1,
+          logoImage: 1,
+          mainImage: 1,
+          openDays: 1,
+          userId: {
+            name: '$owner.name',
+            email: '$owner.email',
+            phone: '$owner.phone',
+            _id: '$owner._id'
+          }
+        }
+      }
+    ]);
 
     return {
       success: true,
       message: MESSAGES.RESTAURANT_FOUND,
       data: {
-        restaurants, totalPages: Math.ceil(count / limit),
-        currentPage: page * 1,
-        totalDocs: count
+        restaurants,
+        totalPages: Math.ceil(totalDocs / limit),
+        currentPage: Number(page),
+        totalDocs
       }
     };
   } catch (error) {
@@ -274,11 +318,11 @@ const updateRestaurant = async (req) => {
           : existingRestaurant.description,
       logoImage: logoImageUrl,
       mainImage: mainImageUrl,
-      openDays: openDays,
-      closedDates: closedDates || existingRestaurant.closedDates,
+      openDays: typeof openDays === 'string' ? openDays.split(',') : openDays,
+      closedDates: closedDates || existingRestaurant.closedDates
     };
 
-    await Restaurant.findByIdAndUpdate(restaurantId, updateData, { session });
+    await Restaurant.findByIdAndUpdate(restaurantId, updateData, { session, new: true });
 
     // Update user details if provided
     if (restaurantName || email || phone || password) {
@@ -421,46 +465,118 @@ const deleteRestaurant = async (req) => {
 };
 const allBooking = async (req) => {
   try {
-    let { page, search } = req.query;
-    if (search) {
+    let { page, search, sortby, date, status } = req.query;
+    if (search, sortby, date, status) {
       page = 1;
-      console.log(page);
-
-      const searchTerm = search;
-      const regex = new RegExp(searchTerm, 'i');
     }
+    let startOfDay, nextDay;
+    if (date) {
+      startOfDay = new Date(date);
+      console.log(startOfDay);
+      nextDay = new Date(startOfDay);
+      nextDay.setDate(startOfDay.getDate() + 1);
+      console.log(nextDay);
 
+    }
     const limit = 5;
-    const skip = (page - 1) * limit;
-    const booking = await Booking.find()
-      .populate('userId', 'name -_id')
-      .populate('restaurantId', 'name logoImage -_id')
-      .populate('timeSlotId', 'timeSlot -_id')
-      .select('numberOfGuests date status -_id')
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    const skip = (Math.max(1, page) - 1) * limit;
 
-    const count = await Booking.countDocuments();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $lookup: {
+          from: 'restaurants',
+          localField: 'restaurantId',
+          foreignField: '_id',
+          as: 'restaurant'
+        }
+      },
+      {
+        $lookup: {
+          from: 'timeslots',
+          localField: 'timeSlotId',
+          foreignField: '_id',
+          as: 'timeSlot'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$restaurant', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$timeSlot', preserveNullAndEmptyArrays: true } },
+
+      {
+        $match: search ? {
+          $or: [
+            { 'user.name': { $regex: search, $options: 'i' } },
+            { 'restaurant.name': { $regex: search, $options: 'i' } },
+            { 'status': { $regex: search, $options: 'i' } },
+          ]
+        } : {}
+      },
+      {
+        $match: date ? {
+          date: {
+            $gte: startOfDay,
+            $lt: nextDay
+          }
+
+        } : {}
+      },
+      {
+        $match: status ? {
+
+          status: { $regex: status, $options: 'i' }
+
+        } : {}
+      }
+    ];
+
+    const totalResults = await Booking.aggregate([...pipeline, { $count: 'count' }]);
+    const totalDocs = totalResults.length > 0 ? totalResults[0].count : 0;
+
+
+    const booking = await Booking.aggregate([
+      ...pipeline,
+      sortby === "1"
+        ? { $sort: { date: 1 } }
+        : sortby === "2"
+          ? { $sort: { 'restaurant.name': 1 } }
+          : { $sort: { createdAt: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          numberOfGuests: 1,
+          date: 1,
+          status: 1,
+          'userId.name': '$user.name',
+          'restaurantId.name': '$restaurant.name',
+          'restaurantId.logoImage': '$restaurant.logoImage',
+          'timeSlotId.timeSlot': '$timeSlot.timeSlot'
+        }
+      }
+    ]);
 
     return {
       success: true,
       data: {
-        booking, totalPages: Math.ceil(count / limit),
-        currentPage: page * 1,
-        totalDocs: count
+        booking,
+        totalPages: Math.ceil(totalDocs / limit),
+        currentPage: Number(page),
+        totalDocs
       }
-
     };
   } catch (error) {
-    if (!error.status) {
-      error.status = STATUS.INTERNAL_SERVER_ERROR;
-      error.message;
-    }
     throw error;
   }
 };
+
 module.exports = {
   uploadToCloudinary,
   createRestaurantAccount,

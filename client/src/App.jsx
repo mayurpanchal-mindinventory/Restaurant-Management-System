@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginLayout from "./components/layout/LoginLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,7 +16,6 @@ import MyBookings from "./pages/MyBookings";
 import RestaurantLayout from "./components/layout/Restaurant-Panal/RestaurantLayout";
 import MenuList from "./pages/MenuList";
 import Slot from "./pages/Slot";
-
 import BookingList from "./pages/BookingList";
 import HanldeBooking from "./pages/Restaurant-Panal/HandleBooking";
 import Menu from "./pages/Menu";
@@ -24,7 +23,6 @@ import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import { AxiosInterceptor } from "./services/apiClient";
 import Loader from "./components/common/Loader";
 import { ConfirmationProvider } from "./context/ConfirmationContext";
-
 import Bills from "./pages/Bills";
 import MenuByRestaurant from "./components/Restaurant-Panal/MenuByRestaurant";
 import PublicMenu from "./pages/PublicMenu";

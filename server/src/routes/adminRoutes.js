@@ -4,6 +4,8 @@ const adminController = require("../controllers/restaurantController.js");
 const { upload, uploadMenu } = require("../middleware/uploadMiddleware");
 const menuController = require("../controllers/menuController.js");
 const slotController = require("../controllers/slotController.js");
+const verifyToken = require("../middleware/authMiddleware.js");
+
 router.post(
   "/create-restaurant",
   upload,

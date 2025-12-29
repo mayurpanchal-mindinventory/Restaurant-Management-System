@@ -14,7 +14,7 @@ exports.createSlot = async (req, res) => {
 exports.getSlotList = async (req, res) => {
     try {
         const slot = await slotList(req);
-        return sendResponse(res, STATUS.OK, "", slot);
+        return sendResponse(res, STATUS.OK, slot.message, slot);
 
     } catch (error) {
         return sendResponse(

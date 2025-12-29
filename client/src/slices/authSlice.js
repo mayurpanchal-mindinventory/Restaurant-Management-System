@@ -17,8 +17,27 @@ export const loginUser = createAsyncThunk(
 
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
+        localStorage.setItem("token", response.data.token);
       }
       return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (thunkAPI) => {
+    try {
+      await apiClient.post("api/auth/logout");
+      localStorage.clear();
+      window.location.href = "/";
     } catch (error) {
       const message =
         (error.response &&
@@ -58,14 +77,17 @@ const authSlice = createSlice({
   initialState,
 
   reducers: {
-    // Logout Reducer: clears state and local storage
-    logout: (state) => {
-      localStorage.removeItem("user"); // Clear the 'user' item
-      state.user = null;
-      state.isAuthenticated = false;
-      state.isLoading = false;
-      state.error = null;
-    },
+    // // Logout Reducer: clears state and local storage
+    // logout: (state) => {
+    //   // localStorage.removeItem("user"); // Clear the 'user' item
+    //   // localStorage.removeItem("token"); // Clear the 'token'
+
+    //   // state.user = null;
+    //   // state.isAuthenticated = false;
+    //   // state.isLoading = false;
+    //   // state.error = null;
+
+    // },
 
     // Set user from localStorage (for initialization)
     setUserFromStorage: (state, action) => {
@@ -100,6 +122,8 @@ const authSlice = createSlice({
         // Store the response data in localStorage if not already stored
         if (action.payload) {
           localStorage.setItem("user", JSON.stringify(action.payload));
+          localStorage.setItem("token", action.payload.token);
+
           console.log("User data stored in localStorage:", action.payload);
         }
 
@@ -127,5 +151,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setUserFromStorage, clearAuthState } = authSlice.actions;
+export const { setUserFromStorage, clearAuthState } = authSlice.actions;
 export default authSlice.reducer;
