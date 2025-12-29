@@ -133,7 +133,7 @@ const PublicMenu = () => {
 
         <button
           onClick={() => navigate(-1)}
-          className="absolute z-20 top-20 left-6 bg-white hover:bg-orange-500 hover:text-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+          className="absolute top-20 left-6 bg-white hover:bg-orange-500 hover:text-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>

@@ -103,7 +103,7 @@ function Restaurant() {
               <th className="p-3">Restaurant</th>
               <th className="p-3">Email</th>
               <th className="p-3">Phone</th>
-              <th className="p-3">Close Day</th>
+              {/* <th className="p-3">Close Day</th> */}
               <th className="p-3">Menu</th>
               <th className="p-3">Slots</th>
               <th className="p-3">Actions</th>
@@ -141,9 +141,9 @@ function Restaurant() {
 
                   <td className="p-3">{r.userId.email}</td>
                   <td className="p-3">{r.userId.phone}</td>
-                  <td className="p-3">
+                  {/* <td className="p-3">
                     {r?.openDays.length > 1 ? r.openDays : "-"}{" "}
-                  </td>
+                  </td> */}
                   <td className="p-3">
                     <Link to={`menu/${r._id}`}>
                       <button className="p-2 rounded hover:bg-gray-100">
