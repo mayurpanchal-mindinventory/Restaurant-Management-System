@@ -60,6 +60,10 @@ const BillList = ({ userId }) => {
     try {
       const response = await billService.updatePaymentStatus(billId, newStatus);
       if (response) {
+        // Show success toast when payment is marked as Paid
+        if (newStatus === "Paid") {
+          toast.success("Payment successful!");
+        }
         // Update the bill in the list
         setBills(
           bills.map((bill) =>
@@ -69,7 +73,7 @@ const BillList = ({ userId }) => {
       }
     } catch (error) {
       console.error("Error updating payment status:", error);
-      alert("Failed to update payment status");
+      toast.error("Failed to update payment status");
     }
   };
 

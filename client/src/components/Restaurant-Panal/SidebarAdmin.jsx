@@ -7,9 +7,10 @@ function SidebarAdmin() {
   const dispatch = useDispatch();
 
   const navLinkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${isActive
-      ? "bg-gray-100 text-gray-900"
-      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${
+      isActive
+        ? "bg-gray-100 text-gray-900"
+        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
     }`;
 
   return (
@@ -21,7 +22,7 @@ function SidebarAdmin() {
         </div>
         <div>
           <span className="text-lg font-bold tracking-tight text-gray-900">
-            Restaurant<span className="text-orange-600">Panel</span>
+            FOODIE<span className="text-orange-600">HUB</span>
           </span>
           <p className="text-xs text-gray-500 font-medium">Management</p>
         </div>
@@ -29,8 +30,6 @@ function SidebarAdmin() {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-3 py-6 space-y-2">
-
-
         <NavLink to="restaurant/booking" className={navLinkClasses}>
           <Calendar size={18} />
           Bookings
