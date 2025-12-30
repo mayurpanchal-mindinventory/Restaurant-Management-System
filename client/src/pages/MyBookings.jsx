@@ -159,10 +159,10 @@ function MyBookings() {
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
           {customer.date
             ? new Date(customer.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
             : "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -170,11 +170,10 @@ function MyBookings() {
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              customer.status === "Completed"
-                ? "bg-green-100 text-green-700"
-                : "bg-orange-100 text-orange-700"
-            }`}
+            className={`px-3 py-1 rounded-full text-xs font-medium ${customer.status === "Completed"
+              ? "bg-green-100 text-green-700"
+              : "bg-orange-100 text-orange-700"
+              }`}
           >
             {customer.status}
           </span>
@@ -187,7 +186,7 @@ function MyBookings() {
     if (billsLoading) {
       return (
         <tr>
-          <td colSpan={billHeaders.length} className="px-6 py-10 text-center">
+          <td colSpan={billHeaders?.length} className="px-6 py-10 text-center">
             <div className="flex flex-col items-center justify-center space-y-4">
               <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
               <p className="text-gray-500 font-medium">Loading your bills...</p>
@@ -202,7 +201,7 @@ function MyBookings() {
       return (
         <tr>
           <td
-            colSpan={billHeaders.length}
+            colSpan={billHeaders?.length}
             className="px-6 py-10 text-center text-gray-500"
           >
             No bills found. Bills will appear here once your restaurant bookings
@@ -212,9 +211,9 @@ function MyBookings() {
       );
     }
 
-    return bills.map((bill, index) => (
+    return bills?.map((bill, index) => (
       <tr
-        key={bill._id || index}
+        key={bill?._id || index}
         className={
           index % 2 === 0
             ? "bg-white"
@@ -232,11 +231,11 @@ function MyBookings() {
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
           {bill?.bookingId?.date
-            ? new Date(bill.bookingId.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
+            ? new Date(bill?.bookingId?.date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
             : "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -293,11 +292,10 @@ function MyBookings() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-3 px-8 py-5 font-semibold transition-all duration-300 whitespace-nowrap border-b-2 ${
-                    isActive
-                      ? "text-orange-600 border-orange-600 bg-orange-50/50"
-                      : "text-gray-500 border-transparent hover:text-orange-500 hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center space-x-3 px-8 py-5 font-semibold transition-all duration-300 whitespace-nowrap border-b-2 ${isActive
+                    ? "text-orange-600 border-orange-600 bg-orange-50/50"
+                    : "text-gray-500 border-transparent hover:text-orange-500 hover:bg-gray-50"
+                    }`}
                 >
                   <IconComponent
                     className={`w-5 h-5 ${isActive ? "animate-pulse" : ""}`}
@@ -356,7 +354,7 @@ function MyBookings() {
             setShowBillDetails(false);
             setSelectedBill(null);
           }}
-          onUpdatePaymentStatus={() => {}}
+          onUpdatePaymentStatus={() => { }}
         />
       )}
     </div>

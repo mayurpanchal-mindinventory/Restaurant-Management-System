@@ -8,14 +8,12 @@ export default function AdminLayout() {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
-  // Helper to apply active styles
   const linkStyle = (path) =>
     `block px-4 py-2 rounded-md transition ${pathname === path ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700"
     }`;
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-gray-100">
-      {/* Sidebar */}
       <nav className="md:w-64 bg-gray-800 text-white flex flex-col text-center w-full">
         <div className="p-6 text-xl font-bold border-b border-gray-700">Admin Panel</div>
 
@@ -31,13 +29,12 @@ export default function AdminLayout() {
 
         <button
           onClick={() => dispatch(logout())}
-          className="m-4 flex items-center gap-3 px-4 py-2 text-red-400 hover:bg-gray-700 rounded-md transition"
+          className="m-4 flex items-center justify-center gap-3 px-4 text-center py-2 text-red-400 hover:bg-gray-700 rounded-md transition"
         >
           <LogOut size={18} /> Logout
         </button>
       </nav>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <header className="bg-white shadow-sm px-8 py-4">
           <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>

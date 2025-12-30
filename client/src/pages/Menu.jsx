@@ -96,7 +96,7 @@ export default function Menu() {
                     navigate(-1);
 
                 } catch (e) {
-                    toast.error("Failed to create menu item.");
+                    toast.error("Failed to create menu item due to server issue.");
                 }
             }}
         >

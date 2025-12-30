@@ -25,6 +25,7 @@ function BookingList() {
     const res = await getAllBooking(currentpage, searchTerm, sortby, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
+
     prevStatusRef.current = s;
     prevDateRef.current = d;
 
@@ -36,7 +37,7 @@ function BookingList() {
     } else {
       const debouncedSearch = setTimeout(() => {
         bookingList();
-      }, 1500);
+      }, 500);
 
       return () => clearTimeout(debouncedSearch)
     }
@@ -61,15 +62,16 @@ function BookingList() {
     if (currentpage > 1) setcurrentpage(currentpage - 1);
   };
 
-  return booking.length > 0 || searchTerm !== "" || date != "" || status != null ? (
+  return booking.length > 0 || searchTerm !== "" || date != "" || status != null || totalPages > 1 ? (
     <>
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
 
         <div className="bg-white grid gap-2">
           <select
             id="sortby"
             onChange={(e) => setSortBy(e.target.value)}
             className="h-10 px-2 py-2 border rounded-lg">
+            <option value="">Sort by: Created At</option>
             <option value="1">Sort by: Booking Date</option>
             <option value="2">Sort by: Restaurant (A-Z)</option>
             <option value="3">Sort by: Restaurant (Z-A)</option>
@@ -94,12 +96,12 @@ function BookingList() {
             </select>
           </div>
           <div>
-            <label htmlFor="date-range" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <label htmlFor="date-range" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
             <input type="date" id="date-range" name="date-range" value={date}
               onChange={(e) => setDate(e.target.value)} placeholder="Select date range"
               className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md" />
           </div>
-          <div class="flex items-end gap-2">
+          <div className="flex items-end gap-2">
             <button type="button"
               onClick={() => { if (prevStatusRef.current !== status || prevDateRef.current !== date) bookingList() }}
               className="w-full md:w-auto px-4 py-2 border  rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
