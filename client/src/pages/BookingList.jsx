@@ -22,6 +22,7 @@ function BookingList() {
 
   const bookingList = async (sr = sortby, s = status, d = date) => {
 
+
     const res = await getAllBooking(currentpage, searchTerm, sr, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
@@ -35,6 +36,7 @@ function BookingList() {
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else {
+      setcurrentpage(1);
       const debouncedSearch = setTimeout(() => {
         bookingList();
       }, 500);

@@ -466,9 +466,9 @@ const deleteRestaurant = async (req) => {
 const allBooking = async (req) => {
   try {
     let { page, search, sortby, date, status } = req.query;
-    if ((search || sortby || date || status) && page != 1) {
-      page = 1;
-    }
+    // if ((search || sortby || date || status) && page != 1) {
+    //   page = 1;
+    // }
     let startOfDay, nextDay;
     if (date) {
       startOfDay = new Date(date);
