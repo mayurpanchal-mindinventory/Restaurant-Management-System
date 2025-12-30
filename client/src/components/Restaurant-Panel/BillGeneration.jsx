@@ -238,7 +238,7 @@ const BillGeneration = ({
                 <div className="flex items-center gap-2">
                   <Percent size={16} className="text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
-                    Auto-applied discount from time slot: {autoDiscount}%
+                    Auto applied discount as per time slot is {autoDiscount}%
                   </span>
                 </div>
               </div>
@@ -371,7 +371,6 @@ const BillGeneration = ({
 
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <Percent size={16} className="text-gray-500" />
                         <span className="text-sm text-gray-600">
                           Discount (%):
                         </span>
@@ -407,7 +406,6 @@ const BillGeneration = ({
                     <div className="border-t border-gray-200 pt-2">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <DollarSign size={18} className="text-gray-600" />
                           <span className="font-medium text-gray-900">
                             Total:
                           </span>

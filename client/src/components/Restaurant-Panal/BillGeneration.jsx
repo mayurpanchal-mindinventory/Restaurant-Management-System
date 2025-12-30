@@ -10,7 +10,6 @@ import {
   Trash2,
   ShoppingCart,
   Percent,
-  DollarSign,
 } from "lucide-react";
 
 const BillGeneration = ({
@@ -339,7 +338,6 @@ const BillGeneration = ({
 
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <Percent size={16} className="text-gray-500" />
                         <span className="text-sm text-gray-600">
                           Discount (%):
                         </span>
@@ -368,7 +366,6 @@ const BillGeneration = ({
                     <div className="border-t border-gray-200 pt-2">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <DollarSign size={18} className="text-gray-600" />
                           <span className="font-medium text-gray-900">
                             Total:
                           </span>

@@ -4,7 +4,9 @@ import { useSelector } from "react-redux";
 
 function RestaurantLayout() {
   const { user } = useSelector((state) => state.auth);
-
+  {
+    console.log(user);
+  }
   return (
     <div className="flex min-h-screen bg-gray-50">
       <aside className="sticky top-0 h-screen flex-shrink-0 border-r border-gray-200">
@@ -20,7 +22,7 @@ function RestaurantLayout() {
                 Restaurant Panel
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                Welcome back, {user?.name || "Restaurant Owner"}
+                Welcome back, {user?.username || "Restaurant Owner"}
               </p>
             </div>
             <div className="text-sm text-gray-500">

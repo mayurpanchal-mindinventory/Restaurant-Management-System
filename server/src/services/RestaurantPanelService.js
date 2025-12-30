@@ -286,6 +286,7 @@ exports.getBillsByRestaurant = async (req) => {
     const Bill = require("../models/Bill.js");
     const bills = await Bill.find({ restaurantId })
       .populate("bookingId", "date numberOfGuests -_id")
+      .populate("restaurantId")
       .populate("userId", "name email -_id")
       .skip(skip)
       .limit(limit)

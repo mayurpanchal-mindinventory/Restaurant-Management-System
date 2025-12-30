@@ -114,33 +114,19 @@ const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
           </div>
 
           <div className="mb-6">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <CurrencyRupeeIcon className="h-6 w-6 text-gray-600" />
-                <div>
-                  <div className="font-medium">Payment Status</div>
-                  <span
-                    className={`w-fit px-3 py-1 text-center rounded-full text-xs font-medium ${
-                      paymentStatusStyles[bill?.paymentStatus] ||
-                      "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {bill?.paymentStatus || "Unpaid"}
-                  </span>
-                </div>
+            <div className="flex items-center p-4 border rounded-lg">
+              <CurrencyRupeeIcon className="h-6 w-6 text-gray-600 mr-3" />
+              <div>
+                <div className="font-medium">Payment Status</div>
+                <span
+                  className={`w-fit px-3 py-1 text-center rounded-full text-xs font-medium ${
+                    paymentStatusStyles[bill?.paymentStatus] ||
+                    "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {bill?.paymentStatus || "Unpaid"}
+                </span>
               </div>
-              <button
-                onClick={handleUpdatePaymentStatus}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  bill.paymentStatus === "Paid"
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-green-600 text-white hover:bg-green-700"
-                }`}
-              >
-                {bill.paymentStatus === "Paid"
-                  ? "Mark as Unpaid"
-                  : "Mark as Paid"}
-              </button>
             </div>
           </div>
 
