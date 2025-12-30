@@ -31,9 +31,14 @@ function MenuDetails({ id }) {
               </div>
 
               <div className="flex flex-row w-full px-5  gap-10 ml-4 justify-between items-baseline">
-                <h2 className="text-base font-semibold text-gray-700">
-                  {i.name || "Unnamed Product"}
-                </h2>
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-base font-semibold text-gray-700">
+                    {i.name || "Unnamed Product"}
+                  </h2>
+                  <p className="bg-orange-100 text-orange-500 h-fit px-1 w-fit rounded-full text-xs">
+                    {i.categoryId.categoryName}
+                  </p>
+                </div>
 
                 <p className="text-lg font-bold text-orange-600 mt-1">
                   ₹{i.price ? parseFloat(i.price).toFixed(2) : "N/A"}
