@@ -9,7 +9,9 @@ import {
 const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
   if (!bill) return null;
   // const [show, setShow] = useState(true);
-
+  {
+    console.log(bill);
+  }
   const paymentStatusStyles = {
     Unpaid: "bg-red-100 text-red-700 border border-red-300",
     Paid: "bg-green-100 text-green-700 border border-green-300",
@@ -45,11 +47,16 @@ const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
                   <span className="font-medium">Name:</span>{" "}
                   {bill?.restaurantId?.name}
                 </div>
-                <div>
+                <div className="flex flex-row gap-7 ">
                   <span className="font-medium">Logo:</span>{" "}
-                  {bill?.restaurantId?.logoImage
-                    ? "Available"
-                    : "Not Available"}
+                  {bill?.restaurantId?.logoImage ? (
+                    <img
+                      className="h-[50px] w-[50px] rounded-full"
+                      src={bill?.restaurantId?.logoImage}
+                    />
+                  ) : (
+                    "Not Available"
+                  )}
                 </div>
               </div>
             </div>
@@ -160,14 +167,6 @@ const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
                               ? item.name
                               : item.name?.name || "Unknown Item"}
                           </div>
-                          {item.itemId && (
-                            <div className="text-xs text-gray-500">
-                              ID:{" "}
-                              {typeof item.itemId === "string"
-                                ? item.itemId
-                                : item.itemId._id}
-                            </div>
-                          )}
                         </div>
                       </td>
 

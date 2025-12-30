@@ -93,7 +93,7 @@ const createMenu = async (req) => {
 const getAllMenusByRestaurant = async (req) => {
   try {
     let menuData;
-    const limit = 2;
+    const limit = 10;
     let { page, sortby, category, search } = req.query;
 
     if ((search, category, !page)) {
@@ -377,7 +377,7 @@ const getAllMenu = async (queryParams = {}) => {
       sortBy = "name",
       sortOrder = "asc",
       page = 1,
-      limit = 50,
+      limit = 10,
     } = queryParams;
 
     const skip = (page - 1) * limit;
@@ -474,7 +474,8 @@ const getAllMenu = async (queryParams = {}) => {
 
     // Get the filtered and sorted results
     const results = await MenuItem.aggregate([
-      // First, populate restaurant information for each menu item
+      // First.. populate restaurant information for each menu item
+      //console.log();
       {
         $lookup: {
           from: "restaurants",
