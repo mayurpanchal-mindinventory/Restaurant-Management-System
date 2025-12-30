@@ -41,7 +41,8 @@ exports.loginService = async ({ email, password }) => {
 exports.refreshTokenService = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return res.status(401).json({ message: "No refresh token" });
+    if (!token)
+      return res.status(401).json({ message: "No refresh token" });
 
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
@@ -66,6 +67,31 @@ exports.refreshTokenService = async (req, res) => {
     return { error: e.message };
   }
 };
+
+exports.refreshTokenService = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    throw new Error("NO_TOKEN");
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  const tokenDoc = await Token.findOne({ userId: decoded.id });
+
+  if (!tokenDoc || tokenDoc.refreshToken !== refreshToken) {
+    throw new Error("INVALID_TOKEN");
+  }
+
+  const user = await User.findById(decoded.id);
+  const accessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  tokenDoc.refreshToken = newRefreshToken;
+  await tokenDoc.save();
+
+  return { accessToken, newRefreshToken };
+};
+
 
 exports.logoutService = async (req, res) => {
   const token = req.cookies.refreshToken;

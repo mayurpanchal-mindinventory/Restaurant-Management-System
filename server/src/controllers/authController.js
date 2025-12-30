@@ -60,10 +60,18 @@ exports.refresh = async (req, res) => {
 
     res.json({ accessToken });
   } catch (err) {
-    res.status(STATUS.BAD_REQUEST).json({ error: err.message });
+    if (err.message === "NO_TOKEN") {
+      return res.status(401).json({ message: "No refresh token" });
+    }
+    if (err.message === "INVALID_TOKEN" || err.name === "JsonWebTokenError") {
+      return res.status(403).json({ message: "Invalid or expired token" });
+    }
 
+    return res.status(500).json({ error: "Internal server error" });
   }
+
 }
+
 
 exports.logout = async (req, res) => {
   try {
