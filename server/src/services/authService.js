@@ -39,7 +39,6 @@ exports.loginService = async ({ email, password }) => {
   return { user, accessToken, refreshToken };
 };
 
-
 exports.refreshTokenService = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -64,7 +63,6 @@ exports.refreshTokenService = async (req, res) => {
   return { accessToken, newRefreshToken };
 };
 
-
 exports.logoutService = async (req, res) => {
   const token = req.cookies.refreshToken;
 
@@ -76,20 +74,16 @@ exports.logoutService = async (req, res) => {
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     await Token.findOneAndDelete({ userId: decoded.id });
 
-
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
       sameSite: "Strict",
-      path: "/"
+      path: "/",
     });
 
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
-
     res.clearCookie("refreshToken", { path: "/" });
     return res.status(401).json({ message: "Session expired" });
   }
-
 };
-

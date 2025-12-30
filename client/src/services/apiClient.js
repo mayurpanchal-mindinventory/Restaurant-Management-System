@@ -32,13 +32,13 @@ import { useLoading } from "../context/LoadingContext";
 import { toast } from "react-hot-toast";
 
 export const apiClient = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://192.168.1.213:5000",
   timeout: 5000,
   withCredentials: true,
 });
 
 const refreshAxios = axios.create({
-  baseURL: "http://localhost:5000/api/auth",
+  baseURL: "http://192.168.1.213:5000/api/auth",
   withCredentials: true,
 });
 

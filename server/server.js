@@ -15,18 +15,27 @@ const app = express();
 //   "http://localhost:5173",
 //   "http://192.168.1.213:5173", // Your network IP
 // ];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://192.168.1.213:5173",
+  "http://192.168.1.213:5173/api/auth", // Replace with your exact network IP
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, or Postman)
+      // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
-      // This dynamically allows whatever URL is hitting your API
-      // (Great for localhost, network IPs, and localtunnel)
-      callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    credentials: true, // Required for cookieParser()
+    credentials: true,
     allowedHeaders: [
       "Content-Type",
       "Authorization",
@@ -36,7 +45,6 @@ app.use(
   })
 );
 
-// Explicitly handle Preflight requests for all routes
 app.options(/.*/, cors());
 
 app.use(express.json());
