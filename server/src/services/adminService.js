@@ -466,7 +466,7 @@ const deleteRestaurant = async (req) => {
 const allBooking = async (req) => {
   try {
     let { page, search, sortby, date, status } = req.query;
-    if (search, sortby, date, status) {
+    if ((search || sortby || date || status) && page != 1) {
       page = 1;
     }
     let startOfDay, nextDay;
@@ -547,7 +547,9 @@ const allBooking = async (req) => {
         ? { $sort: { date: 1 } }
         : sortby === "2"
           ? { $sort: { 'restaurant.name': 1 } }
-          : { $sort: { 'restaurant.name': -1 } },
+          : sortby === "3"
+            ? { $sort: { 'restaurant.name': -1 } }
+            : { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
       {

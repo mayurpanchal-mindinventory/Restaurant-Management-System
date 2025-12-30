@@ -30,7 +30,6 @@ import PublicMenu from "./pages/PublicMenu";
 function App() {
   const GlobalLoader = () => {
     const { isLoading } = useLoading();
-    // Using your existing Loader component
     return (
       <Loader loading={isLoading} className="fixed inset-0 z-50 bg-white/50" />
     );

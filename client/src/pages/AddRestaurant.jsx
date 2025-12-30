@@ -17,7 +17,12 @@ export default function RestaurantForm() {
 
     const validationSchema = Yup.object({
         restaurantName: Yup.string().required("Name is required"),
-        password: id ? Yup.string() : Yup.string().required("Password is required"),
+        password: id ? Yup.string() :
+            Yup.string()
+                .required("Password is required")
+                .min(8, 'Password is too short - should be 8 characters minimum.')
+                .matches(/[A-Z]/, 'Password requires an uppercase letter')
+                .matches(/[0-9]/, 'Password requires a number'),
         email: Yup.string().email().required("Email is required"),
         description: Yup.string().required("Description is required"),
         phone: Yup.string().required("Phone number is required"),
