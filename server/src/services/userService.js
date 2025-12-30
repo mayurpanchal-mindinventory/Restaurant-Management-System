@@ -73,8 +73,6 @@ exports.getBookings = async (userId) => {
 exports.getBillByuserId = async (req) => {
   try {
     const { userId } = req.params;
-    // console.log(userId);
-
     const result = await Bill.find({
       userId: userId,
       isSharedWithUser: true,

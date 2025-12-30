@@ -3,10 +3,11 @@ import { Search, Filter, MapPin, ArrowLeft, ChevronDown } from "lucide-react";
 import { getAllMenu } from "../services/adminService";
 import { toast } from "react-hot-toast";
 import bookingImg from "../assets/booking.jpg";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 
 const PublicMenu = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [menuData, setMenuData] = useState([]);
   const [allMenuItems, setAllMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,8 +20,16 @@ const PublicMenu = () => {
     currentPage: 1,
     totalPages: 1,
     totalDocs: 0,
-    limit: 50,
+    limit: 10,
   });
+
+  // Set search term from URL parameters when component loads
+  useEffect(() => {
+    const searchQuery = searchParams.get("search");
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchParams]);
   const searchTimeoutRef = useRef(null);
   const handlePriceChange = (e) => {
     const { name, value } = e.target;
@@ -49,8 +58,12 @@ const PublicMenu = () => {
         setMenuData(response.data.data.groupedData || []);
         setAllMenuItems(response.data.data.flatData || []);
 
-        if (response.data.pagination) {
-          setPagination((prev) => ({ ...prev, ...response.data.pagination }));
+        if (response?.data?.data?.pagination) {
+          // console.log(response.data.data.pagination);
+          setPagination((prev) => ({
+            ...prev,
+            ...response.data.data.pagination,
+          }));
         }
 
         if (allMenuItems.length === 0 && response.data.flatData) {
@@ -315,54 +328,50 @@ const PublicMenu = () => {
         )}
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="mt-8 flex justify-center gap-2">
-            <button
-              onClick={() => handlePageChange(pagination.currentPage - 1)}
-              disabled={pagination.currentPage === 1}
-              className="px-3 py-2 border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            {Array.from(
-              { length: Math.min(5, pagination.totalPages) },
-              (_, i) => {
-                let pageNum;
-                if (pagination.totalPages <= 5 || pagination.currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (
-                  pagination.currentPage >=
-                  pagination.totalPages - 2
-                ) {
-                  pageNum = pagination.totalPages - 4 + i;
-                } else {
-                  pageNum = pagination.currentPage - 2 + i;
-                }
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    disabled={loading}
-                    className={`px-3 py-2 border rounded-lg text-sm transition ${
-                      pageNum === pagination.currentPage
-                        ? "bg-orange-500 text-white border-orange-500"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
+        {console.log(pagination)}
+        <div className="mt-8 flex justify-center gap-2">
+          <button
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
+            className="px-3 py-2 border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          {Array.from(
+            { length: Math.min(5, pagination.totalPages) },
+            (_, i) => {
+              let pageNum;
+              if (pagination.totalPages <= 5 || pagination.currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                pageNum = pagination.totalPages - 4 + i;
+              } else {
+                pageNum = pagination.currentPage - 2 + i;
               }
-            )}
-            <button
-              onClick={() => handlePageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages}
-              className="px-3 py-2 border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        )}
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={loading}
+                  className={`px-3 py-2 border rounded-lg text-sm transition ${
+                    pageNum === pagination.currentPage
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            }
+          )}
+          <button
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+            className="px-3 py-2 border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </>
   );

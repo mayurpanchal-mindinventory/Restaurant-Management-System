@@ -11,9 +11,11 @@ function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Searching for:", searchQuery);
-    // Navigate to menu page with search term
-    // navigate(`/menu?search=${encodeURIComponent(searchQuery)}`);
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      // Navigate to menu page with search term
+      navigate(`/menu?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   return (

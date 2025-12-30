@@ -377,7 +377,7 @@ const getAllMenu = async (queryParams = {}) => {
       sortBy = "name",
       sortOrder = "asc",
       page = 1,
-      limit = 50,
+      limit = 10,
     } = queryParams;
 
     const skip = (page - 1) * limit;
