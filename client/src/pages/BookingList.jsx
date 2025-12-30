@@ -20,9 +20,9 @@ function BookingList() {
     Cancelled: "bg-red-100 text-red-700 border border-red-300",
   };
 
-  const bookingList = async (s = status, d = date) => {
+  const bookingList = async (sr = sortby, s = status, d = date) => {
 
-    const res = await getAllBooking(currentpage, searchTerm, sortby, s, d);
+    const res = await getAllBooking(currentpage, searchTerm, sr, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
 
@@ -51,7 +51,8 @@ function BookingList() {
     if (prevStatusRef.current !== "" || prevDateRef.current !== "") {
       setStatus("");
       setDate("");
-      bookingList("", "");
+      setSortBy("");
+      bookingList("", "", "");
     }
   }
   const goToNextPage = () => {
