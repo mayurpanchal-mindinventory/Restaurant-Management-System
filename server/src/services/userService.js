@@ -87,6 +87,7 @@ exports.getBillByuserId = async (req) => {
         },
       })
       .populate("restaurantId userId");
+    console.log(result);
     return {
       success: true,
       message: "Bill retrive Successfully",

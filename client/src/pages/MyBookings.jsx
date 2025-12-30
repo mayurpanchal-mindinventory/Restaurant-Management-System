@@ -125,6 +125,7 @@ function MyBookings() {
   };
 
   const renderBookingRows = (dataList) => {
+    console.log(dataList);
     if (dataList.length === 0) {
       return (
         <tr>
@@ -165,7 +166,7 @@ function MyBookings() {
             : "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-          {customer?.bookingId || "N/A"}
+          {customer?.timeSlotId?.timeSlot || "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm">
           <span
@@ -195,9 +196,8 @@ function MyBookings() {
       );
     }
 
-    if (bills?.length === 0) {
-      console.log(bills);
-
+    if (bills.length === 0) {
+      // console.log(bills);
       return (
         <tr>
           <td
@@ -239,7 +239,7 @@ function MyBookings() {
             : "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-          {bill?.bookingId.timeSlotId?.timeSlot || "N/A"}
+          {bill.data?.bookingId.timeSlotId.timeSlot || "N/A"}
         </td>
         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
           ₹{bill.grandTotal?.toFixed(2) || "0.00"}
