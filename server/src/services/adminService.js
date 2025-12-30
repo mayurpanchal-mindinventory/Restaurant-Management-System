@@ -549,7 +549,7 @@ const allBooking = async (req) => {
           ? { $sort: { 'restaurant.name': 1 } }
           : sortby === "3"
             ? { $sort: { 'restaurant.name': -1 } }
-            : { $sort: { createdAt: 1 } },
+            : { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
