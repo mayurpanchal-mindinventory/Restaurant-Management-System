@@ -38,6 +38,7 @@ exports.loginService = async ({ email, password }) => {
   );
   return { user, accessToken, refreshToken };
 };
+
 exports.refreshTokenService = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
