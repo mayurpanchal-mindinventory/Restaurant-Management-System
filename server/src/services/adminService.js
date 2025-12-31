@@ -471,6 +471,7 @@ const allBooking = async (req) => {
     // }
     let startOfDay, nextDay;
     if (date) {
+      page = 1;
       startOfDay = new Date(date);
       console.log(startOfDay);
       nextDay = new Date(startOfDay);
