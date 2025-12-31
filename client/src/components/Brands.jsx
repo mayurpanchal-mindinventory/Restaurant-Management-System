@@ -30,7 +30,7 @@ function Brands(params) {
   const img = <img src={leaf} />;
   return (
     <>
-      <div className="px-4 md:px-14 py-12 ">
+      <div className=" px-4 md:px-14 py-12 ">
         <div className="mb-8">
           <div className="loader-line"></div>
           <h2 className="text-4xl  font-medium text-gray-900">Brand For You</h2>
@@ -40,7 +40,7 @@ function Brands(params) {
           </p>
         </div>
       </div>
-      <div className="flex flex-row  items-center justify-center overflow-hidden bg-[]">
+      <div className="pb-12 flex flex-row  items-center justify-center overflow-hidden bg-[]">
         {restaurants.length > 0 ? (
           restaurants.map((item) => {
             return (

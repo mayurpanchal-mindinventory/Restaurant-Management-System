@@ -13,7 +13,7 @@ const RestaurantCard = ({ restaurant }) => {
   const staticDiscount = 20;
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:shadow-xl transition duration-300 border border-gray-100">
+    <div className=" w-full bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:shadow-xl transition duration-300 border border-gray-100">
       <div className="relative h-[180px] w-full overflow-hidden">
         <img
           src={restaurant.mainImage || "via.placeholder.com"}

@@ -32,12 +32,12 @@ function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
-      {/* Main Footer Content */}
+    <footer className="absolute z-100 bg-gray-900 text-white ">
+      {/* Main Footer Content   */}
       <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-10">
           {/* Company Info */}
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             <div className="flex items-center gap-2">
               <div className="bg-orange-500 p-1.5 rounded-lg">🍽️</div>
               <h3 className="text-xl font-black">
@@ -82,7 +82,7 @@ function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
+          <div className="md:flex md:flex-col space-y-4 md:justify-center md:items-center ">
             <h4 className="text-lg font-semibold text-orange-400">
               Quick Links
             </h4>
@@ -100,7 +100,6 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-orange-400">
               Contact Info
@@ -108,47 +107,30 @@ function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Phone size={16} className="text-orange-500" />
-                <span className="text-gray-300 text-sm">+1 (555) 123-4567</span>
+                <span className="text-gray-300 text-sm">+91 1234567890</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={16} className="text-orange-500" />
                 <span className="text-gray-300 text-sm">
-                  info@foodiehub.com
+                  mayur.panchal@midninventory
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail size={16} className="text-orange-500" />
+                <span className="text-gray-300 text-sm">
+                  miten.patel@midninventory
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin size={16} className="text-orange-500" />
                 <span className="text-gray-300 text-sm">
-                  123 Food Street, City, State 12345
+                  city center,science city,sola,Amd
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock size={16} className="text-orange-500" />
-                <span className="text-gray-300 text-sm">
-                  Mon-Sun: 9:00 AM - 11:00 PM
-                </span>
+                <span className="text-gray-300 text-sm">24/7 available</span>
               </div>
-            </div>
-          </div>
-
-          {/* Newsletter */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-orange-400">
-              Stay Updated
-            </h4>
-            <p className="text-gray-300 text-sm">
-              Subscribe to our newsletter for the latest restaurant updates and
-              exclusive offers.
-            </p>
-            <div className="space-y-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-orange-500 text-sm"
-              />
-              <button className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm">
-                Subscribe
-              </button>
             </div>
           </div>
         </div>
@@ -157,20 +139,9 @@ function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 md:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-gray-400 text-sm">
-              © 2024 FoodieHub. All rights reserved.
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {legalLinks.map((link) => (
-                <button
-                  key={link.path}
-                  onClick={() => handleNav(link.path)}
-                  className="text-gray-400 hover:text-orange-400 transition-colors text-sm"
-                >
-                  {link.label}
-                </button>
-              ))}
+          <div className="flex justify-center items-center">
+            <div className="text-center text-gray-400 text-sm">
+              © 2026 FoodieHub. All rights reserved.
             </div>
           </div>
         </div>
