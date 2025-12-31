@@ -16,6 +16,7 @@ const app = express();
 //   "http://192.168.1.213:5173", // Your network IP
 // ];
 const allowedOrigins = [
+  "/",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://192.168.1.213:5173",

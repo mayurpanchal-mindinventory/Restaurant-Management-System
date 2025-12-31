@@ -1,4 +1,9 @@
-const { registerService, loginService, refreshTokenService, logoutService } = require("../services/authService");
+const {
+  registerService,
+  loginService,
+  refreshTokenService,
+  logoutService,
+} = require("../services/authService");
 const { STATUS } = require("../utils/constants");
 exports.register = async (req, res) => {
   try {
@@ -22,7 +27,7 @@ exports.login = async (req, res) => {
       secure: false,
       sameSite: "lax",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -40,11 +45,12 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
 exports.refresh = async (req, res) => {
   try {
-    const { accessToken, newRefreshToken } = await refreshTokenService(req, res);
+    const { accessToken, newRefreshToken } = await refreshTokenService(
+      req,
+      res
+    );
 
     if (!accessToken || !newRefreshToken) {
       return res.status(403).json({ message: "Invalid or expired token" });
@@ -55,7 +61,7 @@ exports.refresh = async (req, res) => {
       secure: false,
       sameSite: "strict",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({ accessToken });
@@ -69,16 +75,11 @@ exports.refresh = async (req, res) => {
 
     return res.status(500).json({ error: "Internal server error" });
   }
-
-}
-
-
+};
 exports.logout = async (req, res) => {
   try {
     await logoutService(req, res);
   } catch (err) {
     res.status(STATUS.BAD_REQUEST).json({ error: err.message });
-
   }
-
-}
+};

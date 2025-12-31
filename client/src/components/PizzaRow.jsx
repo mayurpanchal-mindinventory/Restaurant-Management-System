@@ -47,5 +47,4 @@ const PizzaRow = () => (
     ))}
   </div>
 );
-
 export default PizzaRow;

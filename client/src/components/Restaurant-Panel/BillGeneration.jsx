@@ -140,7 +140,7 @@ const BillGeneration = ({
 
       const response = await billService.createBill(billData);
 
-      if (response.success) {
+      if (response) {
         // Show success toast
         showToast && showToast("Bill generated successfully!", "success");
         onBillCreated && onBillCreated(response.data);
