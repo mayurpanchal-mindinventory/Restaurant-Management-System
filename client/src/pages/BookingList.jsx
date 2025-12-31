@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getAllBooking } from "../services/adminService";
-import { FiFilter } from "react-icons/fi";
+import {
+  FiFilter, FiCalendar, FiSearch, FiRefreshCw,
+  FiChevronLeft, FiChevronRight, FiUser, FiClock, FiMapPin
+} from "react-icons/fi";
 
 function BookingList() {
   const [booking, setBooking] = useState([]);
@@ -13,23 +16,20 @@ function BookingList() {
   const [date, setDate] = useState("");
   const prevStatusRef = useRef("");
   const prevDateRef = useRef("");
+
   const statusStyles = {
-    Pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
-    Accepted: "bg-blue-100 text-blue-700 border border-blue-300",
-    Completed: "bg-green-100 text-green-700 border border-green-300",
-    Cancelled: "bg-red-100 text-red-700 border border-red-300",
+    Pending: "bg-amber-50 text-amber-700 border-amber-200",
+    Accepted: "bg-blue-50 text-blue-700 border-blue-200",
+    Completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
   };
 
   const bookingList = async (sr = sortby, s = status, d = date) => {
-
-
     const res = await getAllBooking(currentpage, searchTerm, sr, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
-
     prevStatusRef.current = s;
     prevDateRef.current = d;
-
   };
 
   useEffect(() => {
@@ -40,192 +40,209 @@ function BookingList() {
       const debouncedSearch = setTimeout(() => {
         bookingList();
       }, 500);
-
-      return () => clearTimeout(debouncedSearch)
+      return () => clearTimeout(debouncedSearch);
     }
   }, [searchTerm, sortby]);
 
   useEffect(() => {
     bookingList();
-  }, [currentpage])
+  }, [currentpage]);
 
   const clearfilter = () => {
-    if (prevStatusRef.current !== "" || prevDateRef.current !== "") {
-      setStatus("");
-      setDate("");
-      setSortBy("");
-      bookingList("", "", "");
-    }
-  }
-  const goToNextPage = () => {
-    if (currentpage < totalPages) setcurrentpage(currentpage + 1);
+    setStatus("");
+    setDate("");
+    setSortBy("");
+    setSearchTerm("");
+    bookingList("", "", "");
   };
 
-  const goToPrevpage = () => {
-    if (currentpage > 1) setcurrentpage(currentpage - 1);
-  };
+  return (
+    <div className="min-h-screen  p-4 md:p-8">
+      <div className="max-w-[1400px] mx-auto space-y-6">
 
-  return booking.length > 0 || searchTerm !== "" || date != "" || status != null || totalPages > 1 ? (
-    <>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
-
-        <div className="bg-white grid gap-2">
-          <select
-            id="sortby"
-            onChange={(e) => setSortBy(e.target.value)}
-            className="h-10 px-2 py-2 border rounded-lg">
-            <option value="">Sort by: Created At</option>
-            <option value="1">Sort by: Booking Date</option>
-            <option value="2">Sort by: Restaurant (A-Z)</option>
-            <option value="3">Sort by: Restaurant (Z-A)</option>
-          </select>
-        </div>
-        <div className="flex md:flex-row gap-4 flex-col">
-
-          {/* <div className="flex items-center justify-center">
-            <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
-          </div> */}
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select id="status" name="status"
-              onChange={(e) => setStatus(e.target.value)}
-              value={status}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-              <option value="">All Statuses</option>
-              <option value="Accepted">Accepted</option>
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="date-range" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input type="date" id="date-range" name="date-range" value={date}
-              onChange={(e) => setDate(e.target.value)} placeholder="Select date range"
-              className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md" />
-          </div>
-          <div className="flex items-end gap-2">
-            <button type="button"
-              onClick={() => { if (prevStatusRef.current !== status || prevDateRef.current !== date) bookingList() }}
-              className="w-full md:w-auto px-4 py-2 border  rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-              Apply Filters
-            </button>
-            <button type="button"
-              onClick={() => clearfilter({})}
-              className="w-full md:w-auto px-4 py-2  rounded-md shadow-sm text-sm font-medium text-gray-600   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
-              Clear Filters
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      <div className="w-full bg-white text-black shadow-md rounded-xl p-4">
-
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-          <div className="w-full">
-            <h2 className="text-xl font-semibold"> Booking List</h2>
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reservations</h1>
+            <p className="text-slate-500 text-sm font-medium">Manage and track your restaurant bookings in real-time.</p>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative group">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search name, user, or status..."
-              className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+              placeholder="Search by customer or restaurant..."
+              className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
             />
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
-                <th className="p-3">Date</th>
-                <th className="p-3">Restaurant</th>
-                <th className="p-3">Restaurant Name</th>
-                <th className="p-3">Username</th>
-                <th className="p-3">Slot Time</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="text-black">
-              {booking.length > 0 ? (
-                booking.map((r) => (
-                  <tr key={r._id} className="border-b">
-                    <td className="p-3">{r?.date ? new Date(r.date).toLocaleString().split(',')[0] : "Date is not available"}</td>
+        {/* Filter Toolbar */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-2 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="p-2 border-r border-slate-100 last:border-0">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 px-1">Sort Order</label>
+              <select
+                value={sortby}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full bg-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer"
+              >
+                <option value="">Recently Created</option>
+                <option value="1">Reservation Date</option>
+                <option value="2">Restaurant (A-Z)</option>
+              </select>
+            </div>
 
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={r?.restaurantId?.logoImage ? r.restaurantId.logoImage : "https://placehold.co/800?text=logo&font=roboto"}
-                          className="h-11 w-11 rounded-full border"
-                          alt="restaurant"
-                        />
+            <div className="p-2 border-r border-slate-100 last:border-0">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 px-1">Booking Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full bg-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer"
+              >
+                <option value="">All Statuses</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="p-2 border-r border-slate-100 last:border-0">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 px-1">Selected Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer"
+              />
+            </div>
+
+            <div className="p-2 flex items-center gap-2">
+              <button
+                onClick={() => bookingList()}
+                className="flex-1 bg-slate-900 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-slate-800 transition-all shadow-md active:scale-95"
+              >
+                Apply Filters
+              </button>
+              <button
+                onClick={clearfilter}
+                className="p-2.5 bg-slate-50 text-slate-500 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <FiRefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Table */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-200">
+                  <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reservation Details</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Restaurant</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Timing</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {booking.length > 0 ? (
+                  booking.map((item) => (
+                    <tr key={item._id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-900">{item?.userId?.name || "Guest User"}</span>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                            <FiCalendar className="w-3 h-3" />
+                            {item?.date ? new Date(item.date).toLocaleDateString('en-GB') : 'N/A'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex-shrink-0 overflow-hidden shadow-sm">
+                            <img
+                              src={item?.restaurantId?.logoImage || "ui-avatars.com"}
+                              className="w-full h-full object-cover"
+                              alt=""
+                            />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-slate-900 leading-none">{item?.restaurantId?.name || "Unknown"}</span>
+                            <span className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                              <FiMapPin size={10} /> Partner Outlet
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <FiClock className="text-slate-400 w-3.5 h-3.5" />
+                          <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">
+                            {item?.timeSlotId?.timeSlot || "--:--"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center">
+                          <span className={`min-w-[100px] text-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[item?.status] || "bg-slate-50 text-slate-500 border-slate-200"}`}>
+                            {item?.status}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="py-32 text-center">
+                      <div className="flex flex-col items-center max-w-xs mx-auto">
+                        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                          <FiFilter className="text-slate-300 w-8 h-8" />
+                        </div>
+                        <h3 className="text-slate-900 font-bold">No Records Found</h3>
+                        <p className="text-slate-500 text-xs mt-2 leading-relaxed">
+                          We couldn't find any bookings matching your current criteria. Try adjusting your filters.
+                        </p>
                       </div>
                     </td>
-                    <td className="p-3">{r?.restaurantId?.name || "Restaurant Removed"}</td>
-                    <td className="p-3">{r?.userId?.name}</td>
-                    <td className="p-3">{r?.timeSlotId?.timeSlot || "-"}</td>
-                    <td className="p-3">
-                      <p className={`w-fit px-4 py-1 text-center rounded-full text-xs font-medium ${statusStyles[r?.status] || "bg-gray-100 text-gray-700"}`}>
-                        {r?.status}
-                      </p>
-                    </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="p-10 text-center text-gray-500">
-                    <div className="text-center py-20">
-                      <FiFilter className="mx-auto mb-4" size={48} color="gray" />
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                        No items found
-                      </h3>
-                      <p className="text-gray-500">
-                        Try adjusting your filters or search terms
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {booking.length > 0 && (
+            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Showing Page <span className="text-indigo-600">{currentpage}</span> of {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  disabled={currentpage === 1}
+                  onClick={() => setcurrentpage(prev => prev - 1)}
+                  className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  <FiChevronLeft className="w-5 h-5 text-slate-600" />
+                </button>
+                <button
+                  disabled={currentpage === totalPages}
+                  onClick={() => setcurrentpage(prev => prev + 1)}
+                  className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  <FiChevronRight className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        {booking.length > 0 && <div className="flex justify-between items-center mt-4">
-          <button
-            className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-            disabled={currentpage === 1}
-            onClick={goToPrevpage}
-          >
-            Previous
-          </button>
-          <span className="text-sm">
-            Page {currentpage} of {totalPages}
-          </span>
-          <button
-            className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-            disabled={currentpage === totalPages}
-            onClick={goToNextPage}
-          >
-            Next
-          </button>
-        </div>}
-      </div></>
-  ) : (
-    <div className="text-center py-20">
-      <FiFilter className="mx-auto mb-4" size={48} color="gray" />
-      <h3 className="text-xl font-semibold text-gray-600 mb-2">
-        No Booking found
-      </h3>
-      <p className="text-gray-500">
-        Try adjusting your filters or search terms
-      </p>
+      </div>
     </div>
   );
-
 }
 
 export default BookingList;
