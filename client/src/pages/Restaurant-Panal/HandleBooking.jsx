@@ -406,38 +406,38 @@ function HanldeBooking(params) {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
+                      {booking.status === "Cancelled" ? (
                         <span
-                          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
-                            booking.status === "Completed"
-                              ? "bg-green-100 text-green-700"
-                              : booking.status === "Accepted"
-                              ? "bg-blue-100 text-blue-700"
-                              : booking.status === "Cancelled"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
+                          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700`}
                         >
-                          {booking.status}
+                          Cancelled
                         </span>
-                        {booking.status !== "Cancelled" && (
-                          <select
-                            className="text-xs font-medium bg-white border border-gray-300 text-gray-600 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
-                            value={booking.status}
-                            onChange={(e) =>
-                              handleStatusChange(booking._id, e.target.value)
-                            }
-                          >
-                            {["Pending", "Accepted", "Cancelled", "Completed"]
-                              .filter((s) => s !== booking.status)
-                              .map((s) => (
-                                <option key={s} value={s}>
-                                  {s}
-                                </option>
-                              ))}
-                          </select>
-                        )}
-                      </div>
+                      ) : booking.status === "Completed" ? (
+                        <span
+                          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700`}
+                        >
+                          Completed
+                        </span>
+                      ) : (
+                        <select
+                          className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
+                          value={booking.status}
+                          onChange={(e) =>
+                            handleStatusChange(booking._id, e.target.value)
+                          }
+                        >
+                          {[
+                            "Pending",
+                            "Confirmed",
+                            "Accepted",
+                            "Cancelled",
+                          ].map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

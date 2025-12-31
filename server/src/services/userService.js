@@ -54,16 +54,65 @@ exports.BookRestaurant = async (req) => {
   }
 };
 
-exports.getBookings = async (userId) => {
+exports.getBookings = async (userId, options = {}) => {
   try {
     if (!userId) throwError("User ID is required");
 
-    const bookings = await Booking.find({ userId })
-      .populate("restaurantId", "name description mainImage logoImage")
-      .populate("timeSlotId", "timeSlot")
-      .sort({ createdAt: -1 });
+    const {
+      page = 1,
+      limit = 10,
+      searchDate,
+      searchRestaurant,
+      sortBy = "date",
+      sortOrder = "desc",
+      status, // for current/past filtering
+    } = options;
 
-    return { message: "Bookings retrieved successfully", data: bookings };
+    const query = { userId };
+
+    // Search by date (exact match)
+    if (searchDate) {
+      const searchDateObj = new Date(searchDate);
+      const nextDay = new Date(searchDateObj);
+      nextDay.setDate(nextDay.getDate() + 1);
+      query.date = {
+        $gte: new Date(searchDateObj.toISOString().split("T")[0]),
+        $lt: new Date(nextDay.toISOString().split("T")[0]),
+      };
+    }
+
+    // Filter by status (for current/past)
+    if (status) {
+      if (status === "current") {
+        query.status = { $ne: "Completed" };
+      } else if (status === "past") {
+        query.status = "Completed";
+      }
+    }
+
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+
+    const [bookings, total] = await Promise.all([
+      Booking.find(query)
+        .populate("restaurantId", "name description mainImage logoImage")
+        .populate("timeSlotId", "timeSlot")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      Booking.countDocuments(query),
+    ]);
+
+    return {
+      message: "Bookings retrieved successfully",
+      data: bookings,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   } catch (error) {
     if (error.status) throw error;
     throwError("Failed to retrieve bookings", 500);
@@ -73,23 +122,58 @@ exports.getBookings = async (userId) => {
 exports.getBillByuserId = async (req) => {
   try {
     const { userId } = req.params;
-    const result = await Bill.find({
-      userId: userId,
-      isSharedWithUser: true,
-    })
-      .populate({
-        path: "bookingId",
-        populate: {
-          path: "timeSlotId",
-          model: "TimeSlot"
-        },
-      })
-      .populate("restaurantId userId");
-    console.log(result);
+    const {
+      page = 1,
+      limit = 10,
+      searchDate,
+      searchRestaurant,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const query = { userId, isSharedWithUser: true };
+
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+
+    const [bills, totalDocs] = await Promise.all([
+      Bill.find(query)
+        .populate({
+          path: "bookingId",
+          populate: { path: "timeSlotId", model: "TimeSlot" },
+        })
+        .populate("restaurantId userId")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      Bill.countDocuments(query),
+    ]);
+
+    // Client-side date filtering if searchDate is provided
+    let filteredBills = bills;
+    let filteredTotal = totalDocs;
+
+    if (searchDate) {
+      filteredBills = bills.filter((bill) => {
+        if (!bill.bookingId?.date) return false;
+        const billDate = new Date(bill.bookingId.date)
+          .toISOString()
+          .split("T")[0];
+        return billDate === searchDate;
+      });
+      filteredTotal = filteredBills.length;
+    }
+
     return {
       success: true,
       message: "Bill retrive Successfully",
-      data: result,
+      data: filteredBills,
+      pagination: {
+        total: filteredTotal,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(filteredTotal / limit),
+      },
     };
   } catch (error) {
     if (!error.status) {

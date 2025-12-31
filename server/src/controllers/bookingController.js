@@ -30,6 +30,16 @@ exports.createBooking = async (req, res) => {
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.params.userId || req.user?.id;
+    const {
+      page = 1,
+      limit = 10,
+      searchDate,
+      searchRestaurant,
+      sortBy = "date",
+      sortOrder = "desc",
+      status,
+    } = req.query;
+
     if (!userId)
       return sendResponse(
         res,
@@ -37,8 +47,21 @@ exports.getUserBookings = async (req, res) => {
         MESSAGES.BOOKING_USER_REQUIRED
       );
 
-    const { message, data } = await getBookings(userId);
-    return sendResponse(res, STATUS.OK, message, data);
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      searchDate,
+      searchRestaurant,
+      sortBy,
+      sortOrder,
+      status,
+    };
+
+    const { message, data, pagination } = await getBookings(userId, options);
+    return sendResponse(res, STATUS.OK, message, {
+      bookings: data,
+      pagination,
+    });
   } catch (error) {
     console.error("Retrieval Error:", error.message);
     return sendResponse(
@@ -143,7 +166,10 @@ exports.updateBillPaymentStatusController = async (req, res) => {
 exports.desiplayBillByUserid = async (req, res) => {
   try {
     const result = await getBillByuserId(req);
-    return sendResponse(res, STATUS.OK, result.message, result.data);
+    return sendResponse(res, STATUS.OK, result.message, {
+      bills: result.data,
+      pagination: result.pagination,
+    });
   } catch (error) {
     console.error("Error in desiplayBillByUserid controller:", error);
     return sendResponse(

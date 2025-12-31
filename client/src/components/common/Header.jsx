@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { path: "/", label: "Home" },
   { path: "/home/menu", label: "Menu" },
   { path: "/home/bookings", label: "Bookings" },
-  { path: "/about", label: "About Us" },
+  { path: "#footer", label: "About Us" },
 ];
 
 export default function Header() {
