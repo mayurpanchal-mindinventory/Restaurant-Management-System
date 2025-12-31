@@ -76,7 +76,6 @@ exports.refresh = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 exports.logout = async (req, res) => {
   try {
     await logoutService(req, res);

@@ -39,32 +39,27 @@ exports.loginService = async ({ email, password }) => {
   return { user, accessToken, refreshToken };
 };
 exports.refreshTokenService = async (req, res) => {
-  try {
-    const token = req.cookies.refreshToken;
-    if (!token) return res.status(401).json({ message: "No refresh token" });
+  const refreshToken = req.cookies.refreshToken;
 
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-
-    const tokenDoc = await Token.findOne({ userId: decoded.id });
-
-    if (!tokenDoc || tokenDoc.refreshToken !== token) {
-      throw new Error("Invalid refresh token");
-    }
-
-    const user = await User.findById(decoded.id);
-    const accessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
-
-    tokenDoc.refreshToken = newRefreshToken;
-
-    const savedDoc = await tokenDoc.save();
-
-    console.log("Updated Token in DB:", savedDoc.refreshToken);
-
-    return { accessToken, newRefreshToken };
-  } catch (e) {
-    return { error: e.message };
+  if (!refreshToken) {
+    throw new Error("NO_TOKEN");
   }
+
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  const tokenDoc = await Token.findOne({ userId: decoded.id });
+
+  if (!tokenDoc || tokenDoc.refreshToken !== refreshToken) {
+    throw new Error("INVALID_TOKEN");
+  }
+
+  const user = await User.findById(decoded.id);
+  const accessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  tokenDoc.refreshToken = newRefreshToken;
+  await tokenDoc.save();
+
+  return { accessToken, newRefreshToken };
 };
 
 exports.logoutService = async (req, res) => {
