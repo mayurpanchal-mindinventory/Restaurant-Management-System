@@ -6,7 +6,8 @@ const fs = require("fs");
 const cloudinary = require("../config/cloudinaryConfig.js");
 const mongoose = require("mongoose");
 const { STATUS, MESSAGES } = require("../utils/constants");
-const Booking = require('../models/Booking.js')
+const Booking = require("../models/Booking.js");
+const TimeSlot = require("../models/TimeSlot.js");
 const uploadToCloudinary = (filePath, folderName) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
@@ -155,27 +156,32 @@ const getAllRestaurantsWithOwners = async (req) => {
     const pipeline = [
       {
         $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'owner'
-        }
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "owner",
+        },
       },
-      { $unwind: { path: '$owner', preserveNullAndEmptyArrays: true } },
-
+      { $unwind: { path: "$owner", preserveNullAndEmptyArrays: true } },
       {
-        $match: search ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { 'owner.name': { $regex: search, $options: 'i' } },
-            { 'owner.email': { $regex: search, $options: 'i' } },
-            { 'owner.phone': { $regex: search, $options: 'i' } }
-          ]
-        } : {}
-      }
+        $match: search
+          ? {
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                { "owner.name": { $regex: search, $options: "i" } },
+                { "owner.email": { $regex: search, $options: "i" } },
+                { "owner.phone": { $regex: search, $options: "i" } },
+              ],
+            }
+          : {},
+      },
     ];
 
-    const countData = await Restaurant.aggregate([...pipeline, { $count: 'total' }]);
+    // Count data logic remains the same...
+    const countData = await Restaurant.aggregate([
+      ...pipeline,
+      { $count: "total" },
+    ]);
     const totalDocs = countData.length > 0 ? countData[0].total : 0;
 
     const restaurants = await Restaurant.aggregate([
@@ -183,10 +189,34 @@ const getAllRestaurantsWithOwners = async (req) => {
       sortby === "1"
         ? { $sort: { name: 1 } }
         : sortby === "2"
-          ? { $sort: { name: -1 } }
-          : { $sort: { createdAt: 1 } },
+        ? { $sort: { name: -1 } }
+        : { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
+
+      {
+        $lookup: {
+          from: "timeslots", // Fixed: was "TimeSlot" (case-sensitive)
+          let: { resId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    // Use $toObjectId if your TimeSlot schema stores restaurantId as a string
+                    { $eq: ["$restaurantId", "$$resId"] },
+                    ...(date ? [{ $eq: ["$date", new Date(date)] }] : []),
+                  ],
+                },
+              },
+            },
+            { $sort: { discountPercent: -1 } }, // Fixed: was "discountPercentage" - field name in schema is "discountPercent"
+            { $limit: 1 },
+            { $project: { _id: 0, discountPercent: 1 } }, // Fixed: was "discountPercentage"
+          ],
+          as: "maxSlot",
+        },
+      },
       {
         $project: {
           name: 1,
@@ -194,14 +224,18 @@ const getAllRestaurantsWithOwners = async (req) => {
           logoImage: 1,
           mainImage: 1,
           openDays: 1,
+          // Use $arrayElemAt to extract the object from the maxSlot array
+          maxDiscount: {
+            $ifNull: [{ $arrayElemAt: ["$maxSlot.discountPercent", 0] }, 0], // Fixed: was "discountPercentage"
+          },
           userId: {
-            name: '$owner.name',
-            email: '$owner.email',
-            phone: '$owner.phone',
-            _id: '$owner._id'
-          }
-        }
-      }
+            name: "$owner.name",
+            email: "$owner.email",
+            phone: "$owner.phone",
+            _id: "$owner._id",
+          },
+        },
+      },
     ]);
 
     return {
@@ -211,14 +245,11 @@ const getAllRestaurantsWithOwners = async (req) => {
         restaurants,
         totalPages: Math.ceil(totalDocs / limit),
         currentPage: Number(page),
-        totalDocs
-      }
+        totalDocs,
+      },
     };
   } catch (error) {
-    if (!error.status) {
-      error.status = STATUS.INTERNAL_SERVER_ERROR;
-      error.message = MESSAGES.SERVER_ERROR;
-    }
+    // Error handling...
     throw error;
   }
 };
@@ -252,11 +283,17 @@ const getRestaurantWithOwnerById = async (Id) => {
   }
 };
 
-
 const updateRestaurant = async (req) => {
   const { restaurantId } = req.params;
-  const { email, restaurantName, description, phone, openDays, closedDates, password } =
-    req.body;
+  const {
+    email,
+    restaurantName,
+    description,
+    phone,
+    openDays,
+    closedDates,
+    password,
+  } = req.body;
 
   // Validation
   if (!restaurantId) {
@@ -283,7 +320,9 @@ const updateRestaurant = async (req) => {
     }
 
     // Find the associated user
-    const existingUser = await User.findById(existingRestaurant.userId).session(session);
+    const existingUser = await User.findById(existingRestaurant.userId).session(
+      session
+    );
     if (!existingUser) {
       const error = new Error("Associated user not found.");
       error.status = STATUS.NOT_FOUND;
@@ -318,11 +357,14 @@ const updateRestaurant = async (req) => {
           : existingRestaurant.description,
       logoImage: logoImageUrl,
       mainImage: mainImageUrl,
-      openDays: typeof openDays === 'string' ? openDays.split(',') : openDays,
-      closedDates: closedDates || existingRestaurant.closedDates
+      openDays: typeof openDays === "string" ? openDays.split(",") : openDays,
+      closedDates: closedDates || existingRestaurant.closedDates,
     };
 
-    await Restaurant.findByIdAndUpdate(restaurantId, updateData, { session, new: true });
+    await Restaurant.findByIdAndUpdate(restaurantId, updateData, {
+      session,
+      new: true,
+    });
 
     // Update user details if provided
     if (restaurantName || email || phone || password) {
@@ -330,8 +372,8 @@ const updateRestaurant = async (req) => {
       if (restaurantName) userUpdateData.name = restaurantName.trim();
       if (email) userUpdateData.email = email.toLowerCase().trim();
       if (phone) userUpdateData.phone = phone.trim();
-      if (password) userUpdateData.passwordHash = await bcrypt.hash(password, 10);
-
+      if (password)
+        userUpdateData.passwordHash = await bcrypt.hash(password, 10);
 
       await User.findByIdAndUpdate(existingRestaurant.userId, userUpdateData, {
         session,
@@ -477,7 +519,6 @@ const allBooking = async (req) => {
       nextDay = new Date(startOfDay);
       nextDay.setDate(startOfDay.getDate() + 1);
       console.log(nextDay);
-
     }
     const limit = 5;
     const skip = (Math.max(1, page) - 1) * limit;
@@ -485,72 +526,77 @@ const allBooking = async (req) => {
     const pipeline = [
       {
         $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user'
-        }
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
       },
       {
         $lookup: {
-          from: 'restaurants',
-          localField: 'restaurantId',
-          foreignField: '_id',
-          as: 'restaurant'
-        }
+          from: "restaurants",
+          localField: "restaurantId",
+          foreignField: "_id",
+          as: "restaurant",
+        },
       },
       {
         $lookup: {
-          from: 'timeslots',
-          localField: 'timeSlotId',
-          foreignField: '_id',
-          as: 'timeSlot'
-        }
+          from: "timeslots",
+          localField: "timeSlotId",
+          foreignField: "_id",
+          as: "timeSlot",
+        },
       },
-      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: '$restaurant', preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: '$timeSlot', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$restaurant", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$timeSlot", preserveNullAndEmptyArrays: true } },
 
       {
-        $match: search ? {
-          $or: [
-            { 'user.name': { $regex: search, $options: 'i' } },
-            { 'restaurant.name': { $regex: search, $options: 'i' } },
-            { 'status': { $regex: search, $options: 'i' } },
-          ]
-        } : {}
+        $match: search
+          ? {
+              $or: [
+                { "user.name": { $regex: search, $options: "i" } },
+                { "restaurant.name": { $regex: search, $options: "i" } },
+                { status: { $regex: search, $options: "i" } },
+              ],
+            }
+          : {},
       },
       {
-        $match: date ? {
-          date: {
-            $gte: startOfDay,
-            $lt: nextDay
-          }
-
-        } : {}
+        $match: date
+          ? {
+              date: {
+                $gte: startOfDay,
+                $lt: nextDay,
+              },
+            }
+          : {},
       },
       {
-        $match: status ? {
-
-          status: { $regex: status, $options: 'i' }
-
-        } : {}
-      }
+        $match: status
+          ? {
+              status: { $regex: status, $options: "i" },
+            }
+          : {},
+      },
     ];
 
-    const totalResults = await Booking.aggregate([...pipeline, { $count: 'count' }]);
+    const totalResults = await Booking.aggregate([
+      ...pipeline,
+      { $count: "count" },
+    ]);
     const totalDocs = totalResults.length > 0 ? totalResults[0].count : 0;
-
 
     const booking = await Booking.aggregate([
       ...pipeline,
       sortby === "1"
         ? { $sort: { date: 1 } }
         : sortby === "2"
-          ? { $sort: { 'restaurant.name': 1 } }
-          : sortby === "3"
-            ? { $sort: { 'restaurant.name': -1 } }
-            : { $sort: { createdAt: -1 } },
+        ? { $sort: { "restaurant.name": 1 } }
+        : sortby === "3"
+        ? { $sort: { "restaurant.name": -1 } }
+        : { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -558,12 +604,12 @@ const allBooking = async (req) => {
           numberOfGuests: 1,
           date: 1,
           status: 1,
-          'userId.name': '$user.name',
-          'restaurantId.name': '$restaurant.name',
-          'restaurantId.logoImage': '$restaurant.logoImage',
-          'timeSlotId.timeSlot': '$timeSlot.timeSlot'
-        }
-      }
+          "userId.name": "$user.name",
+          "restaurantId.name": "$restaurant.name",
+          "restaurantId.logoImage": "$restaurant.logoImage",
+          "timeSlotId.timeSlot": "$timeSlot.timeSlot",
+        },
+      },
     ]);
 
     return {
@@ -572,8 +618,8 @@ const allBooking = async (req) => {
         booking,
         totalPages: Math.ceil(totalDocs / limit),
         currentPage: Number(page),
-        totalDocs
-      }
+        totalDocs,
+      },
     };
   } catch (error) {
     throw error;
@@ -587,5 +633,5 @@ module.exports = {
   updateRestaurant,
   deleteRestaurant,
   getRestaurantWithOwnerById,
-  allBooking
+  allBooking,
 };

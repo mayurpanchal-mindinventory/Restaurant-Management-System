@@ -10,7 +10,6 @@ const subtleOrangeText = "text-orange-600";
 
 const RestaurantCard = ({ restaurant }) => {
   const staticRating = 4.5;
-  const staticDiscount = 20;
 
   return (
     <div className=" w-full bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:shadow-xl transition duration-300 border border-gray-100">
@@ -24,11 +23,10 @@ const RestaurantCard = ({ restaurant }) => {
             e.target.src = "via.placeholder.com";
           }}
         />
-
         <div
           className={`absolute top-3 left-3 ${subtleOrangeBg} ${subtleOrangeText} px-3 py-1 rounded-full text-xs font-bold shadow-md`}
         >
-          {staticDiscount}% OFF
+          {restaurant.maxDiscount}% OFF
         </div>
       </div>
 
@@ -51,7 +49,10 @@ const RestaurantCard = ({ restaurant }) => {
             </span>
           </div>
 
-          <NavLink to="/Home/restaurant" state={{ id: restaurant._id }}>
+          <NavLink
+            to="/Home/restaurant"
+            state={{ id: restaurant._id, discount: restaurant.maxDiscount }}
+          >
             <button
               className={`text-sm font-semibold ${brandColor} hover:text-orange-600 transition duration-200`}
             >

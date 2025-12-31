@@ -5,7 +5,6 @@ import {
 } from "../services/adminService";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Star,
   Clock,
   Calendar,
   Phone,
@@ -15,9 +14,6 @@ import {
   Calendar as CalendarIcon,
   Utensils,
   Camera,
-  MessageSquare,
-  CheckCircle,
-  AlertCircle,
   Loader2,
   LayoutDashboard,
 } from "lucide-react";
@@ -25,95 +21,6 @@ import { toast } from "react-hot-toast";
 import MenuDetails from "../components/MenuDetails";
 import { useSelector } from "react-redux";
 import { createBookings } from "../services/userService";
-
-// Success SVG Component
-const SuccessAnimation = ({ isVisible, onComplete }) => {
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        onComplete();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, onComplete]);
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center transform animate-bounce">
-        <div className="mb-6">
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 120 120"
-            className="mx-auto"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r="50"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="4"
-              className="animate-pulse"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="40"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="3"
-              strokeDasharray="251.2"
-              strokeDashoffset="251.2"
-              className="animate-[draw_2s_ease-in-out_forwards]"
-              style={{
-                animation: "draw 2s ease-in-out forwards",
-              }}
-            />
-            <path
-              d="M40 60 L52 72 L80 44"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="animate-[check_0.5s_ease-in-out_2s_forwards]"
-              style={{
-                strokeDasharray: "100",
-                strokeDashoffset: "100",
-                animation: "check 0.5s ease-in-out 2s forwards",
-              }}
-            />
-          </svg>
-        </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">
-          Booking Successful! 🎉
-        </h3>
-        <p className="text-gray-600 mb-4">
-          Your restaurant has been booked successfully. You'll receive a
-          confirmation shortly.
-        </p>
-        <div className="flex justify-center">
-          <CheckCircle className="w-8 h-8 text-green-500 animate-pulse" />
-        </div>
-      </div>
-      <style jsx>{`
-        @keyframes draw {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        @keyframes check {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
 
 function RestoDetails() {
   //for slot manage with date
@@ -124,13 +31,14 @@ function RestoDetails() {
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.state?.id;
+  const disCount = location.state?.discount;
+  // console.log(location.state?.discount);
   const [timeSlots, setTimeSlots] = useState([]);
   const [resto, setResto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const userString = localStorage.getItem("user");
   const userData = JSON.parse(userString);
   const userId = userData.user.id;
@@ -142,6 +50,12 @@ function RestoDetails() {
     numberOfGuests: 2,
     date: "",
   });
+  // Calculate remaining seats based on selected slot and current guest count
+  const getRemainingSeats = () => {
+    if (!selectedSlot) return 0;
+    return selectedSlot.maxBookings - bookingData.numberOfGuests;
+  };
+
   const validateBookingData = () => {
     if (!bookingData.date) {
       toast.error("Please select a booking date");
@@ -153,6 +67,13 @@ function RestoDetails() {
     }
     if (bookingData.numberOfGuests < 1 || bookingData.numberOfGuests > 20) {
       toast.error("Number of guests must be between 1 and 20");
+      return false;
+    }
+    const remainingSeats = getRemainingSeats();
+    if (remainingSeats < 0) {
+      toast.error(
+        `Only ${selectedSlot.maxBookings} seats available for this slot`
+      );
       return false;
     }
     const selectedDate = new Date(bookingData.date);
@@ -190,10 +111,16 @@ function RestoDetails() {
       const result = await createBookings(bookingData);
 
       if (result.data) {
-        setShowSuccessAnimation(true);
         toast.success("Restaurant booked successfully!", {
           duration: 5000,
           icon: "🎉",
+        });
+        setBookingData({
+          userId: userId,
+          restaurantId: id,
+          timeSlotId: "",
+          numberOfGuests: 2,
+          date: "",
         });
       }
     } catch (error) {
@@ -209,18 +136,6 @@ function RestoDetails() {
     } finally {
       setBookingLoading(false);
     }
-  };
-
-  const handleSuccessAnimationComplete = () => {
-    setShowSuccessAnimation(false);
-
-    setBookingData({
-      userId: userId,
-      restaurantId: id,
-      timeSlotId: "",
-      numberOfGuests: 2,
-      date: "",
-    });
   };
 
   useEffect(() => {
@@ -378,29 +293,14 @@ function RestoDetails() {
         </div>
 
         {/* Rating - Bottom Right */}
-        <div className="absolute bottom-6 right-6 bg-white bg-opacity-95 px-6 py-3 rounded-xl shadow-lg">
+        <div className="absolute bottom-6 right-6 bg-transparent bg-opacity-95 px-6 py-3 rounded-xl shadow-lg">
           <div className="flex items-center space-x-3">
-            <Star className="w-6 h-6 text-orange-500 fill-current" />
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-xl text-gray-800">
-                  {staticRating}
+              <div className="absolute top-0 right-4 bg-white rounded-full shadow-lg px-4 py-2 flex items-center gap-2">
+                <span className="text-orange-500 font-bold text-xl">
+                  {disCount}%
                 </span>
-                <span className="text-gray-600">
-                  ({staticReviewCount} reviews)
-                </span>
-              </div>
-              <div className="flex items-center space-x-1 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= staticRating
-                        ? "text-orange-500 fill-current"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
+                <span className="text-gray-600 text-sm font-medium">OFF</span>
               </div>
             </div>
           </div>
@@ -440,7 +340,7 @@ function RestoDetails() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                      About {resto.name}
+                      About <span className="underline">{resto.name}</span>{" "}
                     </h3>
                     <p className="text-gray-600 text-lg leading-relaxed">
                       {resto.description ||
@@ -482,7 +382,15 @@ function RestoDetails() {
                         </h4>
                       </div>
                       <p className="text-gray-600">
-                        {formatClosedDates(resto.closedDates)}
+                        {formatClosedDates(
+                          resto.closedDates.filter((date) => {
+                            const closedDate = new Date(date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+
+                            return closedDate >= today;
+                          })
+                        )}
                       </p>
                     </div>
                   </div>
@@ -622,8 +530,9 @@ function RestoDetails() {
                     </div>
                     <button
                       disabled={
+                        bookingData.numberOfGuests >= 20 ||
                         bookingData.numberOfGuests + 1 >
-                        selectedSlot?.maxBookings
+                          selectedSlot?.maxBookings
                       }
                       onClick={() =>
                         setBookingData({
@@ -631,20 +540,31 @@ function RestoDetails() {
                           numberOfGuests: bookingData.numberOfGuests + 1,
                         })
                       }
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition duration-200 ${
+                        bookingData.numberOfGuests >= 20 ||
+                        bookingData.numberOfGuests + 1 >
+                          selectedSlot?.maxBookings
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      }`}
                     >
                       +
                     </button>
                     {selectedSlot ? (
                       <p
                         className={
-                          selectedSlot?.maxBookings <= 10
-                            ? "text-red-600"
+                          getRemainingSeats() <= 5
+                            ? "text-red-600 font-semibold"
+                            : getRemainingSeats() <= 10
+                            ? "text-orange-600 font-medium"
                             : "text-green-600"
                         }
                       >
-                        {" "}
-                        {selectedSlot?.maxBookings} slot left
+                        {getRemainingSeats() > 0
+                          ? `${getRemainingSeats()} seat${
+                              getRemainingSeats() !== 1 ? "s" : ""
+                            } remaining`
+                          : "No seats available"}
                       </p>
                     ) : (
                       <p></p>
@@ -673,11 +593,6 @@ function RestoDetails() {
           </div>
         </div>
       </div>
-
-      <SuccessAnimation
-        isVisible={showSuccessAnimation}
-        onComplete={handleSuccessAnimationComplete}
-      />
     </div>
   );
 }
