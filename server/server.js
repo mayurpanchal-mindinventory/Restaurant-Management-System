@@ -19,7 +19,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://192.168.1.213:5173",
-  "http://192.168.1.213:5173/api/auth", // Replace with your exact network IP
+  "http://192.168.1.214:5173",
+  "http://192.168.1.213:5173", // Replace with your exact network IP
 ];
 
 app.use(
