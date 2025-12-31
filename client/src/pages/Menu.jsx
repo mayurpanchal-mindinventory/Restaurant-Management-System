@@ -62,7 +62,7 @@ export default function Menu() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-gray-50 pb-20 ">
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -86,8 +86,7 @@ export default function Menu() {
             >
                 {({ setFieldValue, isSubmitting }) => (
                     <Form>
-                        {/* Action Header */}
-                        <header className="bg-white border-b border-gray-200 sticky top-0 z-30 px-6 py-4 mb-8 shadow-sm">
+                        <header className="bg-white border-b border-gray-200 md:sticky top-20 z-30 px-6 py-4 mb-8 shadow-sm">
                             <div className="max-w-4xl mx-auto flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <button

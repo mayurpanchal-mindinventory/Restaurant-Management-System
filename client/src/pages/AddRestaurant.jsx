@@ -93,8 +93,14 @@ export default function RestaurantForm() {
                 {({ setFieldValue, values, isSubmitting }) => (
                     <Form className="flex-1 flex flex-col">
                         <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
-                            <div className="flex text-orange-500 items-center gap-4">
-                                <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                            <div className="flex text-gray-500 items-center gap-4">
+                                {/* <button type="button" onClick={() => navigate(-1)} className="p-2">
+                                    <FiArrowLeft size={20} className="hover:text-indigo-700" />
+                                </button> */}
+                                <button type="button"
+                                    onClick={() => navigate(-1)}
+                                    className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                                >
                                     <FiArrowLeft size={20} />
                                 </button>
                                 <h1 className="text-xl font-bold text-gray-800">

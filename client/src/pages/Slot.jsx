@@ -72,10 +72,9 @@ function Slot() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] p-6">
-            <div className="max-w-6xl mx-auto space-y-6">
+        <div className="min-h-screen">
+            <div className={`max-w-6xl mx-auto ${!showModal && `space-y-6`}`}>
 
-                {/* Top Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <button
@@ -91,15 +90,14 @@ function Slot() {
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-slate-200"
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-slate-200"
                     >
                         <PlusIcon className="w-5 h-5" /> Add New Slot
                     </button>
                 </div>
 
-                {/* Filters Panel */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-end">
-                    <div className="flex-1 space-y-1.5">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col w-full md:flex-row gap-4 items-end">
+                    <div className="flex-1 w-full">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">View Schedule</label>
                         <select
                             value={sortby}
@@ -113,7 +111,7 @@ function Slot() {
                         </select>
                     </div>
 
-                    <div className="flex-1 space-y-1.5">
+                    <div className="flex-1 w-full">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Filter by Time</label>
                         <select
                             value={selectedSlot}
@@ -128,7 +126,6 @@ function Slot() {
                     </div>
                 </div>
 
-                {/* Slots Table */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -173,7 +170,6 @@ function Slot() {
                     </table>
                 </div>
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                         <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -244,7 +240,6 @@ function Slot() {
                     </div>
                 )}
 
-                {/* Pagination */}
                 <div className="flex items-center justify-between pt-4">
                     <button disabled={currentpage === 1} onClick={() => setcurrentpage(p => p - 1)} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 shadow-sm transition-all">Previous</button>
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Page {currentpage} / {totalPages}</span>
