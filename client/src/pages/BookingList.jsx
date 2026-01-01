@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getAllBooking } from "../services/adminService";
 import {
-  FiFilter,
   FiCalendar,
-  FiSearch,
   FiRefreshCw,
   FiChevronLeft,
   FiChevronRight,
   FiInbox,
-  FiUser,
   FiClock
 } from "react-icons/fi";
 
@@ -31,7 +28,6 @@ function BookingList() {
     Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
   };
 
-  // Restored your exact functionality logic
   const bookingList = async (sr = sortby, s = status, d = date) => {
     if (prevStatusRef.current !== status) {
       setcurrentpage(1);
@@ -61,7 +57,6 @@ function BookingList() {
     bookingList();
   }, [currentpage]);
 
-  // Restored exact clearfilter functionality
   const clearfilter = () => {
     if (prevStatusRef.current !== "" || prevDateRef.current !== "") {
       setStatus("");
@@ -81,7 +76,6 @@ function BookingList() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 ">
-      {/* Header & Search */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Booking List</h1>
@@ -99,7 +93,6 @@ function BookingList() {
         </div>
       </div>
 
-      {/* Advanced Filter Bar - UI Polished but functionality preserved */}
       <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
         <div className="grid grid-cols-1  lg:grid-cols-4 gap-3">
           <div>
@@ -166,7 +159,6 @@ function BookingList() {
         </div>
       </div>
 
-      {/* Content Section */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -224,8 +216,8 @@ function BookingList() {
                       <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
                         <FiInbox className="text-slate-300" size={32} />
                       </div>
-                      <h3 className="text-slate-900 font-bold">No items found</h3>
-                      <p className="text-slate-500 text-xs mt-1 leading-relaxed">
+                      <h3 className="text-slate-900 font-bold">No Bookings found</h3>
+                      <p className="text-slate-500 text-xs mt-1">
                         Try adjusting your filters or search terms to find what you're looking for.
                       </p>
                     </div>

@@ -54,7 +54,6 @@ function Restaurant() {
         </Link>
       </div>
 
-      {/* Filters Bar */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
         <div className="relative w-full md:w-96">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -79,7 +78,6 @@ function Restaurant() {
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -161,7 +159,6 @@ function Restaurant() {
           </table>
         </div>
 
-        {/* Pagination */}
         {restaurant.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50/50 flex items-center justify-between">
             <p className="text-sm text-gray-600">

@@ -86,8 +86,8 @@ export default function Menu() {
             >
                 {({ setFieldValue, isSubmitting }) => (
                     <Form>
-                        <header className="bg-white border-b border-gray-200 md:sticky top-20 z-30 px-6 py-4 mb-8 shadow-sm">
-                            <div className="max-w-4xl mx-auto flex items-center justify-between">
+                        <header className="max-w-7xl mx-auto p-4 md:py-4 md:px-8 space-y-6 bg-white">
+                            <div className="max-w-7xl flex  justify-between">
                                 <div className="flex items-center gap-4">
                                     <button
                                         type="button"
@@ -110,8 +110,7 @@ export default function Menu() {
                             </div>
                         </header>
 
-                        <main className="max-w-3xl mx-auto px-6 space-y-8">
-                            {/* General Details Section */}
+                        <main className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
                             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-2">
@@ -158,7 +157,6 @@ export default function Menu() {
                                 </div>
                             </div>
 
-                            {/* Image Upload Section */}
                             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-4">
                                 <label className="text-xs font-black uppercase tracking-widest text-gray-400">Media Upload</label>
 

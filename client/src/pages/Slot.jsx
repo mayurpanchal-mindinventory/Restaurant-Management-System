@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from "yup";
 import { PencilIcon, TrashIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { FiArrowLeft, FiFilter, FiCalendar, FiClock, FiPercent, FiUsers } from "react-icons/fi";
+import { FiArrowLeft, FiCalendar, FiClock, FiPercent, FiUsers } from "react-icons/fi";
 import { toast } from 'react-hot-toast';
 import { useConfirm } from "../context/ConfirmationContext";
 import {
@@ -119,7 +119,7 @@ function Slot() {
                             className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                         >
                             <option value="">Any Time</option>
-                            {["10:00 AM - 11:00 AM", "12:00 PM - 01:00 PM", "02:00 PM - 03:00 PM", "04:00 PM - 05:00 PM"].map(t => (
+                            {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"].map(t => (
                                 <option key={t} value={t}>{t}</option>
                             ))}
                         </select>
@@ -213,8 +213,10 @@ function Slot() {
                                             <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiClock /> Time Range</label>
                                             <Field as="select" name="timeslot" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                                                 <option value="">Select Time</option>
-                                                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                                                <option value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
+                                                {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"].map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
+
                                             </Field>
                                             <ErrorMessage name="timeslot" component="p" className="text-rose-500 text-[10px] font-bold" />
                                         </div>

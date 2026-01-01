@@ -77,7 +77,6 @@ function MenuList() {
           </Link>
         </div>
 
-        {/* Professional Filter Bar */}
         <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Search Item</label>
@@ -127,7 +126,6 @@ function MenuList() {
           </button>
         </div>
 
-        {/* Table Section */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -198,7 +196,6 @@ function MenuList() {
             </table>
           </div>
 
-          {/* Pagination */}
           {menulist.length > 0 && (
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
               <span className="text-xs font-bold text-gray-500 uppercase">

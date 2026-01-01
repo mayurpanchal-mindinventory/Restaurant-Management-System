@@ -58,7 +58,7 @@ export default function AdminLayout() {
       </nav>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="hidden md:flex flex-col px-8 py-6 bg-white border-b border-slate-200 sticky top-0">
+        <header className="hidden md:flex flex-col px-8 py-6 bg-white border-b border-slate-200 sticky z-10 top-0">
           <h1 className="text-lg font-bold text-slate-900">
             {pathname === "/admin" ? "Restaurants" : pathname === "/admin/bookingList" ? "Bookings" : "Dashboard"}
           </h1>
@@ -68,7 +68,7 @@ export default function AdminLayout() {
         </header>
 
         <main className="flex-1 p-4 md:p-8">
-          <div className="min-h-full p-4 md:p-8">
+          <div className="min-h-full">
             <Outlet />
           </div>
         </main>
