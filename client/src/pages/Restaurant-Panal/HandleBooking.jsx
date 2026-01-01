@@ -380,10 +380,10 @@ function HanldeBooking(params) {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.date
                           ? new Date(booking.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                           : "N/A"}
                       </div>
                     </td>
@@ -442,10 +442,11 @@ function HanldeBooking(params) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                          }`}
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                          isBillGenerated(booking)
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}
                       </span>
