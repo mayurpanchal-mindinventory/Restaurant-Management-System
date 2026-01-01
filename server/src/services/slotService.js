@@ -22,10 +22,10 @@ exports.createSlot = async (data) => {
 exports.slotList = async (req) => {
   try {
     const { id } = req.params;
-    limit = 5;
-    if (!id) throw new Error("Resaurant Id Required");
+    let limit = 40;
+    if (!id) throw new Error("Restaurant Id Required");
     let { page, sortby, timeslot } = req.query;
-    if (!page) page = 1;
+    if (!page) { page = 1; }
     if (sortby) {
       if (sortby == "2") {
         startOfDay = new Date(new Date().toISOString().split("T")[0]);

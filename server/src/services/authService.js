@@ -8,7 +8,9 @@ const {
   generateRefreshToken,
 } = require("../utils/generateToken");
 
+
 exports.registerService = async (data) => {
+
   const { name, email, phone, password, role } = data;
   console.log();
   const exists = await User.findOne({ email });

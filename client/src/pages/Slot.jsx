@@ -129,15 +129,12 @@ function Slot() {
                         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Time Slots</label>
                         <select id="category" name="category"
                             onChange={(e) => setSelectedSlot(e.target.value)}
-                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <option value="">All</option>
-                            <option key="10-11" value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                            <option key="11-12" value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                            <option key="12-13" value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
-                            <option key="13-14" value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
-                            <option key="14-15" value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                            <option key="15-16" value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
-                            <option key="16-17" value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                        >
+                            <option value="">Any Time</option>
+                            {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM", "06:00 PM - 07:00 PM"].map(t => (
+                                <option key={t} value={t}>{t}</option>
+                            ))}
                         </select>
                     </div>
                     {/* <div>
@@ -206,102 +203,58 @@ function Slot() {
                                 <span>page {currentpage} of {totalPages}</span>
                             </div>
 
-                            <button className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
-                        </div>
-                    }
-                </div>) : (<div className="text-center py-20">
-                    <FiFilter className="mx-auto mb-4" size={48} color="gray" />
-                    <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                        No Slots found
-                    </h3>
-                    <p className="text-gray-500">
-                        Try adjusting your filters or search terms
-                    </p>
-                </div>)
-            }
-            {
-                showModal && (
-                    <Formik
-                        initialValues={initialValues} enableReinitialize={true}
-                        validationSchema={validationSchema}
-                        onSubmit={async (values) => {
-                            try {
+                            <Formik
+                                initialValues={initialValues}
+                                validationSchema={validationSchema}
+                                enableReinitialize
+                                onSubmit={async (values) => {
+                                    const data = {
+                                        timeSlot: values.timeslot,
+                                        maxBookings: values.maxbooking,
+                                        discountPercent: values.discount,
+                                        date: values.date,
+                                        restaurantId: id
+                                    };
+                                    try {
+                                        detail ? await updateSlot(detail._id, data) : await createSlot(data);
+                                        toast.success(`Slot ${detail ? 'updated' : 'added'}`);
+                                        closeModal();
+                                        getSlotList();
+                                    } catch (e) {
+                                        toast.error("Process failed");
+                                    }
+                                }}
+                            >
+                                <Form className="p-6 space-y-5">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiCalendar /> Date</label>
+                                            <Field name="date" type="date" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
+                                            <ErrorMessage name="date" component="p" className="text-rose-500 text-[10px] font-bold" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiClock /> Time Range</label>
+                                            <Field as="select" name="timeslot" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                                                <option value="">Select Time</option>
+                                                {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM", "06:00 PM - 07:00 PM"].map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
 
-                                const formdata = {
-                                    "restaurantId": id,
-                                    "timeSlot": values.timeslot,
-                                    "maxBookings": values.maxbooking,
-                                    "discountPercent": Number(values.discount),
-                                    "date": values.date
-                                }
+                                            </Field>
+                                            <ErrorMessage name="timeslot" component="p" className="text-rose-500 text-[10px] font-bold" />
+                                        </div>
+                                    </div>
 
-
-
-                                if (!detail) {
-                                    const res = await createSlot(formdata);
-                                    if (res)
-                                        toast.success("Slot Created");
-                                } else {
-                                    const res = await updateSlot(detail._id, formdata);
-                                    toast.success("Slot information Updated");
-                                }
-                                setShowModal(false);
-                                setDetail(null)
-
-                                getSlotList();
-                            } catch (e) {
-                                toast.error(e.response?.data?.error || e.message);
-                            }
-
-                        }}
-
-                    >
-                        {({ values }) => (<Form className="fixed inset-0 bg-black/40 flex items-center text-black justify-center">
-
-                            <div className="bg-white w-96 rounded-xl shadow-lg p-6">
-                                <h2 className="text-xl font-semibold mb-4">Add Time Slot</h2>
-
-                                <div className="space-y-4">
-                                    <Field
-                                        name="date"
-                                        type="date"
-                                        min={todayDate}
-                                        className="w-full border rounded-lg p-2"
-                                        placeholder="Slot Date"
-                                    />
-                                    <ErrorMessage name="date" component="p" className="text-red-500 text-sm" />
-
-                                    <label className="block mb-2.5 text-sm font-medium text-heading">Select an option</label>
-                                    <Field name="timeslot" as="select" className="block w-full px-3 bg-white py-2.5 border rounded-md text-heading text-sm focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
-                                        <option value="">Choose a Time Slot</option>
-                                        <option key="10-11" value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                                        <option key="11-12" value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                                        <option key="12-13" value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
-                                        <option key="13-14" value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
-                                        <option key="14-15" value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                                        <option key="15-16" value="02:00 PM - 03:00 PM">03:00 PM - 04:00 PM</option>
-                                        <option key="16-17" value="02:00 PM - 03:00 PM">04:00 PM - 05:00 PM</option>
-
-                                    </Field >
-                                    <ErrorMessage name="timeslot" component="p" className="text-red-500 text-sm" />
-
-                                    <Field
-                                        name="maxbooking"
-                                        type="number"
-                                        className="w-full border rounded-lg p-2"
-                                        placeholder="Max Bookings"
-                                    />
-                                    <ErrorMessage name="maxbooking" component="p" className="text-red-500 text-sm" />
-
-                                    <Field
-                                        name="discount"
-                                        type="number"
-                                        className="w-full border rounded-lg p-2"
-                                        placeholder="Discount %"
-                                    />
-                                    <ErrorMessage name="discount" component="p" className="text-red-500 text-sm" />
-
-                                </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiUsers /> Max Bookings</label>
+                                            <Field name="maxbooking" type="number" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiPercent /> Discount</label>
+                                            <Field name="discount" type="number" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        </div>
+                                    </div>
 
                                 <div className="flex justify-end gap-3 mt-6">
                                     <button

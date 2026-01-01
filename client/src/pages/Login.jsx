@@ -96,11 +96,8 @@ function Login() {
     try {
       await dispatch(loginUser(credentials)).unwrap();
     } catch (err) {
-      console.error("Login failed:", err);
 
-      toast.error(
-        "There was an error while logging in. Please check your credentials and try again."
-      );
+      toast.error(err.response.data.error || "There was an error while logging in. Please check your credentials and try again.");
     }
   };
 

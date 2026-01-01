@@ -47,6 +47,13 @@ const createMenu = async (req) => {
     throw error;
   }
 
+  const existMenu = await MenuItem.findOne({ name: name, restaurantId: restaurantId });
+  if (existMenu) {
+    const error = new Error("Menu with same name exist.");
+    error.status = STATUS.BAD_REQUEST;
+    throw error;
+  }
+
   const mainFile = req.files["image"] ? req.files["image"][0] : null;
 
   const session = await mongoose.startSession();
@@ -137,13 +144,13 @@ const getAllMenusByRestaurant = async (req) => {
       {
         $match: search
           ? {
-              $or: [
-                { name: { $regex: search, $options: "i" } },
-                {
-                  "categories.categoryName": { $regex: search, $options: "i" },
-                },
-              ],
-            }
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              {
+                "categories.categoryName": { $regex: search, $options: "i" },
+              },
+            ],
+          }
           : {},
       },
     ];
@@ -158,10 +165,10 @@ const getAllMenusByRestaurant = async (req) => {
       sortby === "1"
         ? { $sort: { price: -1 } }
         : sortby === "2"
-        ? { $sort: { price: 1 } }
-        : sortby === "3"
-        ? { $sort: { name: 1 } }
-        : { $sort: { name: -1 } },
+          ? { $sort: { price: 1 } }
+          : sortby === "3"
+            ? { $sort: { name: 1 } }
+            : { $sort: { name: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -177,12 +184,12 @@ const getAllMenusByRestaurant = async (req) => {
       },
       ...(category
         ? [
-            {
-              $match: {
-                "categoryId._id": new mongoose.Types.ObjectId(category),
-              },
+          {
+            $match: {
+              "categoryId._id": new mongoose.Types.ObjectId(category),
             },
-          ]
+          },
+        ]
         : []),
     ]);
     return {
@@ -315,11 +322,14 @@ const updateMenuById = async (req) => {
     };
     throw error;
   }
+
   if (!name.trim()) {
     const error = new Error("Menu name cannot be empty or just whitespace.");
     error.status = STATUS.BAD_REQUEST;
     throw error;
   }
+
+
 
   const mainFile = req.files["image"] ? req.files["image"][0] : null;
 
@@ -327,6 +337,12 @@ const updateMenuById = async (req) => {
   session.startTransaction();
 
   try {
+    const existMenu = await MenuItem.findOne({ name: name });
+    if (existMenu) {
+      const error = new Error("Menu with same name exist.");
+      error.status = STATUS.BAD_REQUEST;
+      throw error;
+    }
     const existingMenu = await MenuItem.findById(id);
     console.log(existingMenu);
 

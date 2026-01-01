@@ -4,68 +4,79 @@ const User = require("../models/User.js");
 const Restaurant = require("../models/Restaurant.js");
 const { STATUS, MESSAGES } = require("../utils/constants.js");
 const MenuItem = require("../models/MenuItem.js");
+const TimeSlot = require("../models/TimeSlot.js");
 exports.getBookingByRestaurent = async (req) => {
   try {
     const userId = req.params.userId || req.user?.id;
 
     if (!userId) {
-      throw new Error("User ID is required");
+      const error = new Error("User ID is required");
+      error.status = 400;
+      throw error;
     }
 
     const restaurant = await Restaurant.findOne({ userId });
 
     if (!restaurant) {
-      throw new Error("Restaurant not found for this user");
+      const error = new Error("Restaurant not found for this user");
+      error.status = 404;
+      throw error;
     }
 
     const restaurantId = restaurant._id;
-
     const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-    const query = { restaurantId };
+    // Build the dynamic filter for the main list
+    const mainQuery = { restaurantId };
+
     if (req.query.status) {
-      query.status = req.query.status;
+      mainQuery.status = req.query.status;
     }
+
     if (req.query.date) {
-      query.date = req.query.date;
+      mainQuery.date = req.query.date;
     }
+
     if (req.query.search) {
-      //Find users matching the search string first very complex
-      //coz we dont have user name in booking so we need to get from user
       const users = await User.find({
         $or: [
           { name: { $regex: req.query.search, $options: "i" } },
           { email: { $regex: req.query.search, $options: "i" } },
         ],
-      }).select("_id"); // We only need the IDs to filter the Bookings
+      }).select("_id");
       const userIds = users.map((u) => u._id);
-      query.userId = { $in: userIds };
+      mainQuery.userId = { $in: userIds };
     }
 
-    const limit = 5;
-    const skip = (page - 1) * limit;
     const results = await Booking.aggregate([
-      // 1. Initial Filter (Applies to all counts and the data)
-      { $match: query },
-
       {
         $facet: {
-          // Branch 1: Paginated Booking Data
+          // Branch 1: Paginated & Filtered Data
           bookings: [
+            { $match: mainQuery },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
-            // Manual lookup since .populate() doesn't work directly in aggregate
             {
               $lookup: {
                 from: "users",
                 localField: "userId",
                 foreignField: "_id",
-                as: "userId",
+                as: "userDetails",
               },
             },
-            { $unwind: "$userId" },
-
+            {
+              $lookup: {
+                from: "timeslots",
+                localField: "timeSlotId",
+                foreignField: "_id",
+                as: "timeSlotDetails",
+              },
+            },
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: "$timeSlotDetails", preserveNullAndEmptyArrays: true } },
             {
               $project: {
                 numberOfGuests: 1,
@@ -74,53 +85,59 @@ exports.getBookingByRestaurent = async (req) => {
                 createdAt: 1,
                 hasGeneratedBill: 1,
                 billId: 1,
-                "userId.name": 1,
-                "userId.email": 1,
-                "userId._id": 1,
+                restaurantId: 1,
+                "timeSlotId": "$timeSlotDetails", // Mapping back to your preferred name
+                "userId": {
+                  _id: "$userDetails._id",
+                  name: "$userDetails.name",
+                  email: "$userDetails.email"
+                }
               },
             },
           ],
-          // Branch 2: Total Filtered Count
-          totalCount: [{ $count: "count" }],
-          // Branch 3: Specific Status Counts
+          // Branch 2: Total count for current filters (for pagination)
+          totalFilteredCount: [
+            { $match: mainQuery },
+            { $count: "count" }
+          ],
+          // Branch 3: Stats (Total Pending for this restaurant regardless of filter)
           pendingCount: [
-            { $match: { status: "Pending" } },
+            { $match: { restaurantId, status: "Pending" } },
             { $count: "count" },
           ],
+          // Branch 4: Stats (Total Completed for this restaurant regardless of filter)
           completedCount: [
-            { $match: { status: "Completed" } },
+            { $match: { restaurantId, status: "Completed" } },
             { $count: "count" },
           ],
         },
       },
     ]);
 
-    // Extracting values from the aggregate result
     const bookings = results[0].bookings;
-    const count = results[0].totalCount[0]?.count || 0;
-    const pendingCount = results[0].pendingCount[0]?.count || 0;
-    const completedCount = results[0].completedCount[0]?.count || 0;
+    const totalDocs = results[0].totalFilteredCount[0]?.count || 0;
+    const totalPending = results[0].pendingCount[0]?.count || 0;
+    const totalCompleted = results[0].completedCount[0]?.count || 0;
 
-    console.log({ bookings, count, pendingCount, completedCount });
-    //console.log({ search, status, date });
     return {
       success: true,
       message: "Bookings retrieved successfully",
       data: {
         bookings,
-        totalPages: Math.ceil(count / limit),
+        totalPages: Math.ceil(totalDocs / limit),
         currentPage: page,
-        totalDocs: count,
-        totalPending: pendingCount,
-        totalCompleted: completedCount,
+        totalDocs,
+        totalPending,
+        totalCompleted,
       },
     };
   } catch (error) {
-    if (!error.status) {
-      error.status = STATUS.INTERNAL_SERVER_ERROR;
-      error.message;
-    }
-    throw error;
+    // Ensure we send back a status and message
+    const statusCode = error.status || 500;
+    const message = error.message || "Internal Server Error";
+
+    // In a real app, you might want to log the error here
+    throw { status: statusCode, message: message };
   }
 };
 

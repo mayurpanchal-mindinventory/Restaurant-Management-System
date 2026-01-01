@@ -17,6 +17,7 @@ import {
 import { useSelector } from "react-redux";
 import { useToast } from "../../components/common/ToastProvider";
 import BillGeneration from "../../components/Restaurant-Panel/BillGeneration";
+import toast from "react-hot-toast";
 
 function HanldeBooking(params) {
   const [dataList, setdataList] = useState([]);
@@ -43,8 +44,18 @@ function HanldeBooking(params) {
   // Toast notification hook
   const { showSuccess, showError, showInfo } = useToast();
 
-  const handleStatusChange = async (bookingId, newStatus) => {
+  const handleStatusChange = async (bookingId, newStatus, date) => {
     try {
+      const now = new Date();
+      const todayDate = now.toLocaleDateString('en-CA');
+      const bookedDate = new Date(date).toLocaleDateString('en-CA');
+
+      if (newStatus === "Completed") {
+        if (todayDate < bookedDate) {
+          toast.error("Sorry, you cannot complete booking before the booked date");
+          return;
+        }
+      }
       await updateBookingStatus(bookingId, newStatus);
       setss(newStatus);
       showSuccess(`Booking status ${newStatus} updated successfully`);
@@ -183,7 +194,6 @@ function HanldeBooking(params) {
           </div>
         </div>
       </div>
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -201,6 +211,7 @@ function HanldeBooking(params) {
             </div>
           </div>
         </div>
+        {console.log(selectedBooking)}
 
         <div className="bg-white rounded-lg p-6 border border-gray-200">
           <div className="flex items-center justify-between">
@@ -294,8 +305,10 @@ function HanldeBooking(params) {
               onChange={handleChange}
             >
               <option value="">All Status</option>
-              <option value="Confirmed">Confirmed</option>
               <option value="Pending">Pending</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
 
@@ -380,10 +393,10 @@ function HanldeBooking(params) {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.date
                           ? new Date(booking.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
                           : "N/A"}
                       </div>
                     </td>
@@ -423,12 +436,11 @@ function HanldeBooking(params) {
                           className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
                           value={booking.status}
                           onChange={(e) =>
-                            handleStatusChange(booking._id, e.target.value)
+                            handleStatusChange(booking._id, e.target.value, booking.date)
                           }
                         >
                           {[
                             "Pending",
-                            "Confirmed",
                             "Accepted",
                             "Cancelled",
                             "Completed",
@@ -442,11 +454,10 @@ function HanldeBooking(params) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
-                          isBillGenerated(booking)
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                          }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}
                       </span>
