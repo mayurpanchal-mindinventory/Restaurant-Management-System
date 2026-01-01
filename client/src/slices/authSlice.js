@@ -49,7 +49,7 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, thunkAPI) => {
     try {
-      console.log(userData);
+      //  console.log(userData);
 
       const response = await apiClient.post("api/auth/register", userData);
 
@@ -121,7 +121,7 @@ const authSlice = createSlice({
           localStorage.setItem("user", JSON.stringify(action.payload));
           localStorage.setItem("token", action.payload.token);
 
-          console.log("User data stored in localStorage:", action.payload);
+          //console.log("User data stored in localStorage:", action.payload);
         }
 
         // Set user in state - handle both possible data structures

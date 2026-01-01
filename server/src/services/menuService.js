@@ -27,8 +27,8 @@ const getAllCategories = async () => {
 const createMenu = async (req) => {
   const { name, price, categoryId, restaurantId } = req.body;
 
-  console.log(req.body);
-  console.log(req.files["image"]);
+  // console.log(req.body);
+  // console.log(req.files["image"]);
 
   if (!name || !price || !categoryId || !restaurantId) {
     const error = new Error(
@@ -64,7 +64,7 @@ const createMenu = async (req) => {
     if (mainFile) {
       mainImageUrl = await uploadToCloudinary(mainFile.path, "menu_images");
     }
-    console.log("check " + mainImageUrl);
+    // console.log("check " + mainImageUrl);
 
     const menu = new MenuItem({
       categoryId: categoryId,
@@ -344,7 +344,7 @@ const updateMenuById = async (req) => {
       throw error;
     }
     const existingMenu = await MenuItem.findById(id);
-    console.log(existingMenu);
+    // console.log(existingMenu);
 
     let mainImageUrl = existingMenu.image;
     if (mainFile) {

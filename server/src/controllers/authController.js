@@ -7,7 +7,7 @@ const {
 const { STATUS } = require("../utils/constants");
 exports.register = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const user = await registerService(req.body);
     res.json({
       message: "User registered successfully",

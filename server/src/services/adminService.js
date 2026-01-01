@@ -166,13 +166,13 @@ const getAllRestaurantsWithOwners = async (req) => {
       {
         $match: search
           ? {
-              $or: [
-                { name: { $regex: search, $options: "i" } },
-                { "owner.name": { $regex: search, $options: "i" } },
-                { "owner.email": { $regex: search, $options: "i" } },
-                { "owner.phone": { $regex: search, $options: "i" } },
-              ],
-            }
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              { "owner.name": { $regex: search, $options: "i" } },
+              { "owner.email": { $regex: search, $options: "i" } },
+              { "owner.phone": { $regex: search, $options: "i" } },
+            ],
+          }
           : {},
       },
     ];
@@ -189,8 +189,8 @@ const getAllRestaurantsWithOwners = async (req) => {
       sortby === "1"
         ? { $sort: { name: 1 } }
         : sortby === "2"
-        ? { $sort: { name: -1 } }
-        : { $sort: { createdAt: 1 } },
+          ? { $sort: { name: -1 } }
+          : { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
 
@@ -513,9 +513,9 @@ const allBooking = async (req) => {
     // }
     let startOfDay, nextDay;
     if (date) {
-      page = 1;
+      //  page = 1;
       startOfDay = new Date(date);
-      console.log(startOfDay);
+      // console.log(startOfDay);
       nextDay = new Date(startOfDay);
       nextDay.setDate(startOfDay.getDate() + 1);
       console.log(nextDay);
@@ -555,29 +555,29 @@ const allBooking = async (req) => {
       {
         $match: search
           ? {
-              $or: [
-                { "user.name": { $regex: search, $options: "i" } },
-                { "restaurant.name": { $regex: search, $options: "i" } },
-                { status: { $regex: search, $options: "i" } },
-              ],
-            }
+            $or: [
+              { "user.name": { $regex: search, $options: "i" } },
+              { "restaurant.name": { $regex: search, $options: "i" } },
+              { status: { $regex: search, $options: "i" } },
+            ],
+          }
           : {},
       },
       {
         $match: date
           ? {
-              date: {
-                $gte: startOfDay,
-                $lt: nextDay,
-              },
-            }
+            date: {
+              $gte: startOfDay,
+              $lt: nextDay,
+            },
+          }
           : {},
       },
       {
         $match: status
           ? {
-              status: { $regex: status, $options: "i" },
-            }
+            status: { $regex: status, $options: "i" },
+          }
           : {},
       },
     ];
@@ -593,10 +593,10 @@ const allBooking = async (req) => {
       sortby === "1"
         ? { $sort: { date: 1 } }
         : sortby === "2"
-        ? { $sort: { "restaurant.name": 1 } }
-        : sortby === "3"
-        ? { $sort: { "restaurant.name": -1 } }
-        : { $sort: { createdAt: -1 } },
+          ? { $sort: { "restaurant.name": 1 } }
+          : sortby === "3"
+            ? { $sort: { "restaurant.name": -1 } }
+            : { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {

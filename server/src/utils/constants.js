@@ -14,7 +14,7 @@ export const MESSAGES = {
   RESTAURANT_UPDATED: "Restaurant updated successfully.",
   RESTAURANT_DELETED: "Restaurant deleted successfully.",
   RESTAURANT_NOT_FOUND: "Restaurant not found.",
-  RESTAURANT_EXIST: "Restaurant already exists",
+  RESTAURANT_EXIST: "Restaurant already exists with same Email Address",
   INVALID_REQUEST: "Invalid request data.",
   SERVER_ERROR: "Something went wrong on the server.",
   RESTAURANT_NOTADD: "Something went wrong Restaurant adding failed",

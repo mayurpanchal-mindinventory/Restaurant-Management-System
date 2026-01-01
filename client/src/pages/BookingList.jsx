@@ -21,7 +21,7 @@ function BookingList() {
   const [date, setDate] = useState("");
   const prevStatusRef = useRef("");
   const prevDateRef = useRef("");
-
+  const prevSortByRef = useRef("");
   const statusStyles = {
     Pending: "bg-amber-50 text-amber-700 border-amber-200",
     Accepted: "bg-blue-50 text-blue-700 border-blue-200",
@@ -30,13 +30,13 @@ function BookingList() {
   };
 
   const bookingList = async (sr = sortby, s = status, d = date) => {
-    if (prevStatusRef.current !== status) {
+    if (prevStatusRef.current !== status || prevDateRef.current != date) {
       setcurrentpage(1);
     }
     const res = await getAllBooking(currentpage, searchTerm, sr, s, d);
     setBooking(res?.data?.booking || []);
     setTotalPages(res?.data?.totalPages || 1);
-
+    prevSortByRef.current = sr;
     prevStatusRef.current = s;
     prevDateRef.current = d;
   };
@@ -183,7 +183,7 @@ function BookingList() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={r?.restaurantId?.logoImage || "placehold.co"}
+                          src={r?.restaurantId?.logoImage || "https://placehold.co/400"}
                           className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-100 group-hover:ring-indigo-200 transition-all"
                           alt="logo"
                         />

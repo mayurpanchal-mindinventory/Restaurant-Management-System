@@ -17,8 +17,15 @@ export default function RestaurantForm() {
 
     const validationSchema = Yup.object({
         restaurantName: Yup.string().required("Name is required"),
-        password: id ? Yup.string() :
-            Yup.string()
+        password: id
+            ? Yup.string()
+                .test('password-validation', 'Password is too short - should be 8 characters minimum.',
+                    val => !val || val.length >= 8)
+                .test('password-uppercase', 'Password requires an uppercase letter',
+                    val => !val || /[A-Z]/.test(val))
+                .test('password-number', 'Password requires a number',
+                    val => !val || /[0-9]/.test(val))
+            : Yup.string()
                 .required("Password is required")
                 .min(8, 'Password is too short - should be 8 characters minimum.')
                 .matches(/[A-Z]/, 'Password requires an uppercase letter')
@@ -33,7 +40,7 @@ export default function RestaurantForm() {
         try {
             const res = await getRestaurantsById(id);
             setApiData(res.data);
-            setPreviews({ main: res.data.mainImage, logo: res.data.logoImage });
+            setPreviews({ main: res?.data?.mainImage, logo: res?.data?.logoImage });
         } catch (e) {
             toast.error("Failed to fetch details");
         }
@@ -86,7 +93,7 @@ export default function RestaurantForm() {
                         toast.success(`Restaurant ${id ? 'Updated' : 'Created'} Successfully`);
                         navigate('/admin');
                     } catch (e) {
-                        toast.error("An error occurred");
+                        toast.error(e?.response?.data?.message || "An error occurred");
                     }
                 }}
             >

@@ -107,7 +107,7 @@ exports.slotList = async (req) => {
       { $skip: skip },
       { $limit: limit },
     ]);
-    console.log(slots);
+    //console.log(slots);
     return {
       success: true,
       data: {
@@ -138,7 +138,7 @@ exports.deleteSlot = async (req) => {
 };
 
 exports.updateSlot = async (req) => {
-  console.log(req.body);
+  //  console.log(req.body);
   try {
     const exists = await TimeSlot.findOne({
       timeSlot: req.body.timeSlot,

@@ -62,7 +62,7 @@ export const billService = {
     } catch (error) {
       throw new Error(
         error.response?.data?.message ||
-          "Failed to update shared with user status"
+        "Failed to update shared with user status"
       );
     }
   },
@@ -70,9 +70,9 @@ export const billService = {
   // Get menu items for bill generation (this would use existing menu service)
   getMenuItems: async (id) => {
     try {
-      console.log(id);
+      // console.log(id);
       const response = await apiClient.get(`/api/admin/menulist/${id}`);
-      console.log(response);
+      // console.log(response);
       return response.data;
     } catch (error) {
       throw new Error(
