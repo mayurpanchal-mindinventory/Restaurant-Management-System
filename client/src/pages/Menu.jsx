@@ -80,7 +80,9 @@ export default function Menu() {
                         toast.success(`Menu item ${edit ? "updated" : "created"}!`);
                         navigate(-1);
                     } catch (e) {
-                        toast.error("Update failed. Please check server connection.");
+                        console.log(e);
+
+                        toast.error(e?.response?.data?.message);
                     }
                 }}
             >

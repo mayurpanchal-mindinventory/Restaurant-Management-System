@@ -21,13 +21,8 @@ export const loginUser = createAsyncThunk(
       }
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
@@ -60,13 +55,15 @@ export const registerUser = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      // console.log(error);
+
+      // const message =
+      //   (error.response &&
+      //     error.response.data &&
+      //     error.response.data.error) ||
+      //   error.error ||
+      //   error.toString();
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );

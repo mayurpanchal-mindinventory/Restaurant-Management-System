@@ -119,7 +119,7 @@ function Slot() {
                             className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                         >
                             <option value="">Any Time</option>
-                            {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"].map(t => (
+                            {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM", "06:00 PM - 07:00 PM"].map(t => (
                                 <option key={t} value={t}>{t}</option>
                             ))}
                         </select>
@@ -213,7 +213,7 @@ function Slot() {
                                             <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><FiClock /> Time Range</label>
                                             <Field as="select" name="timeslot" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                                                 <option value="">Select Time</option>
-                                                {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"].map(t => (
+                                                {["10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM", "06:00 PM - 07:00 PM"].map(t => (
                                                     <option key={t} value={t}>{t}</option>
                                                 ))}
 

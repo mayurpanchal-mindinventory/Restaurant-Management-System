@@ -8,6 +8,7 @@ import {
   FiInbox,
   FiClock
 } from "react-icons/fi";
+import { PersonStanding, User2, Users, Users2 } from "lucide-react";
 
 function BookingList() {
   const [booking, setBooking] = useState([]);
@@ -167,6 +168,7 @@ function BookingList() {
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Restaurant</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Guest</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Slot Time</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Status</th>
               </tr>
@@ -192,6 +194,12 @@ function BookingList() {
                       <div className="flex flex-col">
                         <span className="text-sm font-bold text-slate-900 leading-none">{r?.userId?.name}</span>
                         <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">Verified User</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                        <Users size={12} className="text-slate-400" />
+                        {r?.numberOfGuests || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4">

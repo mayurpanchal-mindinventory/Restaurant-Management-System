@@ -28,7 +28,7 @@ const BillGeneration = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [autoDiscount, setAutoDiscount] = useState(0);
-
+  console.log(restaurantId)
   useEffect(() => {
     if (isOpen && restaurantId) {
       fetchMenuItems();
@@ -52,6 +52,7 @@ const BillGeneration = ({
   const fetchMenuItems = async () => {
     try {
       const response = await billService.getMenuItems(restaurantId);
+
       setMenuItems(response.data.menuData || []);
     } catch (error) {
       console.error("Error fetching menu items:", error);
@@ -221,11 +222,10 @@ const BillGeneration = ({
               <div className="bg-white rounded p-3 border border-gray-200">
                 <p className="text-xs font-medium text-gray-600 mb-1">Status</p>
                 <span
-                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
-                    booking?.status === "Completed"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
+                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${booking?.status === "Completed"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                    }`}
                 >
                   {booking?.status}
                 </span>
@@ -258,6 +258,8 @@ const BillGeneration = ({
                 <ShoppingCart size={20} className="text-gray-600" />
                 <h3 className="font-medium text-gray-900">Select Menu Items</h3>
               </div>
+              {console.log(menuItems)
+              }
               <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
                 {menuItems?.length > 0 ? (
                   <div className="space-y-2">
