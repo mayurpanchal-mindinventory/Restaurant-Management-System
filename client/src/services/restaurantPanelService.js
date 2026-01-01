@@ -5,6 +5,7 @@ export const getBookingsByRestaurantId = async (
   currentpage,
   tempFilters
 ) => {
+  console.log({ tempFilters });
   const res = await apiClient.get(`api/owner/bookingList/${userId}`, {
     params: { page: currentpage, ...tempFilters },
   });

@@ -47,12 +47,14 @@ function HanldeBooking(params) {
   const handleStatusChange = async (bookingId, newStatus, date) => {
     try {
       const now = new Date();
-      const todayDate = now.toLocaleDateString('en-CA');
-      const bookedDate = new Date(date).toLocaleDateString('en-CA');
+      const todayDate = now.toLocaleDateString("en-CA");
+      const bookedDate = new Date(date).toLocaleDateString("en-CA");
 
       if (newStatus === "Completed") {
         if (todayDate < bookedDate) {
-          toast.error("Sorry, you cannot complete booking before the booked date");
+          toast.error(
+            "Sorry, you cannot complete booking before the booked date"
+          );
           return;
         }
       }
@@ -145,6 +147,7 @@ function HanldeBooking(params) {
 
   const handleApplyClick = () => {
     fetchBookingById();
+    setcurrentpage(1);
   };
 
   const handleResetClick = () => {
@@ -393,10 +396,10 @@ function HanldeBooking(params) {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.date
                           ? new Date(booking.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                           : "N/A"}
                       </div>
                     </td>
@@ -436,7 +439,11 @@ function HanldeBooking(params) {
                           className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
                           value={booking.status}
                           onChange={(e) =>
-                            handleStatusChange(booking._id, e.target.value, booking.date)
+                            handleStatusChange(
+                              booking._id,
+                              e.target.value,
+                              booking.date
+                            )
                           }
                         >
                           {[
@@ -454,10 +461,11 @@ function HanldeBooking(params) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                          }`}
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                          isBillGenerated(booking)
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}
                       </span>
