@@ -47,7 +47,7 @@ function HanldeBooking(params) {
     try {
       await updateBookingStatus(bookingId, newStatus);
       setss(newStatus);
-      showSuccess(`Booking ${newStatus} successfully`);
+      showSuccess(`Booking status ${newStatus} updated successfully`);
     } catch (error) {
       console.error("Failed to update status", error);
       showError("Failed to update booking status");
@@ -99,13 +99,13 @@ function HanldeBooking(params) {
         currentpage,
         filtersToUse
       );
-      setdataList(result?.booking || []);
+      setdataList(result?.bookings || []);
 
       setTotalPages(result?.totalPages || 1);
       setTotalrecord(result?.totalDocs);
       setCountStatus({
-        totalCompleted: result?.totalPending,
-        totalPending: result?.totalCompleted,
+        totalPending: result?.totalPending,
+        totalCompleted: result?.totalCompleted,
       });
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -431,7 +431,7 @@ function HanldeBooking(params) {
                             "Confirmed",
                             "Accepted",
                             "Cancelled",
-                            "Completed"
+                            "Completed",
                           ].map((s) => (
                             <option key={s} value={s}>
                               {s}

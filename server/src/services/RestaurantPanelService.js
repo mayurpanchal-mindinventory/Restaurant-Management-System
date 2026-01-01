@@ -44,39 +44,75 @@ exports.getBookingByRestaurent = async (req) => {
 
     const limit = 5;
     const skip = (page - 1) * limit;
-    const booking = await Booking.find(query)
-      .populate("userId", "name email _id")
-      .populate("restaurantId", "name logoImage _id")
-      .populate("timeSlotId", "timeSlot discountPercent _id")
-      .select(
-        "numberOfGuests date status createdAt hasGeneratedBill billId _id"
-      )
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    const results = await Booking.aggregate([
+      // 1. Initial Filter (Applies to all counts and the data)
+      { $match: query },
 
-    const count = await Booking.countDocuments(query);
-    const count2 = await Booking.find({
-      restaurantId,
-      status: "Pending",
-    }).countDocuments();
-    const count3 = await Booking.find({
-      restaurantId,
-      status: "Completed",
-    }).countDocuments();
+      {
+        $facet: {
+          // Branch 1: Paginated Booking Data
+          bookings: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            // Manual lookup since .populate() doesn't work directly in aggregate
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "userId",
+              },
+            },
+            { $unwind: "$userId" },
 
+            {
+              $project: {
+                numberOfGuests: 1,
+                date: 1,
+                status: 1,
+                createdAt: 1,
+                hasGeneratedBill: 1,
+                billId: 1,
+                "userId.name": 1,
+                "userId.email": 1,
+                "userId._id": 1,
+              },
+            },
+          ],
+          // Branch 2: Total Filtered Count
+          totalCount: [{ $count: "count" }],
+          // Branch 3: Specific Status Counts
+          pendingCount: [
+            { $match: { status: "Pending" } },
+            { $count: "count" },
+          ],
+          completedCount: [
+            { $match: { status: "Completed" } },
+            { $count: "count" },
+          ],
+        },
+      },
+    ]);
+
+    // Extracting values from the aggregate result
+    const bookings = results[0].bookings;
+    const count = results[0].totalCount[0]?.count || 0;
+    const pendingCount = results[0].pendingCount[0]?.count || 0;
+    const completedCount = results[0].completedCount[0]?.count || 0;
+
+    console.log({ bookings, count, pendingCount, completedCount });
     //console.log({ search, status, date });
     return {
       success: true,
       message: "Bookings retrieved successfully",
       data: {
-        booking,
+        bookings,
         totalPages: Math.ceil(count / limit),
-        currentPage: page * 1,
+        currentPage: page,
         totalDocs: count,
-        totalPending: count2,
-        totalCompleted: count3,
+        totalPending: pendingCount,
+        totalCompleted: completedCount,
       },
     };
   } catch (error) {
