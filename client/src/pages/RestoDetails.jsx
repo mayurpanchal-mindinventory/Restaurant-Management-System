@@ -173,15 +173,15 @@ function RestoDetails() {
   };
 
   const now = new Date();
-  const todayDateStr = now.toISOString().split('T')[0];
+  const todayDate = now.toISOString().split('T')[0];
   const currentHour = now.getHours();
 
   const filteredSlots = slotsForDate?.filter((time) => {
 
-    const selectedDateStr = bookingData?.date;
-    if (selectedDateStr < todayDateStr) return false;
+    const selectedDate = bookingData?.date;
+    if (selectedDate < todayDate) return false;
 
-    if (selectedDateStr === todayDateStr) {
+    if (selectedDate === todayDate) {
       return getSlotHour(time.timeSlot) > currentHour;
     }
     return true;
@@ -191,7 +191,7 @@ function RestoDetails() {
     const fetchSlots = async () => {
       const response = await getSlotListByRestaurant(id, "", "", "");
 
-      console.log("hhhh", response.data.data.data.slots);
+      // console.log("hhhh", response.data.data.data.slots);
 
       setTimeSlots(response.data.data.data.slots);
       // console.log("heloooooooooooooo", response.data.data);
