@@ -28,14 +28,16 @@ exports.BookRestaurant = async (req) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    const newBooking = new Booking({
-      userId,
-      restaurantId,
-      timeSlotId,
-      date,
-      numberOfGuests,
-    });
-    await newBooking.save({ session });
+    const olddata = { userId, restaurantId, date, timeSlotId };
+    const update = { $inc: { numberOfGuests: numberOfGuests } };
+    const options = {
+      upsert: true,
+      new: true,
+      session,
+      runValidators: true
+    };
+
+    const booking = await Booking.findOneAndUpdate(olddata, update, options);
 
     await TimeSlot.findByIdAndUpdate(timeSlotId, {
       $inc: { maxBookings: -numberOfGuests },
@@ -43,7 +45,7 @@ exports.BookRestaurant = async (req) => {
     await session.commitTransaction();
     session.endSession();
 
-    return { message: "Restaurant booked successfully", data: newBooking };
+    return { message: "Restaurant booked successfully", data: booking };
   } catch (error) {
     if (error.status) throw error;
     // if (error.code === 11000) throwError("This booking already exists", 409);

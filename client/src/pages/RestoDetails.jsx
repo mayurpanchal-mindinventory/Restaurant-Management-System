@@ -505,7 +505,7 @@ function RestoDetails() {
                         {time.timeSlot}
                       </button>
                     ))}
-                    {filteredSlots?.length === 0 && <p className="col-span-2 text-gray-400">No slots available for this date.</p>}
+                    {filteredSlots?.length === 0 && <p className="col-span-2 text-gray-400">You missed slots for this date.</p>}
                   </div>
                 </div>
               ) : selectedDate != "" ? (
