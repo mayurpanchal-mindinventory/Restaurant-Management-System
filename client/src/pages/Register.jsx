@@ -50,7 +50,7 @@ function Register() {
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address";
     }
-    return "Please enter a valid email address";
+    return;
   };
 
   const validatePhone = (phone) => {
@@ -64,7 +64,7 @@ function Register() {
         return "Please enter a valid phone number";
       }
     }
-    return "Please enter a valid phone number";
+    return;
   };
 
   const validatePassword = (password) => {
@@ -77,7 +77,7 @@ function Register() {
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       return "Password must contain at least one uppercase letter, one lowercase letter, and one number";
     }
-    return "Passwordd must contain at least one uppercase letter, one lowercase letter, and one number";
+    return;
 
   };
 
