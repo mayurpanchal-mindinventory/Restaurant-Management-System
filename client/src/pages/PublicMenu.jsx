@@ -91,19 +91,27 @@ const PublicMenu = () => {
     allMenuItems.length,
   ]);
 
-  // Debounce search/filter updates
+  // Debounce search/filter updates and reset to page 1
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
       setPagination((prev) => ({ ...prev, currentPage: 1 }));
-      fetchData();
     }, 300);
     return () => clearTimeout(searchTimeoutRef.current);
   }, [searchTerm, category, restaurant, sortBy, priceRange]);
 
+  // Fetch data when page changes or when filters cause page reset
   useEffect(() => {
     fetchData();
-  }, [pagination.currentPage]);
+  }, [
+    pagination.currentPage,
+    searchTerm,
+    category,
+    restaurant,
+    sortBy,
+    priceRange.min,
+    priceRange.max,
+  ]);
 
   const categories = useMemo(() => {
     return [...new Set(allMenuItems.map((item) => item.categoryName))]
@@ -353,10 +361,11 @@ const PublicMenu = () => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={loading}
-                  className={`px-3 py-2 border rounded-lg text-sm transition ${pageNum === pagination.currentPage
-                    ? "bg-orange-500 text-white border-orange-500"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
+                  className={`px-3 py-2 border rounded-lg text-sm transition ${
+                    pageNum === pagination.currentPage
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
                   {pageNum}
                 </button>

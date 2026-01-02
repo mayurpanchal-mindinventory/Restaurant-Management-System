@@ -88,10 +88,6 @@ const BillDetails = ({ bill, onClose, onUpdatePaymentStatus }) => {
                   <span className="font-medium">Guests:</span>{" "}
                   {bill?.bookingId?.numberOfGuests || "N/A"}
                 </div>
-                <div>
-                  <span className="font-medium">Status:</span>{" "}
-                  {bill?.bookingId?.status || "N/A"}
-                </div>
               </div>
             </div>
 
