@@ -6,7 +6,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiInbox,
-  FiClock
+  FiClock,
 } from "react-icons/fi";
 import { PersonStanding, User2, Users, Users2 } from "lucide-react";
 
@@ -23,10 +23,10 @@ function BookingList() {
   const prevDateRef = useRef("");
   const prevSortByRef = useRef("");
   const statusStyles = {
-    Pending: "bg-amber-50 text-amber-700 border-amber-200",
-    Accepted: "bg-blue-50 text-blue-700 border-blue-200",
-    Completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+    Pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
+    Accepted: "bg-blue-100 text-blue-700 border border-blue-300",
+    Completed: "bg-green-100 text-green-700 border border-green-300",
+    Cancelled: "bg-red-100 text-red-700 border border-red-300",
   };
 
   const bookingList = async (sr = sortby, s = status, d = date) => {
@@ -66,7 +66,6 @@ function BookingList() {
       bookingList("", "", "");
     }
   };
-
   const goToNextPage = () => {
     if (currentpage < totalPages) setcurrentpage(currentpage + 1);
   };
@@ -75,49 +74,42 @@ function BookingList() {
     if (currentpage > 1) setcurrentpage(currentpage - 1);
   };
 
-  return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 ">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Booking List</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Manage and monitor customer reservations.</p>
+  return booking.length > 0 ||
+    searchTerm !== "" ||
+    date != "" ||
+    status != null ||
+    totalPages > 1 ? (
+    <>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b">
+        <div className="bg-white grid gap-2">
+          <select
+            id="sortby"
+            onChange={(e) => setSortBy(e.target.value)}
+            className="h-10 px-2 py-2 border rounded-lg"
+          >
+            <option value="">Sort by: Created At</option>
+            <option value="1">Sort by: Booking Date</option>
+            <option value="2">Sort by: Restaurant (A-Z)</option>
+            <option value="3">Sort by: Restaurant (Z-A)</option>
+          </select>
         </div>
-
-        <div className="">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search name, user, or status..."
-            className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
-          />
-        </div>
-      </div>
-
-      <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="grid grid-cols-1  lg:grid-cols-4 gap-3">
+        <div className="flex md:flex-row gap-4 flex-col">
+          {/* <div className="flex items-center justify-center">
+            <p className="align-middle font-mono text-lg text-gray-600 font-bold mt-5">Filters : </p>
+          </div> */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Sort Results</label>
-            <select
-              id="sortby"
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              <option value="">Created At</option>
-              <option value="1">Booking Date</option>
-              <option value="2">Restaurant (A-Z)</option>
-              <option value="3">Restaurant (Z-A)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Status</label>
+              Status
+            </label>
             <select
               id="status"
               name="status"
               onChange={(e) => setStatus(e.target.value)}
               value={status}
-              className="w-full bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
             >
               <option value="">All Statuses</option>
               <option value="Accepted">Accepted</option>
@@ -126,61 +118,100 @@ function BookingList() {
               <option value="Cancelled">Cancelled</option>
             </select>
           </div>
-
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Filter Date</label>
-            <div className="relative">
-              <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="date"
-                id="date-range"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full pl-10 bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-              />
-            </div>
+            <label
+              htmlFor="date-range"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Date
+            </label>
+            <input
+              type="date"
+              id="date-range"
+              name="date-range"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              placeholder="Select date range"
+              className="mt-1 block w-full pl-3 border pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+            />
           </div>
-
           <div className="flex items-end gap-2">
             <button
               type="button"
-              onClick={() => { if (prevStatusRef.current !== status || prevDateRef.current !== date) bookingList() }}
-              className="flex-1 bg-slate-900 text-white text-xs font-bold py-3 rounded-lg hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
+              onClick={() => {
+                if (
+                  prevStatusRef.current !== status ||
+                  prevDateRef.current !== date
+                )
+                  bookingList();
+              }}
+              className="w-full md:w-auto px-4 py-2 border  rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               Apply Filters
             </button>
             <button
               type="button"
-              onClick={clearfilter}
-              className="p-3 bg-slate-100 text-slate-500 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all"
+              onClick={() => clearfilter({})}
+              className="w-full md:w-auto px-4 py-2  rounded-md shadow-sm text-sm font-medium text-gray-600   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              <FiRefreshCw className="w-4 h-4" />
+              Clear Filters
             </button>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+      <div className="w-full bg-white text-black shadow-md rounded-xl p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="w-full">
+            <h2 className="text-xl font-semibold"> Booking List</h2>
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search name, user, or status..."
+              className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-left text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Restaurant</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Guest</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Slot Time</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Status</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Restaurant
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Guest
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                  Slot Time
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">
+                  Status
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="text-black">
               {booking.length > 0 ? (
                 booking.map((r) => (
-                  <tr key={r._id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                      {r?.date ? new Date(r.date).toLocaleString().split(',')[0] : "Date unavailable"}
+                  <tr key={r._id} className="border-b">
+                    <td className="p-3">
+                      {r?.date
+                        ? new Date(r.date).toLocaleString().split(",")[0]
+                        : "Date is not available"}
                     </td>
-                    <td className="px-6 py-4">
+
+                    <td className="p-3">
                       <div className="flex items-center gap-3">
                         <img
                           src={r?.restaurantId?.logoImage || "https://placehold.co/400"}
@@ -192,8 +223,12 @@ function BookingList() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-900 leading-none">{r?.userId?.name}</span>
-                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">Verified User</span>
+                        <span className="text-sm font-bold text-slate-900 leading-none">
+                          {r?.userId?.name}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">
+                          Verified User
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -219,14 +254,18 @@ function BookingList() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="py-24">
-                    <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
-                      <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                        <FiInbox className="text-slate-300" size={32} />
-                      </div>
-                      <h3 className="text-slate-900 font-bold">No Bookings found</h3>
-                      <p className="text-slate-500 text-xs mt-1">
-                        Try adjusting your filters or search terms to find what you're looking for.
+                  <td colSpan="5" className="p-10 text-center text-gray-500">
+                    <div className="text-center py-20">
+                      <FiFilter
+                        className="mx-auto mb-4"
+                        size={48}
+                        color="gray"
+                      />
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                        No items found
+                      </h3>
+                      <p className="text-gray-500">
+                        Try adjusting your filters or search terms
                       </p>
                     </div>
                   </td>
@@ -235,31 +274,38 @@ function BookingList() {
             </tbody>
           </table>
         </div>
-
         {booking.length > 0 && (
-          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-              Page <span className="text-indigo-600">{currentpage}</span> of {totalPages}
-            </div>
-            <div className="flex gap-2">
-              <button
-                disabled={currentpage === 1}
-                onClick={goToPrevpage}
-                className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-              >
-                <FiChevronLeft /> Prev
-              </button>
-              <button
-                disabled={currentpage === totalPages}
-                onClick={goToNextPage}
-                className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-              >
-                Next <FiChevronRight />
-              </button>
-            </div>
+          <div className="flex justify-between items-center mt-4">
+            <button
+              className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+              disabled={currentpage === 1}
+              onClick={goToPrevpage}
+            >
+              Previous
+            </button>
+            <span className="text-sm">
+              Page {currentpage} of {totalPages}
+            </span>
+            <button
+              className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+              disabled={currentpage === totalPages}
+              onClick={goToNextPage}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
+    </>
+  ) : (
+    <div className="text-center py-20">
+      <FiFilter className="mx-auto mb-4" size={48} color="gray" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+        No Booking found
+      </h3>
+      <p className="text-gray-500">
+        Try adjusting your filters or search terms
+      </p>
     </div>
   );
 }

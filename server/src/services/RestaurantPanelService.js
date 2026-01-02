@@ -25,6 +25,7 @@ exports.getBookingByRestaurent = async (req) => {
 
     const restaurantId = restaurant._id;
     const page = parseInt(req.query.page) || 1;
+
     const limit = 5;
     const skip = (page - 1) * limit;
 
@@ -34,9 +35,9 @@ exports.getBookingByRestaurent = async (req) => {
     if (req.query.status) {
       mainQuery.status = req.query.status;
     }
-
-    if (req.query.date) {
-      mainQuery.date = req.query.date;
+    if (req.query?.date) {
+      const date = new Date(req.query?.date);
+      mainQuery.date = date;
     }
 
     if (req.query.search) {
@@ -75,8 +76,18 @@ exports.getBookingByRestaurent = async (req) => {
                 as: "timeSlotDetails",
               },
             },
-            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
-            { $unwind: { path: "$timeSlotDetails", preserveNullAndEmptyArrays: true } },
+            {
+              $unwind: {
+                path: "$userDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $unwind: {
+                path: "$timeSlotDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
             {
               $project: {
                 numberOfGuests: 1,
@@ -86,20 +97,17 @@ exports.getBookingByRestaurent = async (req) => {
                 hasGeneratedBill: 1,
                 billId: 1,
                 restaurantId: 1,
-                "timeSlotId": "$timeSlotDetails", // Mapping back to your preferred name
-                "userId": {
+                timeSlotId: "$timeSlotDetails", // Mapping back to your preferred name
+                userId: {
                   _id: "$userDetails._id",
                   name: "$userDetails.name",
-                  email: "$userDetails.email"
-                }
+                  email: "$userDetails.email",
+                },
               },
             },
           ],
           // Branch 2: Total count for current filters (for pagination)
-          totalFilteredCount: [
-            { $match: mainQuery },
-            { $count: "count" }
-          ],
+          totalFilteredCount: [{ $match: mainQuery }, { $count: "count" }],
           // Branch 3: Stats (Total Pending for this restaurant regardless of filter)
           pendingCount: [
             { $match: { restaurantId, status: "Pending" } },
