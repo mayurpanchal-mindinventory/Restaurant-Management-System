@@ -155,6 +155,7 @@ function HanldeBooking(params) {
 
   const handleApplyClick = () => {
     fetchBookingById();
+    setcurrentpage(1);
   };
 
   const handleResetClick = () => {
@@ -465,8 +466,8 @@ function HanldeBooking(params) {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
                           }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}

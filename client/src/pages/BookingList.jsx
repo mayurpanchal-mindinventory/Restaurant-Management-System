@@ -6,7 +6,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiInbox,
-  FiClock
+  FiClock,
 } from "react-icons/fi";
 import { PersonStanding, User2, Users, Users2 } from "lucide-react";
 
@@ -79,8 +79,12 @@ function BookingList() {
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 ">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Booking List</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Manage and monitor customer reservations.</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Booking List
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Manage and monitor customer reservations.
+          </p>
         </div>
 
         <div className="">
@@ -97,7 +101,9 @@ function BookingList() {
       <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
         <div className="grid grid-cols-1  lg:grid-cols-4 gap-3">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Sort Results</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Sort Results
+            </label>
             <select
               id="sortby"
               onChange={(e) => setSortBy(e.target.value)}
@@ -111,7 +117,9 @@ function BookingList() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Status</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Status
+            </label>
             <select
               id="status"
               name="status"
@@ -128,7 +136,9 @@ function BookingList() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Filter Date</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Filter Date
+            </label>
             <div className="relative">
               <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -144,7 +154,13 @@ function BookingList() {
           <div className="flex items-end gap-2">
             <button
               type="button"
-              onClick={() => { if (prevStatusRef.current !== status || prevDateRef.current !== date) bookingList() }}
+              onClick={() => {
+                if (
+                  prevStatusRef.current !== status ||
+                  prevDateRef.current !== date
+                )
+                  bookingList();
+              }}
               className="flex-1 bg-slate-900 text-white text-xs font-bold py-3 rounded-lg hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
             >
               Apply Filters
@@ -165,35 +181,61 @@ function BookingList() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Restaurant</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Guest</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Slot Time</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Status</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Restaurant
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Guest
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                  Slot Time
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {booking.length > 0 ? (
                 booking.map((r) => (
-                  <tr key={r._id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr
+                    key={r._id}
+                    className="hover:bg-slate-50/50 transition-colors group"
+                  >
                     <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                      {r?.date ? new Date(r.date).toLocaleString().split(',')[0] : "Date unavailable"}
+                      {r?.date
+                        ? new Date(r.date).toLocaleString().split(",")[0]
+                        : "Date unavailable"}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={r?.restaurantId?.logoImage || "https://placehold.co/400"}
+                          src={
+                            r?.restaurantId?.logoImage ||
+                            "https://placehold.co/400"
+                          }
                           className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-100 group-hover:ring-indigo-200 transition-all"
                           alt="logo"
                         />
-                        <span className="text-sm font-bold text-slate-900">{r?.restaurantId?.name || "Restaurant Removed"}</span>
+                        <span className="text-sm font-bold text-slate-900">
+                          {r?.restaurantId?.name || "Restaurant Removed"}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-900 leading-none">{r?.userId?.name}</span>
-                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">Verified User</span>
+                        <span className="text-sm font-bold text-slate-900 leading-none">
+                          {r?.userId?.name}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">
+                          Verified User
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -210,7 +252,12 @@ function BookingList() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end">
-                        <span className={`px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[r?.status] || "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                        <span
+                          className={`px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${
+                            statusStyles[r?.status] ||
+                            "bg-slate-100 text-slate-700 border-slate-200"
+                          }`}
+                        >
                           {r?.status}
                         </span>
                       </div>
@@ -224,9 +271,12 @@ function BookingList() {
                       <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
                         <FiInbox className="text-slate-300" size={32} />
                       </div>
-                      <h3 className="text-slate-900 font-bold">No Bookings found</h3>
+                      <h3 className="text-slate-900 font-bold">
+                        No Bookings found
+                      </h3>
                       <p className="text-slate-500 text-xs mt-1">
-                        Try adjusting your filters or search terms to find what you're looking for.
+                        Try adjusting your filters or search terms to find what
+                        you're looking for.
                       </p>
                     </div>
                   </td>
@@ -239,7 +289,8 @@ function BookingList() {
         {booking.length > 0 && (
           <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-              Page <span className="text-indigo-600">{currentpage}</span> of {totalPages}
+              Page <span className="text-indigo-600">{currentpage}</span> of{" "}
+              {totalPages}
             </div>
             <div className="flex gap-2">
               <button

@@ -56,7 +56,6 @@ exports.getUserBookings = async (req, res) => {
       sortOrder,
       status,
     };
-
     const { message, data, pagination } = await getBookings(userId, options);
     return sendResponse(res, STATUS.OK, message, {
       bookings: data,

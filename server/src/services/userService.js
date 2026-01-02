@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const Booking = require("../models/Booking");
 const TimeSlot = require("../models/TimeSlot");
 const Bill = require("../models/Bill");
+const Restaurant = require("../models/Restaurant");
 const throwError = (msg, status = 400) => {
   const err = new Error(msg);
   err.status = status;
@@ -69,6 +70,15 @@ exports.getBookings = async (userId, options = {}) => {
     } = options;
 
     const query = { userId };
+    // first here searchRestaurant work first restaurants matching the name and then pass their IDs into your query object.
+
+    if (searchRestaurant) {
+      const matchingRestaurants = await Restaurant.find({
+        name: { $regex: searchRestaurant, $options: "i" },
+      }).select("_id");
+      const restaurantIds = matchingRestaurants.map((res) => res._id);
+      query.restaurantId = { $in: restaurantIds };
+    }
 
     // Search by date (exact match)
     if (searchDate) {
