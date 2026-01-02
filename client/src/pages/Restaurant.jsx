@@ -29,10 +29,19 @@ function Restaurant() {
   };
 
   const updateRestaurantStatus = async (id) => {
+    try {
+      await updateRestaurantStatusById(id);
 
-    await updateRestaurantStatusById(id);
-    toast.success("Status Changed");
+      setRestaurant(prev =>
+        prev.map(r => r._id === id ? { ...r, isActive: !r.isActive } : r)
+      );
+
+      toast.success("Visibility status Changed");
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
   }
+
   const restaurantList = async () => {
     const res = await getAllRestaurants(currentpage, searchTerm, sortby);
     setRestaurant(res?.data?.restaurants || []);
