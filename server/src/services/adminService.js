@@ -148,6 +148,7 @@ const createRestaurantAccount = async (req) => {
 };
 
 const getAllRestaurantsWithOwners = async (req) => {
+
   try {
     let { page = 1, search, sortby, date } = req.query;
     const limit = 5;
@@ -175,6 +176,7 @@ const getAllRestaurantsWithOwners = async (req) => {
           }
           : {},
       },
+
     ];
 
     // Count data logic remains the same...
@@ -220,6 +222,7 @@ const getAllRestaurantsWithOwners = async (req) => {
       {
         $project: {
           name: 1,
+          isActive: 1,
           address: 1,
           logoImage: 1,
           mainImage: 1,
@@ -250,6 +253,37 @@ const getAllRestaurantsWithOwners = async (req) => {
     };
   } catch (error) {
     // Error handling...
+    throw error;
+  }
+};
+
+const changeRestaurantStatusById = async (req) => {
+  try {
+
+    const restaurantId = req.params.id;
+
+    const existingRestaurant = await Restaurant.findById(restaurantId);
+
+    if (!existingRestaurant) {
+      return {
+        success: false,
+        message: MESSAGES.RESTAURANT_NOT_FOUND,
+        data: null,
+      };
+    }
+
+    existingRestaurant.isActive = !existingRestaurant.isActive;
+    await existingRestaurant.save();
+    return {
+      success: true,
+      message: "",
+      data: existingRestaurant,
+    };
+  } catch (error) {
+    if (!error.status) {
+      error.status = STATUS.INTERNAL_SERVER_ERROR;
+      error.message = MESSAGES.SERVER_ERROR;
+    }
     throw error;
   }
 };
@@ -634,4 +668,5 @@ module.exports = {
   deleteRestaurant,
   getRestaurantWithOwnerById,
   allBooking,
+  changeRestaurantStatusById
 };

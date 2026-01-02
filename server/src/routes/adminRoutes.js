@@ -27,6 +27,7 @@ router.delete(
   adminController.deleteRestaurant
 );
 
+router.patch("/update-status/:id", adminController.restaurantStatusChange)
 //Routes For Categories and menu
 
 router.get("/categories", menuController.getAllMenuCategories);

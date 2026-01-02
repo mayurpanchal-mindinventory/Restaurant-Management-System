@@ -141,9 +141,12 @@ function FeaturedRestaurants() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-            {restaurants.map((restaurant) => (
-              <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-            ))}
+            {restaurants
+              .filter((i) => i.isActive === true)
+              .map((restaurant) => (
+                <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+              ))
+            }
           </div>
         )}
       </div>

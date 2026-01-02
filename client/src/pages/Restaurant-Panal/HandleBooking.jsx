@@ -44,14 +44,24 @@ function HanldeBooking(params) {
   // Toast notification hook
   const { showSuccess, showError, showInfo } = useToast();
 
-  const handleStatusChange = async (bookingId, newStatus, date) => {
+  const getSlotHour = (timeStr) => {
+    const [time, modifier] = timeStr.split(" - ")[0].split(" ");
+    let [hours] = time.split(":");
+    let hour = parseInt(hours, 10);
+    if (modifier === "PM" && hour !== 12) hour += 12;
+    if (modifier === "AM" && hour === 12) hour = 0;
+    return hour;
+  };
+
+  const handleStatusChange = async (bookingId, newStatus, date, timeslot) => {
     try {
       const now = new Date();
+      const currentHour = now.getHours();
       const todayDate = now.toLocaleDateString('en-CA');
       const bookedDate = new Date(date).toLocaleDateString('en-CA');
 
       if (newStatus === "Completed") {
-        if (todayDate < bookedDate) {
+        if (todayDate < bookedDate || getSlotHour(timeslot) > currentHour) {
           toast.error("Sorry, you cannot complete booking before the booked date");
           return;
         }
@@ -436,7 +446,7 @@ function HanldeBooking(params) {
                           className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
                           value={booking.status}
                           onChange={(e) =>
-                            handleStatusChange(booking._id, e.target.value, booking.date)
+                            handleStatusChange(booking._id, e.target.value, booking.date, booking.timeSlotId?.timeSlot)
                           }
                         >
                           {[

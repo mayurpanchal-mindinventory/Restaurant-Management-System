@@ -6,6 +6,7 @@ const {
   deleteRestaurant,
   getRestaurantWithOwnerById,
   allBooking,
+  changeRestaurantStatusById,
 } = require("../services/adminService.js");
 const { getRestaurantMenu } = require("../services/RestaurantPanelService.js");
 
@@ -83,6 +84,21 @@ exports.deleteRestaurant = async (req, res) => {
   }
 };
 
+
+exports.restaurantStatusChange = async (req, res) => {
+  try {
+    const result = await changeRestaurantStatusById(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in changeStatus controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR,
+      error.details
+    );
+  }
+};
 exports.getAllBookingswithDetails = async (req, res) => {
   try {
     const result = await allBooking(req);

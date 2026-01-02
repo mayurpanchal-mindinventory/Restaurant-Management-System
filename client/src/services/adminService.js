@@ -19,6 +19,11 @@ export const deleteRestaurantById = async (id) => {
   const res = await apiClient.delete(`api/admin/delete-restaurant/${id}`);
   return res.data;
 };
+
+export const updateRestaurantStatusById = async (id) => {
+  const res = await apiClient.patch(`api/admin/update-status/${id}`);
+  return res.data;
+};
 export const updateRestaurant = async (restaurantId, body) => {
   return await apiClient.put(
     `api/admin/update-restaurant/${restaurantId}`,

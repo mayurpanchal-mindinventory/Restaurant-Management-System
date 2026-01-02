@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 import { useLoading } from '../context/LoadingContext'
 export const apiClient = axios.create({
   baseURL: "/",
-  timeout: 5000,
+  timeout: 10000,
   withCredentials: true,
 });
 

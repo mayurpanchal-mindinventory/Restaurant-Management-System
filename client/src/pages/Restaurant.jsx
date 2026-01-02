@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PencilIcon, TrashIcon, PlusIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
+import { PencilIcon, TrashIcon, PlusIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, EyeClosed, EyeIcon } from "lucide-react";
 import { MenuSquareIcon, NotebookPenIcon } from "lucide-react";
 import { FiFilter, FiInbox } from "react-icons/fi";
 import Highlighter from "react-highlight-words";
 import toast from "react-hot-toast";
-import { deleteRestaurantById, getAllRestaurants } from "../services/adminService";
+import { deleteRestaurantById, getAllRestaurants, updateRestaurantStatusById } from "../services/adminService";
 import { useConfirm } from "../context/ConfirmationContext";
 
 function Restaurant() {
@@ -28,6 +28,11 @@ function Restaurant() {
     }
   };
 
+  const updateRestaurantStatus = async (id) => {
+
+    await updateRestaurantStatusById(id);
+    toast.success("Status Changed");
+  }
   const restaurantList = async () => {
     const res = await getAllRestaurants(currentpage, searchTerm, sortby);
     setRestaurant(res?.data?.restaurants || []);
@@ -87,6 +92,7 @@ function Restaurant() {
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact Info</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Menu</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Slots</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Status</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -127,6 +133,13 @@ function Restaurant() {
                         <MenuSquareIcon size={20} />
                       </Link>
                     </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => updateRestaurantStatus(r._id)}
+                        className="inline-flex p-2 text-orange-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                        {r.isActive ? <EyeIcon size={20} /> : <EyeClosed size={20} />}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <Link to={`add/${r._id}`} className="inline-flex p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                         <PencilIcon className="size-5" />
@@ -137,6 +150,7 @@ function Restaurant() {
                       >
                         <TrashIcon className="size-5" />
                       </button>
+
                     </td>
                   </tr>
                 ))
