@@ -2,46 +2,73 @@ import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
-import { LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard, Utensils, CalendarCheck } from "lucide-react";
 
 export default function AdminLayout() {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
-  const linkStyle = (path) =>
-    `block px-4 py-2 rounded-md transition ${pathname === path ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700"
-    }`;
-
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-gray-100">
-      <nav className="md:w-64 bg-gray-800 text-white flex flex-col text-center w-full">
-        <div className="p-6 text-xl font-bold border-b border-gray-700">Admin Panel</div>
-
-        <div className="flex-1 px-4 py-6 space-y-2">
-          <Link to="/admin" className={linkStyle("/admin")}>
-            Restaurants
-          </Link>
-
-          <Link to="/admin/bookingList" className={linkStyle("/admin/bookingList")}>
-            Bookings
-          </Link>
+    <div className="flex flex-col md:flex-row min-h-screen w-full bg-[#f8fafc]">
+      <nav className="flex flex-col w-full md:w-72 md:h-screen bg-slate-900 text-white md:sticky md:top-0">
+        <div className="flex items-center gap-3 p-5 md:p-8 border-b border-slate-800">
+          <div className="flex items-center justify-center w-9 h-9 bg-indigo-50 rounded-xl">
+            <LayoutDashboard size={20} className="text-indigo-600" />
+          </div>
+          <span className="text-lg font-black uppercase tracking-tight">
+            Admin<span className="text-indigo-400">Hub</span>
+          </span>
         </div>
 
-        <button
-          onClick={() => dispatch(logout())}
-          className="m-4 flex items-center justify-center gap-3 px-4 text-center py-2 text-red-400 hover:bg-gray-700 rounded-md transition"
-        >
-          <LogOut size={18} /> Logout
-        </button>
+        <div className="flex flex-col p-4 gap-2">
+
+          <Link
+            to="/admin"
+            className={`flex items-center justify-center md:justify-normal gap-3 px-4 py-3 rounded-xl text-sm font-semibold ${pathname === "/admin"
+              ? "bg-indigo-600 text-white shadow-md"
+              : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+          >
+            <Utensils size={18} />
+            <span>Restaurants</span>
+          </Link>
+
+          <Link
+            to="/admin/bookingList"
+            className={`flex items-center justify-center md:justify-normal gap-3 px-4 py-3 rounded-xl text-sm font-semibold ${pathname === "/admin/bookingList"
+              ? "bg-indigo-600 text-white shadow-md"
+              : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+          >
+            <CalendarCheck size={18} />
+            <span>Bookings</span>
+          </Link>
+
+        </div>
+
+        <div className="p-4 md:p-6 border-t  border-slate-800 md:mt-auto">
+          <button
+            onClick={() => dispatch(logout())}
+            className="flex items-center gap-3  justify-center md:justify-normal w-full px-4 py-3 text-sm font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl"
+          >
+            <LogOut size={18} />
+            <span>Logout Session</span>
+          </button>
+        </div>
       </nav>
 
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm px-8 py-4">
-          <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
+      <div className="flex flex-col flex-1 min-w-0">
+        <header className="hidden md:flex flex-col px-8 py-6 bg-white border-b border-slate-200 sticky z-10 top-0">
+          <h1 className="text-lg font-bold text-slate-900">
+            {pathname === "/admin" ? "Restaurants" : pathname === "/admin/bookingList" ? "Bookings" : "Dashboard"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            System Management Center
+          </p>
         </header>
 
-        <main className="p-8 flex-1">
-          <div className="bg-white rounded-lg shadow p-6 min-h-full">
+        <main className="flex-1 p-4 md:p-8">
+          <div className="min-h-full">
             <Outlet />
           </div>
         </main>

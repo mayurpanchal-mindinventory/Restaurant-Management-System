@@ -73,7 +73,7 @@ export default function RestaurantForm() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
             <Formik
                 initialValues={initialValues}
                 enableReinitialize={true}
@@ -99,9 +99,15 @@ export default function RestaurantForm() {
             >
                 {({ setFieldValue, values, isSubmitting }) => (
                     <Form className="flex-1 flex flex-col">
-                        <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
-                            <div className="flex text-orange-500 items-center gap-4">
-                                <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                        <header className="bg-white border-b px-8 py-4 flex items-center justify-between">
+                            <div className="flex text-gray-500 items-center gap-4">
+                                {/* <button type="button" onClick={() => navigate(-1)} className="p-2">
+                                    <FiArrowLeft size={20} className="hover:text-indigo-700" />
+                                </button> */}
+                                <button type="button"
+                                    onClick={() => navigate(-1)}
+                                    className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                                >
                                     <FiArrowLeft size={20} />
                                 </button>
                                 <h1 className="text-xl font-bold text-gray-800">
@@ -111,7 +117,7 @@ export default function RestaurantForm() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="bg-orange-500 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                                className="bg-indigo-700 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
                             >
                                 <FiSave /> {isSubmitting ? "Saving..." : "Save Changes"}
                             </button>
@@ -121,11 +127,10 @@ export default function RestaurantForm() {
 
                             <div className="lg:col-span-1 space-y-6  text-black">
                                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                                    <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Branding</h2>
 
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium mb-2">Cover Photo</label>
-                                        <div className="relative h-40 w-full bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group">
+                                        <div className="relative h-40 w-full bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 group">
                                             {previews.main ? (
                                                 <img src={previews.main} className="w-full h-full object-cover" alt="Cover" />
                                             ) : (
