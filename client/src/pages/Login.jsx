@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../slices/authSlice";
 import toast from "react-hot-toast";
-
+import { Eye, EyeOff } from "lucide-react";
 function Login() {
   const [loginValue, setLoginValue] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -96,8 +97,10 @@ function Login() {
     try {
       await dispatch(loginUser(credentials)).unwrap();
     } catch (err) {
-
-      toast.error(err.response.data.error || "There was an error while logging in. Please check your credentials and try again.");
+      toast.error(
+        err.response.data.error ||
+          "There was an error while logging in. Please check your credentials and try again."
+      );
     }
   };
 
@@ -117,10 +120,11 @@ function Login() {
               value={loginValue.email}
               onChange={handleLogin}
               placeholder="Enter your email"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.email
-                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                : "focus:border-orange-500 focus:ring-orange-200"
-                } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.email
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
             {errors.email && (
@@ -135,19 +139,31 @@ function Login() {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={loginValue.password}
-              onChange={handleLogin}
-              placeholder="Enter your password"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.password
-                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                : "focus:border-orange-500 focus:ring-orange-200"
+            <div className="relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={loginValue.password}
+                onChange={handleLogin}
+                placeholder="Enter your password"
+                className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 pl-3 pr-10 leading-8 ${
+                  errors.password
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "focus:border-orange-500 focus:ring-orange-200"
                 } focus:ring-2`}
-              required
-            />
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
