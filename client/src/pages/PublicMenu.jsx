@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, Filter, MapPin, ArrowLeft, ChevronDown } from "lucide-react";
-import { getAllCategories, getAllMenu } from "../services/adminService";
+import { getAllMenu } from "../services/adminService";
 import { toast } from "react-hot-toast";
 import bookingImg from "../assets/booking.jpg";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
@@ -15,7 +15,6 @@ const PublicMenu = () => {
   const [category, setCategory] = useState("");
   const [restaurant, setRestaurant] = useState("");
   const [sortBy, setSortBy] = useState("name");
-  const [categoryListForFilter, setCategoryListForFilter] = useState("");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -23,14 +22,8 @@ const PublicMenu = () => {
     totalDocs: 0,
     limit: 10,
   });
-  const getCategories = useCallback(async () => {
-    try {
-      const res = await getAllCategories();
-      setCategoryListForFilter(res?.data);
-    } catch (e) {
-      toast(e.ErrorMessage || "Failed to load categories");
-    }
-  }, []);
+
+  // Set search term from URL parameters when component loads
   useEffect(() => {
     const searchQuery = searchParams.get("search");
     if (searchQuery) {
@@ -88,14 +81,12 @@ const PublicMenu = () => {
     } finally {
       setLoading(false);
     }
-    getCategories();
   }, [
     searchTerm,
     category,
     restaurant,
     sortBy,
     priceRange,
-
     pagination.currentPage,
     allMenuItems.length,
   ]);
@@ -113,6 +104,12 @@ const PublicMenu = () => {
   useEffect(() => {
     fetchData();
   }, [pagination.currentPage]);
+
+  const categories = useMemo(() => {
+    return [...new Set(allMenuItems.map((item) => item.categoryName))]
+      .filter(Boolean)
+      .sort();
+  }, [allMenuItems]);
 
   const restaurants = useMemo(() => {
     return [...new Set(allMenuItems.map((item) => item.restaurantName))]
@@ -187,12 +184,11 @@ const PublicMenu = () => {
               className="appearance-none w-full bg-white px-4 py-2 pr-10 border border-slate-200 rounded-xl shadow-sm text-slate-700 font-medium focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all duration-300 cursor-pointer hover:bg-slate-50"
             >
               <option value="">All Categories</option>
-              {categoryListForFilter &&
-                categoryListForFilter.map((cat) => (
-                  <option key={cat.categoryName} value={cat.categoryName}>
-                    {cat.categoryName}
-                  </option>
-                ))}
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
             </select>
 
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
@@ -357,11 +353,10 @@ const PublicMenu = () => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={loading}
-                  className={`px-3 py-2 border rounded-lg text-sm transition ${
-                    pageNum === pagination.currentPage
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
+                  className={`px-3 py-2 border rounded-lg text-sm transition ${pageNum === pagination.currentPage
+                    ? "bg-orange-500 text-white border-orange-500"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
                 >
                   {pageNum}
                 </button>
