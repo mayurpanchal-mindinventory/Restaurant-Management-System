@@ -24,7 +24,7 @@ function MenuDetails({ id }) {
             >
               <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
                 <img
-                  src={i.image || "via.placeholder.com"}
+                  src={i?.image || "https://placehold.co/600x400"}
                   alt={`${i.name || "Product"} image`}
                   className="w-full h-full object-cover"
                 />

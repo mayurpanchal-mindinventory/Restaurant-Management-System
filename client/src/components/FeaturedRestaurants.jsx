@@ -4,7 +4,6 @@ import { Star } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const brandColor = "text-orange-500";
-const brandBgColor = "bg-orange-500";
 const subtleOrangeBg = "bg-orange-100";
 const subtleOrangeText = "text-orange-600";
 
@@ -29,7 +28,6 @@ const RestaurantCard = ({ restaurant }) => {
           {restaurant.maxDiscount}% OFF
         </div>
       </div>
-
       <div className="p-5 flex flex-col justify-between h-[150px]">
         <div>
           <h3 className="text-xl font-bold text-gray-800 truncate mb-1">
@@ -50,7 +48,7 @@ const RestaurantCard = ({ restaurant }) => {
           </div>
 
           <NavLink
-            to="/Home/restaurant"
+            to="/home/restaurant"
             state={{ id: restaurant._id, discount: restaurant.maxDiscount }}
           >
             <button

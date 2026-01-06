@@ -153,7 +153,7 @@ const PublicMenu = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => { searchParams.get("search") ? navigate("/home") : navigate(-1) }}
           className="absolute z-20 top-20 left-6 bg-white hover:bg-orange-500 hover:text-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -319,8 +319,9 @@ const PublicMenu = () => {
                   <div className="text-right flex flex-col items-end">
                     <p className="text-xl font-bold mb-2">₹{item.price}</p>
                     <NavLink
-                      to="/Home/restaurant"
-                      state={{ id: item.restaurantId }}
+                      to="/home/restaurant"
+                      state={{ id: item.restaurantId, name: item.name }}
+
                     >
                       <button
                         className={`text-sm font-semibold text-orange-500  hover:text-orange-600 transition duration-200`}
@@ -361,11 +362,10 @@ const PublicMenu = () => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={loading}
-                  className={`px-3 py-2 border rounded-lg text-sm transition ${
-                    pageNum === pagination.currentPage
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
+                  className={`px-3 py-2 border rounded-lg text-sm transition ${pageNum === pagination.currentPage
+                    ? "bg-orange-500 text-white border-orange-500"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
                 >
                   {pageNum}
                 </button>

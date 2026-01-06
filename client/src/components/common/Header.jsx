@@ -12,7 +12,7 @@ import {
 import { logout } from "../../slices/authSlice";
 
 const NAV_LINKS = [
-  { path: "/", label: "Home" },
+  { path: "/home", label: "Home" },
   { path: "/home/menu", label: "Menu" },
   { path: "/home/bookings", label: "Bookings" },
   { path: "#footer", label: "About Us" },
@@ -74,7 +74,7 @@ export default function Header() {
     >
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         <div
-          onClick={() => { if (pathname !== '/home') handleNav("/") }}
+          onClick={() => { if (pathname !== '/home') handleNav("/home") }}
           className="flex items-center gap-2 cursor-pointer group"
         >
           <div className="bg-orange-500 p-1.5 rounded-lg ">🍽️</div>

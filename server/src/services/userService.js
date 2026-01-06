@@ -3,6 +3,7 @@ const Booking = require("../models/Booking");
 const TimeSlot = require("../models/TimeSlot");
 const Bill = require("../models/Bill");
 const Restaurant = require("../models/Restaurant");
+const { STATUS } = require("../utils/constants");
 const throwError = (msg, status = 400) => {
   const err = new Error(msg);
   err.status = status;

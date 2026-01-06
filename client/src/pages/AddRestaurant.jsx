@@ -32,7 +32,7 @@ export default function RestaurantForm() {
                 .matches(/[0-9]/, 'Password requires a number'),
         email: Yup.string().email().required("Email is required"),
         description: Yup.string().required("Description is required"),
-        phone: Yup.string().required("Phone number is required"),
+        phone: Yup.string().required("Phone number is required").min(10).max(10),
         mainImage: Yup.mixed().required("Cover photo is required"),
         logoImage: Yup.mixed().required("Profile photo is required"),
     });
@@ -186,7 +186,7 @@ export default function RestaurantForm() {
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-600">Phone Number</label>
-                                            <Field name="phone" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <Field name="phone" type="number" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
                                             <ErrorMessage name="phone" component="p" className="text-red-500 text-xs mt-1" />
                                         </div>
 
