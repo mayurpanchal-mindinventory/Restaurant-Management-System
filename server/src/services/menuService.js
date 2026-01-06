@@ -297,7 +297,9 @@ const deleteMenuById = async (req) => {
 };
 
 const updateMenuById = async (req) => {
-  const { name, price, categoryId } = req.body;
+  const { name, price, categoryId, restaurantId } = req.body;
+  //console.log(restaurantId);
+
   const { id } = req.params;
 
   if (!id) {
@@ -330,13 +332,17 @@ const updateMenuById = async (req) => {
   session.startTransaction();
 
   try {
-    const existMenu = await MenuItem.findOne({ name: name });
-    if (existMenu) {
+
+    const existMenu = await MenuItem.find({ name: name, restaurantId: new mongoose.Types.ObjectId(restaurantId) });
+    const existingMenu = await MenuItem.findById(id);
+
+    // console.log(existingMenu?.name);
+
+    if (existMenu[0]?.name === name && name !== existingMenu?.name) {
       const error = new Error("Menu with same name exist.");
       error.status = STATUS.BAD_REQUEST;
       throw error;
     }
-    const existingMenu = await MenuItem.findById(id);
     // console.log(existingMenu);
 
     let mainImageUrl = existingMenu.image;
@@ -345,14 +351,19 @@ const updateMenuById = async (req) => {
       await deleteImageFromCloudinary(existingMenu.image);
       mainImageUrl = await uploadToCloudinary(mainFile.path, "menu_images");
     }
-    console.log("check " + mainImageUrl);
+    // console.log("check " + mainImageUrl);
 
-    const updatedMenu = {
+    let updatedMenu = {
       categoryId: categoryId,
-      name: name,
       image: mainImageUrl,
       price: Number(price),
     };
+    if (existMenu.length < 1) {
+      updatedMenu.name = name;
+    }
+
+    console.log(updatedMenu);
+
     await MenuItem.findByIdAndUpdate(id, updatedMenu, { session });
 
     await session.commitTransaction();

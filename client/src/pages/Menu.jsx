@@ -14,7 +14,6 @@ import {
   FiSave,
   FiUploadCloud,
   FiPackage,
-  FiDollarSign,
   FiTag,
 } from "react-icons/fi";
 import { IndianRupee } from "lucide-react";
@@ -87,7 +86,11 @@ export default function Menu() {
           formData.append("price", values.price);
           formData.append("image", values.MenuImage);
           formData.append("categoryId", values.categories);
+          console.log(id);
+
           if (!edit) formData.append("restaurantId", id);
+          else
+            formData.append("restaurantId", menuDetail?.restaurantId?._id)
 
           try {
             edit
@@ -96,7 +99,9 @@ export default function Menu() {
             toast.success(`Menu item ${edit ? "updated" : "created"}!`);
             navigate(-1);
           } catch (e) {
-            toast.error("Update failed. Please check server connection.");
+            console.log(e.response);
+
+            toast.error(e?.response?.data?.message || "Update failed. Please check server connection.");
           }
         }}
       >
@@ -203,11 +208,10 @@ export default function Menu() {
                   <label
                     htmlFor="menu-image"
                     className={`flex flex-col items-center justify-center w-full min-h-[320px] border-2 border-dashed rounded-3xl cursor-pointer transition-all relative overflow-hidden
-                                            ${
-                                              imagePreviewUrl
-                                                ? "border-indigo-400"
-                                                : "border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/30"
-                                            }`}
+                                            ${imagePreviewUrl
+                        ? "border-indigo-400"
+                        : "border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/30"
+                      }`}
                   >
                     {imagePreviewUrl ? (
                       <>

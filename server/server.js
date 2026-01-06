@@ -8,6 +8,7 @@ const userRoutes = require("./src/routes/userRoutes.js");
 const restaurantPanelRoutes = require("./src/routes/restaurantPanelRoutes.js");
 dotenv.config();
 const verifyToken = require("../server/src/middleware/authMiddleware.js");
+const { verifyRole } = require("./src/middleware/verifyRole.js");
 
 const cookieParser = require("cookie-parser");
 const app = express();
