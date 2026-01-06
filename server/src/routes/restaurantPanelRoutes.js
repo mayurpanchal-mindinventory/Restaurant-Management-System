@@ -17,7 +17,7 @@ router.get("/bookingList/:userId", verifyRole(['admin', 'restaurant', 'user']), 
 router.patch("/updateStatus/:id", verifyRole(['restaurant']), updateBookingStatus);
 router.get(`/menulist/:id`, verifyRole(['admin', 'restaurant', 'user']), restaurantController.getAllMenu);
 // Bill routes
-router.post("/createBill", verifyRole(['restaurant']), createBillForBooking);
+router.post("/createBill", verifyRole(['restaurant', 'admin']), createBillForBooking);
 router.get("/bills/:userId", verifyRole(['admin', 'restaurant', 'user']), getBillsForRestaurant);
 router.get("/bill/:billId", verifyRole(['admin', 'restaurant', 'user']), getBillByIdController);
 router.patch("/bill/:billId/paymentStatus", verifyRole(['restaurant']), updateBillPaymentStatusController);
