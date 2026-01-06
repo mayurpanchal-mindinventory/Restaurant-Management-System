@@ -1,4 +1,6 @@
 const express = require("express");
+const { verifyRole } = require("../middleware/verifyRole");
+
 const {
   getAllbookingByRestaurant,
   updateBookingStatus,
@@ -11,13 +13,13 @@ const restaurantController = require("../controllers/restaurantController");
 const router = express.Router();
 
 // Booking routes
-router.get("/bookingList/:userId", getAllbookingByRestaurant);
-router.patch("/updateStatus/:id", updateBookingStatus);
-router.get(`/menulist/:id`, restaurantController.getAllMenu);
+router.get("/bookingList/:userId", verifyRole(['admin', 'restaurant', 'user']), getAllbookingByRestaurant);
+router.patch("/updateStatus/:id", verifyRole(['restaurant']), updateBookingStatus);
+router.get(`/menulist/:id`, verifyRole(['admin', 'restaurant', 'user']), restaurantController.getAllMenu);
 // Bill routes
-router.post("/createBill", createBillForBooking);
-router.get("/bills/:userId", getBillsForRestaurant);
-router.get("/bill/:billId", getBillByIdController);
-router.patch("/bill/:billId/paymentStatus", updateBillPaymentStatusController);
+router.post("/createBill", verifyRole(['restaurant']), createBillForBooking);
+router.get("/bills/:userId", verifyRole(['admin', 'restaurant', 'user']), getBillsForRestaurant);
+router.get("/bill/:billId", verifyRole(['admin', 'restaurant', 'user']), getBillByIdController);
+router.patch("/bill/:billId/paymentStatus", verifyRole(['restaurant']), updateBillPaymentStatusController);
 
 module.exports = router;
