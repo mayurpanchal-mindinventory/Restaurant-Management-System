@@ -38,12 +38,12 @@ exports.getAllRestaurantsWithOwners = async (req, res) => {
     );
   }
 };
+
 exports.getRestaurantsWithOwnerById = async (req, res) => {
   try {
     const Id = req.params.Id;
     //console.log(Id);
     const result = await getRestaurantWithOwnerById(Id);
-
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error in getRestaurantsWithOwnerById controller:", error);
@@ -54,6 +54,7 @@ exports.getRestaurantsWithOwnerById = async (req, res) => {
     );
   }
 };
+
 exports.updateRestaurant = async (req, res) => {
   try {
     const result = await updateRestaurant(req);
@@ -83,7 +84,6 @@ exports.deleteRestaurant = async (req, res) => {
     );
   }
 };
-
 
 exports.restaurantStatusChange = async (req, res) => {
   try {

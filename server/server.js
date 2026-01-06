@@ -50,7 +50,6 @@ app.options(/.*/, cors());
 
 app.use(express.json());
 app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", verifyToken, adminRoutes);

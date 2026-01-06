@@ -21,17 +21,47 @@ const uploadToCloudinary = (filePath, folderName) => {
             console.log(`Deleted local temp file: ${filePath}`);
           }
         });
-
         if (error) {
           console.error("Cloudinary upload failed:", error.message);
           return reject(error);
         }
-
         console.log("Cloudinary upload successful:", result.secure_url);
         resolve(result.secure_url);
       }
     );
   });
+};
+
+// Helper function to extract public ID from Cloudinary URL
+const extractPublicIdFromUrl = (cloudinaryUrl) => {
+  if (!cloudinaryUrl) return null;
+  // Cloudinary URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/filename.jpg
+  // We need to extract: folder/filename
+  const parts = cloudinaryUrl.split("/");
+  // Find "upload" index and skip past it and the version number
+  const uploadIndex = parts.indexOf("upload");
+  if (uploadIndex === -1) return null;
+
+  // Get everything after "upload" and the version (e.g., v1234567890)
+  const afterUpload = parts.slice(uploadIndex + 2);
+  // Remove file extension
+  const publicIdWithPath = afterUpload.join("/").replace(/\.[^/.]+$/, "");
+
+  return publicIdWithPath;
+};
+
+// Helper function to delete image from Cloudinary
+const deleteImageFromCloudinary = async (cloudinaryUrl) => {
+  if (!cloudinaryUrl) return;
+  const publicId = extractPublicIdFromUrl(cloudinaryUrl);
+  if (!publicId) return;
+
+  try {
+    await cloudinary.uploader.destroy(publicId);
+    console.log(`Successfully deleted image: ${publicId}`);
+  } catch (error) {
+    console.error(`Failed to delete image from Cloudinary: ${error.message}`);
+  }
 };
 
 const createRestaurantAccount = async (req) => {
@@ -148,7 +178,6 @@ const createRestaurantAccount = async (req) => {
 };
 
 const getAllRestaurantsWithOwners = async (req) => {
-
   try {
     let { page = 1, search, sortby, date } = req.query;
     const limit = 5;
@@ -167,16 +196,15 @@ const getAllRestaurantsWithOwners = async (req) => {
       {
         $match: search
           ? {
-            $or: [
-              { name: { $regex: search, $options: "i" } },
-              { "owner.name": { $regex: search, $options: "i" } },
-              { "owner.email": { $regex: search, $options: "i" } },
-              { "owner.phone": { $regex: search, $options: "i" } },
-            ],
-          }
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                { "owner.name": { $regex: search, $options: "i" } },
+                { "owner.email": { $regex: search, $options: "i" } },
+                { "owner.phone": { $regex: search, $options: "i" } },
+              ],
+            }
           : {},
       },
-
     ];
 
     // Count data logic remains the same...
@@ -191,8 +219,8 @@ const getAllRestaurantsWithOwners = async (req) => {
       sortby === "1"
         ? { $sort: { name: 1 } }
         : sortby === "2"
-          ? { $sort: { name: -1 } }
-          : { $sort: { createdAt: 1 } },
+        ? { $sort: { name: -1 } }
+        : { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
 
@@ -259,7 +287,6 @@ const getAllRestaurantsWithOwners = async (req) => {
 
 const changeRestaurantStatusById = async (req) => {
   try {
-
     const restaurantId = req.params.id;
 
     const existingRestaurant = await Restaurant.findById(restaurantId);
@@ -366,16 +393,20 @@ const updateRestaurant = async (req) => {
     let logoImageUrl = existingRestaurant.logoImage;
     let mainImageUrl = existingRestaurant.mainImage;
 
-    // Upload new logo if provided
+    // Upload new logo if provided and delete old one
     if (logoFile) {
+      // Delete old logo from Cloudinary
+      await deleteImageFromCloudinary(existingRestaurant.logoImage);
       logoImageUrl = await uploadToCloudinary(
         logoFile.path,
         "restaurant_logos"
       );
     }
 
-    // Upload new main image if provided
+    // Upload new main image if provided and delete old one
     if (mainFile) {
+      // Delete old main image from Cloudinary
+      await deleteImageFromCloudinary(existingRestaurant.mainImage);
       mainImageUrl = await uploadToCloudinary(
         mainFile.path,
         "restaurant_main_images"
@@ -482,35 +513,12 @@ const deleteRestaurant = async (req) => {
 
     // Delete images from Cloudinary if they exist
     const deletePromises = [];
-
-    if (existingRestaurant.logoImage) {
-      const publicId = existingRestaurant.logoImage
-        .split("/")
-        .pop()
-        .split(".")[0];
-      deletePromises.push(
-        cloudinary.uploader
-          .destroy(`restaurant_logos/${publicId}`)
-          .catch((error) =>
-            console.error("Failed to delete logo from Cloudinary:", error)
-          )
-      );
-    }
-
-    if (existingRestaurant.mainImage) {
-      const publicId = existingRestaurant.mainImage
-        .split("/")
-        .pop()
-        .split(".")[0];
-      deletePromises.push(
-        cloudinary.uploader
-          .destroy(`restaurant_main_images/${publicId}`)
-          .catch((error) =>
-            console.error("Failed to delete main image from Cloudinary:", error)
-          )
-      );
-    }
-
+    deletePromises.push(
+      deleteImageFromCloudinary(existingRestaurant.logoImage)
+    );
+    deletePromises.push(
+      deleteImageFromCloudinary(existingRestaurant.mainImage)
+    );
     await Promise.all(deletePromises);
 
     // Delete restaurant and user documents
@@ -589,29 +597,29 @@ const allBooking = async (req) => {
       {
         $match: search
           ? {
-            $or: [
-              { "user.name": { $regex: search, $options: "i" } },
-              { "restaurant.name": { $regex: search, $options: "i" } },
-              { status: { $regex: search, $options: "i" } },
-            ],
-          }
+              $or: [
+                { "user.name": { $regex: search, $options: "i" } },
+                { "restaurant.name": { $regex: search, $options: "i" } },
+                { status: { $regex: search, $options: "i" } },
+              ],
+            }
           : {},
       },
       {
         $match: date
           ? {
-            date: {
-              $gte: startOfDay,
-              $lt: nextDay,
-            },
-          }
+              date: {
+                $gte: startOfDay,
+                $lt: nextDay,
+              },
+            }
           : {},
       },
       {
         $match: status
           ? {
-            status: { $regex: status, $options: "i" },
-          }
+              status: { $regex: status, $options: "i" },
+            }
           : {},
       },
     ];
@@ -627,10 +635,10 @@ const allBooking = async (req) => {
       sortby === "1"
         ? { $sort: { date: 1 } }
         : sortby === "2"
-          ? { $sort: { "restaurant.name": 1 } }
-          : sortby === "3"
-            ? { $sort: { "restaurant.name": -1 } }
-            : { $sort: { createdAt: -1 } },
+        ? { $sort: { "restaurant.name": 1 } }
+        : sortby === "3"
+        ? { $sort: { "restaurant.name": -1 } }
+        : { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -662,11 +670,13 @@ const allBooking = async (req) => {
 
 module.exports = {
   uploadToCloudinary,
+  extractPublicIdFromUrl,
+  deleteImageFromCloudinary,
   createRestaurantAccount,
   getAllRestaurantsWithOwners,
   updateRestaurant,
   deleteRestaurant,
   getRestaurantWithOwnerById,
   allBooking,
-  changeRestaurantStatusById
+  changeRestaurantStatusById,
 };

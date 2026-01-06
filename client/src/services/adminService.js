@@ -9,7 +9,6 @@ export const getAllRestaurants = async (currentpage, search, sortby) => {
   );
   return res.data;
 };
-
 export const getRestaurantsById = async (id) => {
   const res = await apiClient.get(`api/admin/display-restaurant/${id}`);
   // console.log(res);
@@ -30,14 +29,11 @@ export const updateRestaurant = async (restaurantId, body) => {
     body
   );
 };
-
 //Menu and Categories API Services
 export const getAllCategories = async () => {
   const res = await apiClient.get("api/admin/categories");
-
   return res.data;
 };
-
 export const createMenu = async (body) => {
   return await apiClient.post(`api/admin/menu`, body);
 };
@@ -63,7 +59,6 @@ export const updateMenuById = async (menuId, body) => {
 export const getRestaurantMenu = async (page, id) => {
   return await apiClient.get(`api/owner/menulist/${id}?page=${page}`);
 };
-
 export const createSlot = async (body) => {
   return await apiClient.post(`api/admin/slot`, body);
 };
@@ -91,11 +86,9 @@ export const getAllMenu = async (filters = {}) => {
   if (filters.search) {
     params.append("search", filters.search);
   }
-
   if (filters.category) {
     params.append("category", filters.category);
   }
-
   if (filters.restaurant) {
     params.append("restaurant", filters.restaurant);
   }

@@ -4,7 +4,10 @@ const MenuItem = require("../models/MenuItem");
 const { mongoose } = require("mongoose");
 const fs = require("fs");
 const cloudinary = require("../config/cloudinaryConfig.js");
-const { uploadToCloudinary } = require("./adminService");
+const {
+  uploadToCloudinary,
+  deleteImageFromCloudinary,
+} = require("./adminService");
 
 const getAllCategories = async () => {
   try {
@@ -47,7 +50,10 @@ const createMenu = async (req) => {
     throw error;
   }
 
-  const existMenu = await MenuItem.findOne({ name: name, restaurantId: restaurantId });
+  const existMenu = await MenuItem.findOne({
+    name: name,
+    restaurantId: restaurantId,
+  });
   if (existMenu) {
     const error = new Error("Menu with same name exist.");
     error.status = STATUS.BAD_REQUEST;
@@ -144,13 +150,13 @@ const getAllMenusByRestaurant = async (req) => {
       {
         $match: search
           ? {
-            $or: [
-              { name: { $regex: search, $options: "i" } },
-              {
-                "categories.categoryName": { $regex: search, $options: "i" },
-              },
-            ],
-          }
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                {
+                  "categories.categoryName": { $regex: search, $options: "i" },
+                },
+              ],
+            }
           : {},
       },
     ];
@@ -165,10 +171,10 @@ const getAllMenusByRestaurant = async (req) => {
       sortby === "1"
         ? { $sort: { price: -1 } }
         : sortby === "2"
-          ? { $sort: { price: 1 } }
-          : sortby === "3"
-            ? { $sort: { name: 1 } }
-            : { $sort: { name: -1 } },
+        ? { $sort: { price: 1 } }
+        : sortby === "3"
+        ? { $sort: { name: 1 } }
+        : { $sort: { name: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -184,12 +190,12 @@ const getAllMenusByRestaurant = async (req) => {
       },
       ...(category
         ? [
-          {
-            $match: {
-              "categoryId._id": new mongoose.Types.ObjectId(category),
+            {
+              $match: {
+                "categoryId._id": new mongoose.Types.ObjectId(category),
+              },
             },
-          },
-        ]
+          ]
         : []),
     ]);
     return {
@@ -262,18 +268,7 @@ const deleteMenuById = async (req) => {
 
     // Delete images from Cloudinary if they exist
     const deletePromises = [];
-
-    if (existingMenu.image) {
-      const publicId = existingMenu.image.split("/").pop().split(".")[0];
-      deletePromises.push(
-        cloudinary.uploader
-          .destroy(`menu_images/${publicId}`)
-          .catch((error) =>
-            console.error("Failed to delete menu from Cloudinary:", error)
-          )
-      );
-    }
-
+    deletePromises.push(deleteImageFromCloudinary(existingMenu.image));
     await Promise.all(deletePromises);
 
     // Delete restaurant and user documents
@@ -329,8 +324,6 @@ const updateMenuById = async (req) => {
     throw error;
   }
 
-
-
   const mainFile = req.files["image"] ? req.files["image"][0] : null;
 
   const session = await mongoose.startSession();
@@ -348,6 +341,8 @@ const updateMenuById = async (req) => {
 
     let mainImageUrl = existingMenu.image;
     if (mainFile) {
+      // Delete old image from Cloudinary
+      await deleteImageFromCloudinary(existingMenu.image);
       mainImageUrl = await uploadToCloudinary(mainFile.path, "menu_images");
     }
     console.log("check " + mainImageUrl);

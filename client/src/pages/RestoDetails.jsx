@@ -31,7 +31,7 @@ function RestoDetails() {
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.state?.id;
-  const itemName = location?.state?.name
+  const itemName = location?.state?.name;
   const disCount = location.state?.discount;
   // console.log(location.state?.discount);
   const [timeSlots, setTimeSlots] = useState([]);
@@ -174,11 +174,10 @@ function RestoDetails() {
   };
 
   const now = new Date();
-  const todayDate = now.toISOString().split('T')[0];
+  const todayDate = now.toISOString().split("T")[0];
   const currentHour = now.getHours();
 
   const filteredSlots = slotsForDate?.filter((time) => {
-
     const selectedDate = bookingData?.date;
     if (selectedDate < todayDate) return false;
 
@@ -264,7 +263,6 @@ function RestoDetails() {
     );
   }
 
-
   const tabs = [
     { id: "overview", label: "Restaurant Details ", icon: LayoutDashboard },
     { id: "menu", label: "Menu Items", icon: Utensils },
@@ -287,7 +285,9 @@ function RestoDetails() {
 
         {/* Back Button */}
         <button
-          onClick={() => { itemName ? navigate(`/menu?search=${itemName}`) : navigate(-1) }}
+          onClick={() => {
+            itemName ? navigate(`/menu?search=${itemName}`) : navigate(-1);
+          }}
           className="absolute top-20 left-6 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition duration-200 z-10"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -344,10 +344,11 @@ function RestoDetails() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${activeTab === tab.id
-                        ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
-                        : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
-                        }`}
+                      className={`flex items-center space-x-2 px-6 py-4 font-medium transition duration-200 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? "text-orange-500 border-b-2 border-orange-500 bg-orange-50"
+                          : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
+                      }`}
                     >
                       <IconComponent className="w-5 h-5" />
                       <span>{tab.label}</span>
@@ -495,18 +496,28 @@ function RestoDetails() {
                         disabled={time?.maxBookings < 1}
                         key={time.timeSlot}
                         onClick={() => {
-                          setBookingData({ ...bookingData, timeSlotId: time._id });
-                          setSelectedSlot(slotsForDate.find((s) => s._id === time._id) || null);
+                          setBookingData({
+                            ...bookingData,
+                            timeSlotId: time._id,
+                          });
+                          setSelectedSlot(
+                            slotsForDate.find((s) => s._id === time._id) || null
+                          );
                         }}
-                        className={`px-3 py-2 text-sm rounded-lg border transition duration-200 ${bookingData.timeSlotId === time._id
-                          ? "bg-orange-500 text-white border-orange-500"
-                          : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
-                          }`}
+                        className={`px-3 py-2 text-sm rounded-lg border transition duration-200 ${
+                          bookingData.timeSlotId === time._id
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                        }`}
                       >
                         {time.timeSlot}
                       </button>
                     ))}
-                    {filteredSlots?.length === 0 && <p className="col-span-2 text-gray-400">You missed slots for this date.</p>}
+                    {filteredSlots?.length === 0 && (
+                      <p className="col-span-2 text-gray-400">
+                        You missed slots for this date.
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : selectedDate != "" ? (
@@ -547,7 +558,7 @@ function RestoDetails() {
                       disabled={
                         bookingData.numberOfGuests >= 20 ||
                         bookingData.numberOfGuests + 1 >
-                        selectedSlot?.maxBookings
+                          selectedSlot?.maxBookings
                       }
                       onClick={() =>
                         setBookingData({
@@ -555,12 +566,13 @@ function RestoDetails() {
                           numberOfGuests: bookingData.numberOfGuests + 1,
                         })
                       }
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition duration-200 ${bookingData.numberOfGuests >= 20 ||
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition duration-200 ${
+                        bookingData.numberOfGuests >= 20 ||
                         bookingData.numberOfGuests + 1 >
-                        selectedSlot?.maxBookings
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                        }`}
+                          selectedSlot?.maxBookings
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      }`}
                     >
                       +
                     </button>
@@ -570,13 +582,14 @@ function RestoDetails() {
                           getRemainingSeats() <= 5
                             ? "text-red-600 font-semibold"
                             : getRemainingSeats() <= 10
-                              ? "text-orange-600 font-medium"
-                              : "text-green-600"
+                            ? "text-orange-600 font-medium"
+                            : "text-green-600"
                         }
                       >
                         {getRemainingSeats() > 0
-                          ? `${getRemainingSeats()} seat${getRemainingSeats() !== 1 ? "s" : ""
-                          } remaining`
+                          ? `${getRemainingSeats()} seat${
+                              getRemainingSeats() !== 1 ? "s" : ""
+                            } remaining`
                           : "No seats available"}
                       </p>
                     ) : (

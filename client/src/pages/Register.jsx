@@ -31,7 +31,6 @@ function Register() {
     }
   };
 
-
   const validateName = (name) => {
     if (!name.trim()) {
       return "Name is required";
@@ -67,7 +66,6 @@ function Register() {
       if (cleanPhone.length !== 10) {
         return "Phone number must be 10 digits";
       }
-
     }
     return;
   };
@@ -83,24 +81,8 @@ function Register() {
       return "Password must contain at least one uppercase letter, one lowercase letter, and one number";
     }
     return;
-
   };
 
-  // const validateForm = () => {
-  //   const newErrors = {
-  //     name: validateName(regiValue.name),
-  //     email: validateEmail(regiValue.email),
-  //     phone: validatePhone(regiValue.phone),
-  //     password: validatePassword(regiValue.password),
-  //   };
-
-  //   Object.keys(newErrors).forEach((key) => {
-  //     if (!newErrors[key]) delete newErrors[key];
-  //   });
-
-  //   setErrors(newErrors);
-  //   return Object.keys(newErrors).length === 0;
-  // };
   const validateForm = () => {
     const newErrors = {};
 
@@ -120,14 +102,12 @@ function Register() {
 
     return {
       isValid: Object.keys(newErrors).length === 0,
-      newErrors
+      newErrors,
     };
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
 
     const { isValid, newErrors } = validateForm();
 
@@ -153,8 +133,7 @@ function Register() {
     } catch (err) {
       console.log(err);
 
-      if (err?.response?.data?.error)
-        toast.error(err.response.data.error);
+      if (err?.response?.data?.error) toast.error(err.response.data.error);
     }
   };
 
@@ -174,10 +153,11 @@ function Register() {
               value={regiValue.name}
               onChange={handleRegister}
               placeholder="Enter your full name"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.name
-                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                : "focus:border-orange-500 focus:ring-orange-200"
-                } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.name
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
             {errors.name && (
@@ -196,10 +176,11 @@ function Register() {
               value={regiValue.email}
               onChange={handleRegister}
               placeholder="Enter your email address"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.email
-                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                : "focus:border-orange-500 focus:ring-orange-200"
-                } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.email
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
               required
             />
             {errors.email && (
@@ -210,7 +191,6 @@ function Register() {
           <div className="relative mb-4">
             <label htmlFor="phone" className="leading-7 text-sm text-gray-700">
               Phone Number{" "}
-
             </label>
             <input
               type="number"
@@ -219,10 +199,11 @@ function Register() {
               value={regiValue.phone}
               onChange={handleRegister}
               placeholder="Enter your phone number"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.phone
-                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                : "focus:border-orange-500 focus:ring-orange-200"
-                } focus:ring-2`}
+              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                errors.phone
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                  : "focus:border-orange-500 focus:ring-orange-200"
+              } focus:ring-2`}
             />
             {errors.phone && (
               <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -237,7 +218,6 @@ function Register() {
               Password
             </label>
             <div className="relative w-full">
-
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
@@ -245,10 +225,11 @@ function Register() {
                 value={regiValue.password}
                 onChange={handleRegister}
                 placeholder="Enter your password"
-                className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${errors.password
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                  : "focus:border-orange-500 focus:ring-orange-200"
-                  } focus:ring-2`}
+                className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                  errors.password
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "focus:border-orange-500 focus:ring-orange-200"
+                } focus:ring-2`}
                 required
               />
               <button
