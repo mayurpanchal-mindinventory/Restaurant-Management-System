@@ -3,6 +3,9 @@ const { STATUS, MESSAGES } = require("../utils/constants");
 const TimeSlot = require("../models/TimeSlot");
 exports.createSlot = async (data) => {
   try {
+    if (!data.timeSlot || !data.date || !data.restaurantId || !data.discountPercent || !data.maxBookings) {
+      throw new Error("Required All Field(timeSlot,date,restaurantId,discountPercent,maxBookings)");
+    }
     const exists = await TimeSlot.findOne({
       timeSlot: data.timeSlot,
       date: data.date,
