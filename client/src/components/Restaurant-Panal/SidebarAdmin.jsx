@@ -14,7 +14,7 @@ function SidebarAdmin() {
     }`;
 
   return (
-    <div className="flex flex-col w-64 h-screen bg-white border-r border-gray-200">
+    <div className="flex flex-col w-full h-auto md:w-64 md:h-screen bg-white border-r border-gray-200">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200">
         <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white">
