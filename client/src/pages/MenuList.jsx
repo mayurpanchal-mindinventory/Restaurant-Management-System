@@ -129,7 +129,7 @@ function MenuList() {
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead>
+              <thead className="hidden xl:table-row-group">
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Dish</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
@@ -137,7 +137,49 @@ function MenuList() {
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-sm">
+              <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50/50">
+                {menulist.length > 0 ? (
+                  menulist.map((r) => (
+                    <div key={r._id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex items-center gap-4 mb-4">
+                        <img
+                          src={r.image || "placehold.co"}
+                          className="h-16 w-16 rounded-xl object-cover border border-gray-200 shadow-sm"
+                          alt={r.name}
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-bold text-gray-900">{r?.name}</h4>
+                            <span className="font-mono font-black text-indigo-600">₹{r?.price || "0"}</span>
+                          </div>
+                          <span className="mt-1 inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[10px] font-black uppercase border border-indigo-100">
+                            {r?.categoryId.categoryName}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 border-t border-gray-50 pt-3">
+                        <Link
+                          to={`/admin/editmenu/${r._id}`}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 text-gray-600 rounded-xl font-bold text-xs hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+                        >
+                          <PencilIcon className="h-4 w-4" /> Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(r._id)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 text-gray-600 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition-all"
+                        >
+                          <TrashIcon className="h-4 w-4" /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10">No items found</div>
+                )}
+              </div>
+
+              <tbody className="xl:table-row-group hidden divide-y divide-gray-100 text-sm">
                 {menulist.length > 0 ? (
                   menulist.map((r) => (
                     <tr key={r._id} className="hover:bg-gray-50 transition-colors group">

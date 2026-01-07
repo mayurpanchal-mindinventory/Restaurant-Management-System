@@ -24,6 +24,7 @@ import {
   getSlotListByRestaurant,
   updateSlot,
 } from "../services/adminService";
+import { SaveIcon, Users2 } from "lucide-react";
 
 const validationSchema = Yup.object({
   timeslot: Yup.string().required("Time Slot is required"),
@@ -167,7 +168,7 @@ function Slot() {
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-auto">
           <table className="w-full text-left border-collapse ">
-            <thead>
+            <thead className="hidden xl:table-header-group">
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Date
@@ -186,60 +187,111 @@ function Slot() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {slot?.length > 0 ? (
-                slot.map((r) => (
-                  <tr
-                    key={r._id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-semibold text-slate-700">
-                      {new Date(r.date).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-100 uppercase">
-                        {r.timeSlot}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 font-medium">
-                      {r.maxBookings} Guests
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-emerald-600 font-bold">
-                        {r.discountPercent}% Off
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <button
-                        onClick={() => editSlot(r._id)}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                      >
-                        <PencilIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(r._id)}
-                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
+
+            <>
+              <div className="xl:hidden grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+                {slot?.length > 0 ? (
+                  slot.map((r) => (
+                    <div key={r._id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</p>
+                          <p className="text-sm font-bold text-slate-700">
+                            {new Date(r.date).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                        <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black border border-indigo-100 uppercase">
+                          {r.timeSlot}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-50 mb-4">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <Users2 size={16} className="text-slate-400" />
+                          <span className="text-sm font-semibold">{r.maxBookings} Guests</span>
+                        </div>
+                        <div className="flex items-center gap-1 justify-end">
+                          <span className="text-xs font-bold text-slate-400">Discount:</span>
+                          <span className="text-sm font-bold text-emerald-600">{r.discountPercent}% Off</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editSlot(r._id)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl font-bold text-xs hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+                        >
+                          <PencilIcon className="w-4 h-4" /> Edit Slot
+                        </button>
+                        <button
+                          onClick={() => handleDelete(r._id)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl font-bold text-xs hover:bg-rose-50 hover:text-rose-600 transition-all"
+                        >
+                          <TrashIcon className="w-4 h-4" /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full py-10 text-center text-slate-400 italic">No slots configured.</div>
+                )}
+              </div>
+
+              <tbody className="hidden xl:table-row-group divide-y divide-slate-100">
+                {slot?.length > 0 ? (
+                  slot.map((r) => (
+                    <tr key={r._id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-slate-700">
+                        {new Date(r.date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-100 uppercase">
+                          {r.timeSlot}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600 font-medium">
+                        <span className="flex flex-row gap-2">
+                          <Users2 />
+                          {r.maxBookings} Guests
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-emerald-600 font-bold">{r.discountPercent}% Off</span>
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          onClick={() => editSlot(r._id)}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <PencilIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(r._id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <TrashIcon className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-20 text-center text-slate-400 italic">
+                      No slots configured.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="py-20 text-center text-slate-400 italic"
-                  >
-                    No slots configured.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+                )}
+              </tbody>
+            </>
+
           </table>
         </div>
 
