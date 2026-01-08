@@ -72,7 +72,6 @@ function FeaturedRestaurants() {
     const fetchRestaurants = async () => {
       try {
         setLoading(true);
-
         const response = await apiClient.getFeaturedRestaurants();
         setRestaurants(response.data.data.restaurants || []);
         setError(null);
@@ -143,8 +142,7 @@ function FeaturedRestaurants() {
               .filter((i) => i.isActive === true)
               .map((restaurant) => (
                 <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-              ))
-            }
+              ))}
           </div>
         )}
       </div>

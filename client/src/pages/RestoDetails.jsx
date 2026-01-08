@@ -150,7 +150,6 @@ function RestoDetails() {
           setLoading(false);
           return;
         }
-
         const response = await getRestaurantsById(id);
         setResto(response.data);
       } catch (err) {
@@ -216,7 +215,7 @@ function RestoDetails() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading restaurant details...</p>
+          <p className="text-gray-600">Loading restaurant details....</p>
         </div>
       </div>
     );
@@ -321,7 +320,7 @@ function RestoDetails() {
           <div className="flex items-center space-x-3">
             <div>
               <div className="absolute top-0 right-4 bg-white rounded-full shadow-lg px-4 py-2 flex items-center gap-2">
-                <span className="text-orange-500 font-bold text-xl">
+                <span className="text-orange-500 font-bold text-sm md:text-xl">
                   {disCount}%
                 </span>
                 <span className="text-gray-600 text-sm font-medium">OFF</span>
@@ -337,7 +336,7 @@ function RestoDetails() {
           <div className="lg:w-[70%]">
             {/* Navigation Tabs */}
             <div className="bg-white rounded-xl shadow-lg mb-6">
-              <div className="flex border-b border-gray-200 overflow-x-auto">
+              <div className="flex flex-col md:flex-row border-b border-gray-200 overflow-x-auto">
                 {tabs.map((tab) => {
                   const IconComponent = tab.icon;
                   return (
@@ -397,7 +396,6 @@ function RestoDetails() {
                         </p>
                       )}
                     </div>
-
                     <div className="bg-gray-50 rounded-lg p-6">
                       <div className="flex items-center space-x-3 mb-4">
                         <Calendar className="w-6 h-6 text-orange-500" />
@@ -411,14 +409,12 @@ function RestoDetails() {
                             const closedDate = new Date(date);
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
-
                             return closedDate >= today;
                           })
                         )}
                       </p>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {resto.userId?.email && (
                       <div className="flex items-center space-x-3 text-gray-600">
@@ -435,7 +431,7 @@ function RestoDetails() {
                   </div>
                 </div>
               )}
-              {/*Menu part */}
+              {/* Menu part */}
               {activeTab === "menu" && (
                 <div className="text-center py-12">
                   <h3 className="text-xl flex flex-row font-semibold text-gray-600 mb-2">

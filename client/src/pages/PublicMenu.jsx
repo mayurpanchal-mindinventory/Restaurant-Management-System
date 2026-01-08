@@ -153,7 +153,9 @@ const PublicMenu = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <button
-          onClick={() => { searchParams.get("search") ? navigate("/home") : navigate(-1) }}
+          onClick={() => {
+            searchParams.get("search") ? navigate("/home") : navigate(-1);
+          }}
           className="absolute z-20 top-20 left-6 bg-white hover:bg-orange-500 hover:text-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -189,7 +191,7 @@ const PublicMenu = () => {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="appearance-none w-full bg-white px-4 py-2 pr-10 border border-slate-200 rounded-xl shadow-sm text-slate-700 font-medium focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all duration-300 cursor-pointer hover:bg-slate-50"
+              className="text-sm appearance-none w-full bg-white px-4 py-2 pr-10 border border-slate-200 rounded-xl shadow-sm text-slate-700 font-medium focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all duration-300 cursor-pointer hover:bg-slate-50"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -321,7 +323,6 @@ const PublicMenu = () => {
                     <NavLink
                       to="/home/restaurant"
                       state={{ id: item.restaurantId, name: item.name }}
-
                     >
                       <button
                         className={`text-sm font-semibold text-orange-500  hover:text-orange-600 transition duration-200`}
@@ -362,10 +363,11 @@ const PublicMenu = () => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={loading}
-                  className={`px-3 py-2 border rounded-lg text-sm transition ${pageNum === pagination.currentPage
-                    ? "bg-orange-500 text-white border-orange-500"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
+                  className={`px-3 py-2 border rounded-lg text-sm transition ${
+                    pageNum === pagination.currentPage
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
                   {pageNum}
                 </button>

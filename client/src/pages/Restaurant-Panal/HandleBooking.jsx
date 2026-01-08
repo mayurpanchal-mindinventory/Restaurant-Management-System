@@ -57,12 +57,14 @@ function HanldeBooking(params) {
     try {
       const now = new Date();
       const currentHour = now.getHours();
-      const todayDate = now.toLocaleDateString('en-CA');
-      const bookedDate = new Date(date).toLocaleDateString('en-CA');
+      const todayDate = now.toLocaleDateString("en-CA");
+      const bookedDate = new Date(date).toLocaleDateString("en-CA");
 
       if (newStatus === "Completed") {
         if (todayDate < bookedDate || getSlotHour(timeslot) > currentHour) {
-          toast.error("Sorry, you cannot complete booking before the booked date");
+          toast.error(
+            "Sorry, you cannot complete booking before the booked date"
+          );
           return;
         }
       }
@@ -205,7 +207,7 @@ function HanldeBooking(params) {
           </div>
         </div>
       </div>
-      {/* Statistics Cards */}
+      {/*  Cards on top*/}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg p-6 border border-gray-200">
           <div className="flex items-center justify-between">
@@ -272,7 +274,6 @@ function HanldeBooking(params) {
       {/* filtering  */}
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:flex items-center gap-3">
-          {/* Search */}
           <div className="flex-grow relative lg:max-w-xs">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -288,7 +289,6 @@ function HanldeBooking(params) {
             />
           </div>
 
-          {/* Date */}
           <div className="relative">
             <Calendar
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -303,7 +303,6 @@ function HanldeBooking(params) {
             />
           </div>
 
-          {/* Status */}
           <div className="relative">
             <Filter
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -323,7 +322,6 @@ function HanldeBooking(params) {
             </select>
           </div>
 
-          {/* Apply Button - THE TRIGGER */}
           <button
             onClick={handleApplyClick}
             className="flex items-center justify-center gap-2 px-6 py-2 bg-orange-600 text-white text-sm font-bold rounded-lg hover:bg-orange-700 transition-all shadow-sm active:scale-95"
@@ -332,7 +330,6 @@ function HanldeBooking(params) {
             Apply Filters
           </button>
 
-          {/* Reset */}
           <button
             onClick={handleResetClick}
             className="text-xs font-bold text-gray-400 hover:text-orange-600 px-2 transition-colors"
@@ -342,14 +339,13 @@ function HanldeBooking(params) {
         </div>
       </div>
 
-      {/* Bookings Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Recent Bookings</h2>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="hidden md:table min-w-full">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -404,10 +400,10 @@ function HanldeBooking(params) {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.date
                           ? new Date(booking.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                           : "N/A"}
                       </div>
                     </td>
@@ -447,7 +443,12 @@ function HanldeBooking(params) {
                           className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
                           value={booking.status}
                           onChange={(e) =>
-                            handleStatusChange(booking._id, e.target.value, booking.date, booking.timeSlotId?.timeSlot)
+                            handleStatusChange(
+                              booking._id,
+                              e.target.value,
+                              booking.date,
+                              booking.timeSlotId?.timeSlot
+                            )
                           }
                         >
                           {[
@@ -465,10 +466,11 @@ function HanldeBooking(params) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                          isBillGenerated(booking)
                             ? "bg-green-100 text-green-700"
                             : "bg-gray-100 text-gray-700"
-                          }`}
+                        }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}
                       </span>
@@ -519,6 +521,155 @@ function HanldeBooking(params) {
               )}
             </tbody>
           </table>
+
+          {/* mobile screen card */}
+          <div className="md:hidden">
+            {dataList.length > 0 ? (
+              <div className="space-y-4">
+                {dataList.map((booking, index) => (
+                  <div
+                    key={booking._id || index}
+                    className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-600">
+                            #{String(index + 1).padStart(2, "0")}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {booking.userId?.name || "N/A"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {booking.userId?.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-500 mb-1">Date</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {booking.date
+                            ? new Date(booking.date).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )
+                            : "N/A"}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-500 mb-1">Time</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {booking.timeSlotId?.timeSlot || "N/A"}
+                        </p>
+                        {booking.timeSlotId?.discountPercent > 0 && (
+                          <p className="text-xs text-blue-600">
+                            {booking.timeSlotId.discountPercent}% off
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-500 mb-1">Guests</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {booking.numberOfGuests} Guests
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-500 mb-1">
+                          Bill Status
+                        </p>
+
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${
+                            isBillGenerated(booking)
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {isBillGenerated(booking) ? "Generated" : "Pending"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Status</p>
+                        {booking.status === "Cancelled" ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700`}
+                          >
+                            Cancelled
+                          </span>
+                        ) : booking.status === "Completed" ? (
+                          <span
+                            className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700`}
+                          >
+                            Completed
+                          </span>
+                        ) : (
+                          <select
+                            className="text-xs font-medium bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded outline-none hover:border-gray-400 appearance-none cursor-pointer"
+                            value={booking.status}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                booking._id,
+                                e.target.value,
+                                booking.date,
+                                booking.timeSlotId?.timeSlot
+                              )
+                            }
+                          >
+                            {[
+                              "Pending",
+                              "Accepted",
+                              "Cancelled",
+                              "Completed",
+                            ].map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      {booking?.status === "Completed" && (
+                        <button
+                          onClick={() =>
+                            !isBillGenerated(booking) &&
+                            handleGenerateBill(booking)
+                          }
+                          disabled={isBillGenerated(booking)}
+                          className={getGenerateBillButtonStyle(booking)}
+                        >
+                          <FileText size={14} className="mr-1" />
+                          {getGenerateBillButtonText(booking)}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Calendar size={24} className="text-gray-400" />
+                </div>
+                <p className="mt-4 text-lg font-semibold text-gray-900">
+                  No Bookings Found
+                </p>
+                <p className="text-gray-500 text-center mt-1">
+                  Bookings will appear here once customers make reservations.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

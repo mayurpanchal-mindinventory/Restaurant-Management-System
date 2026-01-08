@@ -199,7 +199,7 @@ const BillList = ({ userId }) => {
         ) : bills.length > 0 ? (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full">
+              <table className=" hidden md:table min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -337,6 +337,152 @@ const BillList = ({ userId }) => {
                   ))}
                 </tbody>
               </table>
+
+              <div className="md:hidden">
+                {bills.length > 0 ? (
+                  <div className="space-y-4">
+                    {bills.map((bill, index) => (
+                      <div
+                        key={bill._id || index}
+                        className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-600">
+                                #{String(index + 1).padStart(2, "0")}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {bill?.userId?.name || "Unknown"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {bill?.userId.email || "No-email"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-gray-50 rounded-lg p-2">
+                            <p className="text-xs text-gray-500 mb-1">Date</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              {bill?.bookingId?.date
+                                ? new Date(
+                                    bill?.bookingId?.date
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                : "N/A"}
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-2">
+                            <p className="text-xs text-gray-500 mb-1">Guest</p>
+                            <p className=" flex flex-row items-baseline  text-sm font-medium text-gray-900">
+                              <Users size={13} className="mr-1" />
+                              {bill?.bookingId?.numberOfGuests || "N/A"}
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-2">
+                            <p className="text-xs text-gray-500 mb-1">Items</p>
+                            <p className=" flex flex-row items-baseline  text-sm font-medium text-gray-900">
+                              <ShoppingBag size={12} className="mr-1" />
+                              {bill.items?.length || 0} items
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-2">
+                            <p className="text-xs text-gray-500 mb-1">Total</p>
+                            <p className=" flex flex-row items-baseline  text-sm font-medium text-gray-900">
+                              ₹{bill.grandTotal?.toFixed(2) || "0.00"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-row items-center justify-between pt-2 border-t border-gray-100">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Payment status
+                            </p>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                                bill?.paymentStatus === "Paid"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {bill?.paymentStatus || "Unpaid"}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">
+                              share with user
+                            </p>
+                            {bill?.paymentStatus === "Paid" ? (
+                              <label className="flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={bill?.isSharedWithUser || false}
+                                  onChange={() =>
+                                    handleToggleSharedWithUser(
+                                      bill._id,
+                                      bill?.isSharedWithUser || false
+                                    )
+                                  }
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                              </label>
+                            ) : (
+                              <input
+                                type="checkbox"
+                                disabled
+                                className="h-4 w-4 text-gray-400 focus:ring-gray-400 border-gray-300 rounded cursor-not-allowed"
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleViewBill(bill)}
+                                className="inline-flex items-around px-3 py-1.5 bg-gray-100 text-dark text-xs font-medium hover:bg-orange-100 hover:text-orange-600 rounded "
+                                title="View Bill Details"
+                              >
+                                <Eye size={14} className="mr-1" />
+                                View
+                              </button>
+                              {bill?.paymentStatus === "Unpaid" && (
+                                <button
+                                  onClick={() =>
+                                    handleUpdatePaymentStatus(bill._id, "Paid")
+                                  }
+                                  className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
+                                  title="Mark as Paid"
+                                >
+                                  <CreditCard size={14} className="mr-1" />
+                                  Payment
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                      <Calendar size={24} className="text-gray-400" />
+                    </div>
+                    <p className="mt-4 text-lg font-semibold text-gray-900">
+                      No Bill Found
+                    </p>
+                    <p className="text-gray-500 text-center mt-1">
+                      Bill will appear here once you created from booking
+                      section.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}
