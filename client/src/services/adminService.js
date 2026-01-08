@@ -56,8 +56,8 @@ export const getMenuById = async (id) => {
 export const updateMenuById = async (menuId, body) => {
   return await apiClient.put(`api/admin/update-menu/${menuId}`, body);
 };
-export const getRestaurantMenu = async (page, id) => {
-  return await apiClient.get(`api/owner/menulist/${id}?page=${page}`);
+export const getRestaurantMenu = async (page, id, category, sortby, search) => {
+  return await apiClient.get(`api/owner/menulist/${id}?page=${page}&category=${category}&sortby=${sortby}&search=${search}`);
 };
 export const createSlot = async (body) => {
   return await apiClient.post(`api/admin/slot`, body);

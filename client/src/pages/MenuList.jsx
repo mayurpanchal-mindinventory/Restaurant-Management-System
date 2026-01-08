@@ -18,9 +18,10 @@ function MenuList() {
   const [sortby, setSortBy] = useState("");
   const { confirm } = useConfirm();
 
-  const getmenus = async () => {
+  const getmenus = async (current) => {
     try {
-      const res = await getMenuList(currentpage, id, selectedCategory, sortby, searchTerm);
+      current && setcurrentpage(1)
+      const res = await getMenuList(current ? current : currentpage, id, selectedCategory, sortby, searchTerm);
       setMenuList(res?.data?.data?.menuData || []);
       setTotalPages(res?.data?.data?.totalPages || 1);
     } catch (e) {
@@ -40,9 +41,16 @@ function MenuList() {
     }
   };
 
+
   useEffect(() => {
     getmenus();
-  }, [currentpage, sortby, searchTerm]);
+  }, [currentpage]);
+
+
+  useEffect(() => {
+    getmenus(1);
+    setcurrentpage(1);
+  }, [sortby, searchTerm]);
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -77,7 +85,7 @@ function MenuList() {
           </Link>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Search Item</label>
             <div className="relative">
@@ -119,10 +127,17 @@ function MenuList() {
           </div>
 
           <button
-            onClick={getmenus}
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md"
+            onClick={() => getmenus(1)}
+            className="flex items-center justify-center w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md"
           >
-            <FiRefreshCw className="text-indigo-400" /> Apply
+            Apply Filter
+          </button>
+          <button
+            type="button"
+            // onClick={clearfilter}
+            className="flex items-center gap-3  text-sm justify-center py-2.5 bg-slate-100 text-black-500 w-full font-bold rounded-xl hover:bg-slate-200 hover:text-slate-700 transition-all shadow-md"
+          >
+            <FiRefreshCw className="w-4 h-4 text-indigo-600" />  Reset Filter
           </button>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getRestaurantMenu, deleteMenuById } from "../../services/adminService";
+import { getRestaurantMenu, deleteMenuById, getAllCategories } from "../../services/adminService";
 import { Link } from "react-router-dom";
 import { useConfirm } from "../../context/ConfirmationContext";
 import {
@@ -13,13 +13,19 @@ import {
   DollarSign,
   Tag,
   Image as ImageIcon,
+  Search,
+  Check,
 } from "lucide-react";
+import { FiRefreshCw } from "react-icons/fi";
 
 function MenuByRestaurant() {
   const userIdFromLocal = localStorage.getItem("user");
   const userJson = JSON.parse(userIdFromLocal);
-
-  console.log(userJson?.user?.id);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortby, setSortBy] = useState("");
+  // console.log(userJson?.user?.id);
 
   const userId = userJson?.user?.id;
   const [menulist, setMenuList] = useState([]);
@@ -27,19 +33,35 @@ function MenuByRestaurant() {
   const [currentPage, setcurrentpage] = useState(1);
   const { confirm } = useConfirm();
 
-  const getmenus = async () => {
-    const res = await getRestaurantMenu(currentPage, userId);
+  const getmenus = async (current) => {
+    const res = await getRestaurantMenu(current ? current : currentPage, userId, selectedCategory, sortby, searchTerm);
     setMenuList(res?.data?.data?.menuData || []);
     setTotalPages(res?.data?.data?.totalPages || 1);
   };
 
 
-
+  useEffect(() => {
+    const fetchCats = async () => {
+      const res = await getAllCategories();
+      setCategories(res.data);
+    };
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     getmenus();
   }, [currentPage]);
 
+
+  const clearAll = async () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    setSortBy("");
+  }
+  useEffect(() => {
+    getmenus(1);
+    setcurrentpage(1);
+  }, [sortby, searchTerm, selectedCategory]);
   const handleDelete = async (id) => {
     const isConfirmed = await confirm({
       title: "Delete Menu?",
@@ -90,6 +112,8 @@ function MenuByRestaurant() {
         )}
       </div>
 
+
+
       {/* Stats Section - Minimal Style */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
@@ -132,6 +156,54 @@ function MenuByRestaurant() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex  gap-3 items-baseline">
+          <div className="flex-grow relative lg:max-w-xs">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-orange-500 outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+            >
+              <option value="">All Categories</option>
+              {Array.isArray(categories) && categories.map((a) => (
+                <option key={a._id} value={a._id}>{a.categoryName}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <select
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+            >
+              <option value="4">Name: Z-A</option>
+              <option value="1">Price: High to Low</option>
+              <option value="2">Price: Low to High</option>
+              <option value="3">Name: A-Z</option>
+            </select>
+          </div>
+          <button
+            onClick={clearAll}
+            className="text-xs font-bold text-gray-400 hover:text-orange-600 px-2 transition-colors"
+          >
+            Reset
+          </button>
+        </div>
+
       </div>
 
       {/* Table Section - Clean & Minimal */}
