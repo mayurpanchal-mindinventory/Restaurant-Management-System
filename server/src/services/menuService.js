@@ -150,13 +150,13 @@ const getAllMenusByRestaurant = async (req) => {
       {
         $match: search
           ? {
-              $or: [
-                { name: { $regex: search, $options: "i" } },
-                {
-                  "categories.categoryName": { $regex: search, $options: "i" },
-                },
-              ],
-            }
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              {
+                "categories.categoryName": { $regex: search, $options: "i" },
+              },
+            ],
+          }
           : {},
       },
     ];
@@ -171,10 +171,10 @@ const getAllMenusByRestaurant = async (req) => {
       sortby === "1"
         ? { $sort: { price: -1 } }
         : sortby === "2"
-        ? { $sort: { price: 1 } }
-        : sortby === "3"
-        ? { $sort: { name: 1 } }
-        : { $sort: { name: -1 } },
+          ? { $sort: { price: 1 } }
+          : sortby === "3"
+            ? { $sort: { name: 1 } }
+            : { $sort: { name: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -190,12 +190,12 @@ const getAllMenusByRestaurant = async (req) => {
       },
       ...(category
         ? [
-            {
-              $match: {
-                "categoryId._id": new mongoose.Types.ObjectId(category),
-              },
+          {
+            $match: {
+              "categoryId._id": new mongoose.Types.ObjectId(category),
             },
-          ]
+          },
+        ]
         : []),
     ]);
     return {

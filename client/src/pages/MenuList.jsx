@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { FiArrowLeft, FiFilter, FiPlus, FiSearch, FiRefreshCw } from "react-icons/fi";
+import { FiArrowLeft, FiFilter, FiPlus, FiSearch, FiRefreshCw, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { deleteMenuById, getAllCategories, getMenuList } from "../services/adminService";
 import { useConfirm } from "../context/ConfirmationContext";
 import { toast } from "react-hot-toast";
@@ -77,7 +77,7 @@ function MenuList() {
           </Link>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Search Item</label>
             <div className="relative">
@@ -111,10 +111,10 @@ function MenuList() {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
             >
+              <option value="4">Name: Z-A</option>
               <option value="1">Price: High to Low</option>
               <option value="2">Price: Low to High</option>
               <option value="3">Name: A-Z</option>
-              <option value="4">Name: Z-A</option>
             </select>
           </div>
 
@@ -129,7 +129,7 @@ function MenuList() {
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead>
+              <thead className="hidden xl:table-row-group">
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Dish</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
@@ -137,7 +137,8 @@ function MenuList() {
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-sm">
+
+              <tbody className="xl:table-row-group hidden divide-y divide-gray-100 text-sm">
                 {menulist.length > 0 ? (
                   menulist.map((r) => (
                     <tr key={r._id} className="hover:bg-gray-50 transition-colors group">
@@ -194,27 +195,69 @@ function MenuList() {
                 )}
               </tbody>
             </table>
+            <div className="xl:hidden grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 bg-gray-50/50">
+              {menulist.length > 0 ? (
+                menulist.map((r) => (
+                  <div key={r._id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center gap-4 mb-4">
+                      <img
+                        src={r.image || "placehold.co"}
+                        className="h-16 w-16 rounded-xl object-cover border border-gray-200 shadow-sm"
+                        alt={r.name}
+                      />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-gray-900">{r?.name}</h4>
+                          <span className="font-mono font-black text-indigo-600">₹{r?.price || "0"}</span>
+                        </div>
+                        <span className="mt-1 inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[10px] font-black uppercase border border-indigo-100">
+                          {r?.categoryId.categoryName}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 border-t border-gray-50 pt-3">
+                      <Link
+                        to={`/admin/editmenu/${r._id}`}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 text-gray-600 rounded-xl font-bold text-xs hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+                      >
+                        <PencilIcon className="h-4 w-4" /> Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(r._id)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 text-gray-600 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition-all"
+                      >
+                        <TrashIcon className="h-4 w-4" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10">No items found</div>
+              )}
+            </div>
+
           </div>
 
           {menulist.length > 0 && (
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-500 uppercase">
+              <span className="text-[11px] font-bold text-slate-500 uppercase">
                 Page {currentpage} of {totalPages}
               </span>
               <div className="flex gap-2">
                 <button
                   disabled={currentpage === 1}
                   onClick={() => setcurrentpage(prev => prev - 1)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-bold bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
                 >
-                  Previous
+                  <FiChevronLeft /> Prev
                 </button>
                 <button
                   disabled={currentpage === totalPages}
                   onClick={() => setcurrentpage(prev => prev + 1)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-bold bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
                 >
-                  Next
+                  Next<FiChevronRight />
                 </button>
               </div>
             </div>

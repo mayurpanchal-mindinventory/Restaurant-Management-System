@@ -6,6 +6,7 @@ import { createRestaurant, getRestaurantsById, updateRestaurant } from "../servi
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
 import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi";
+import { Eye, EyeOff } from "lucide-react";
 
 
 export default function RestaurantForm() {
@@ -14,6 +15,7 @@ export default function RestaurantForm() {
     const navigate = useNavigate();
     const [apiData, setApiData] = useState(null);
     const [previews, setPreviews] = useState({ main: null, logo: null });
+    const [showPassword, setShowPassword] = useState(false);
 
     const validationSchema = Yup.object({
         restaurantName: Yup.string().required("Name is required"),
@@ -164,6 +166,7 @@ export default function RestaurantForm() {
                                         </div>
                                         <ErrorMessage name="logoImage" component="p" className="text-red-500 text-xs mt-1" />
                                     </div>
+                                    <p className="text-xs text-red-600 p-6 text-center">Note: All images must be less than 5 MB</p>
                                 </div>
                             </div>
 
@@ -192,7 +195,22 @@ export default function RestaurantForm() {
 
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-600">Password</label>
-                                            <Field name="password" type="password" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <div className="relative mt-1">
+                                                <Field
+                                                    name="password"
+                                                    type={showPassword ? "text" : "password"}
+                                                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-10 bg-gray-50 border"
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                                >
+                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
                                             <ErrorMessage name="password" component="p" className="text-red-500 text-xs mt-1" />
 
                                         </div>
