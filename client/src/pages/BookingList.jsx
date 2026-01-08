@@ -77,8 +77,8 @@ function BookingList() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 ">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col text-start lg:flex-row md:items-center justify-between gap-4">
+        <div className="w-full xl:w-auto">
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Booking List
           </h1>
@@ -87,13 +87,14 @@ function BookingList() {
           </p>
         </div>
 
-        <div className="">
+        <div className="w-full xl:w-auto">
           <input
             type="text"
             value={searchTerm}
+            id="searchanything"
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search name, user, or status..."
-            className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
+            className="pl-10 pr-4 py-2.5 w-full lg:w-80 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
           />
         </div>
       </div>
@@ -175,33 +176,119 @@ function BookingList() {
           </div>
         </div>
       </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left bg-white rounded-2xl border-slate-200 shadow-sm">
+            <thead className="xl:table-row-group hidden">
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Restaurant
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Guest
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                  Slot Time
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">
+                  Status
+                </th>
+              </tr>
+            </thead>
 
-      <table className="w-full text-left bg-white rounded-2xl border-slate-200 shadow-sm">
-        <thead className="xl:table-row-group hidden">
-          <tr className="bg-slate-50 border-b border-slate-200">
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Restaurant
-            </th>
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Customer
-            </th>
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Guest
-            </th>
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
-              Slot Time
-            </th>
-            <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">
-              Status
-            </th>
-          </tr>
-        </thead>
 
-        <>
-          <div className="xl:hidden grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+
+            <tbody className="hidden xl:table-row-group divide-y divide-slate-100">
+              {booking.length > 0 ? (
+                booking.map((r) => (
+                  <tr
+                    key={r._id}
+                    className="hover:bg-slate-50/50 transition-colors group"
+                  >
+                    <td className="px-6 py-4 text-sm font-bold text-slate-700">
+                      {r?.date
+                        ? new Date(r.date).toLocaleString().split(",")[0]
+                        : "Date unavailable"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            r?.restaurantId?.logoImage ||
+                            "https://placehold.co/400"
+                          }
+                          className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-100 group-hover:ring-indigo-200 transition-all"
+                          alt="logo"
+                        />
+                        <span className="text-sm font-bold text-slate-900">
+                          {r?.restaurantId?.name || "Restaurant Removed"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-900 leading-none">
+                          {r?.userId?.name}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">
+                          Verified User
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                        <Users size={12} className="text-slate-400" />
+                        {r?.numberOfGuests || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                        <FiClock size={12} className="text-slate-400" />
+                        {r?.timeSlotId?.timeSlot || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end">
+                        <span
+                          className={`px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[r?.status] ||
+                            "bg-slate-100 text-slate-700 border-slate-200"
+                            }`}
+                        >
+                          {r?.status}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="py-24">
+                    <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
+                      <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                        <FiInbox className="text-slate-300" size={32} />
+                      </div>
+                      <h3 className="text-slate-900 font-bold">
+                        No Bookings found
+                      </h3>
+                      <p className="text-slate-500 text-xs mt-1">
+                        Try adjusting your filters or search terms to find what
+                        you're looking for.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
+          </table>
+
+          <div className={`xl:hidden grid grid-cols-1 md:grid-cols-1 ${booking.length > 0 ? `lg:grid-cols-2` : `lg:grid-cols-1`} gap-4 p-4`}>
             {booking.length > 0 ? (
               booking.map((r) => (
                 <div key={r._id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -246,120 +333,48 @@ function BookingList() {
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-10 text-center">No Bookings found</div>
+              <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <FiInbox className="text-slate-300" size={32} />
+                </div>
+                <h3 className="text-slate-900 font-bold">
+                  No Bookings found
+                </h3>
+                <p className="text-slate-500 text-xs mt-1">
+                  Try adjusting your filters or search terms to find what
+                  you're looking for.
+                </p>
+              </div>
             )}
-          </div>
-
-          <tbody className="hidden xl:table-row-group divide-y divide-slate-100">
-            {booking.length > 0 ? (
-              booking.map((r) => (
-                <tr
-                  key={r._id}
-                  className="hover:bg-slate-50/50 transition-colors group"
-                >
-                  <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                    {r?.date
-                      ? new Date(r.date).toLocaleString().split(",")[0]
-                      : "Date unavailable"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={
-                          r?.restaurantId?.logoImage ||
-                          "https://placehold.co/400"
-                        }
-                        className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-100 group-hover:ring-indigo-200 transition-all"
-                        alt="logo"
-                      />
-                      <span className="text-sm font-bold text-slate-900">
-                        {r?.restaurantId?.name || "Restaurant Removed"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-900 leading-none">
-                        {r?.userId?.name}
-                      </span>
-                      <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">
-                        Verified User
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
-                      <Users size={12} className="text-slate-400" />
-                      {r?.numberOfGuests || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
-                      <FiClock size={12} className="text-slate-400" />
-                      {r?.timeSlotId?.timeSlot || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end">
-                      <span
-                        className={`px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[r?.status] ||
-                          "bg-slate-100 text-slate-700 border-slate-200"
-                          }`}
-                      >
-                        {r?.status}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="py-24">
-                  <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
-                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                      <FiInbox className="text-slate-300" size={32} />
-                    </div>
-                    <h3 className="text-slate-900 font-bold">
-                      No Bookings found
-                    </h3>
-                    <p className="text-slate-500 text-xs mt-1">
-                      Try adjusting your filters or search terms to find what
-                      you're looking for.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </>
-
-      </table>
-
-
-      {booking.length > 0 && (
-        <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-            Page <span className="text-indigo-600">{currentpage}</span> of{" "}
-            {totalPages}
-          </div>
-          <div className="flex gap-2">
-            <button
-              disabled={currentpage === 1}
-              onClick={goToPrevpage}
-              className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-            >
-              <FiChevronLeft /> Prev
-            </button>
-            <button
-              disabled={currentpage === totalPages}
-              onClick={goToNextPage}
-              className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-            >
-              Next <FiChevronRight />
-            </button>
           </div>
         </div>
-      )}
+        {
+          booking.length > 0 && (
+            <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                Page <span className="text-indigo-600">{currentpage}</span> of{" "}
+                {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  disabled={currentpage === 1}
+                  onClick={goToPrevpage}
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  <FiChevronLeft /> Prev
+                </button>
+                <button
+                  disabled={currentpage === totalPages}
+                  onClick={goToNextPage}
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  Next <FiChevronRight />
+                </button>
+              </div>
+            </div>
+          )
+        }
+      </div >
     </div>
   );
 }

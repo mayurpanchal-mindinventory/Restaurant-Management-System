@@ -25,7 +25,7 @@ exports.createSlot = async (data) => {
 exports.slotList = async (req) => {
   try {
     const { id } = req.params;
-    let limit = 40;
+    let limit = 50;
     if (!id) throw new Error("Restaurant Id Required");
     let { page, sortby, timeslot } = req.query;
     if (!page) { page = 1; }

@@ -68,8 +68,8 @@ function Restaurant() {
         </Link>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-        <div className="relative w-full md:w-96">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col lg:flex-row gap-4 items-center justify-between shadow-sm">
+        <div className="relative w-full lg:w-96">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
@@ -80,11 +80,11 @@ function Restaurant() {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Sort by:</span>
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <span className="text-sm lg:flex hidden font-medium text-gray-600 whitespace-nowrap">Sort by:</span>
           <select
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full md:w-48 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
+            className="w-full lg:w-48 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
           >
             <option value="1">Name (A-Z)</option>
             <option value="2">Name (Z-A)</option>
@@ -205,16 +205,17 @@ function Restaurant() {
                       </p>
                     </div>
                   </td>
-
-                  <div className="flex xl:hidden p-10 flex-col items-center justify-center text-center">
-                    <div className="bg-gray-100 p-4 rounded-full mb-4">
-                      <FiInbox size={40} className="text-gray-400" />
+                  <td className="py-24 grid grid-span-1   xl:hidden items-center">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="bg-gray-100 p-4 rounded-full mb-4">
+                        <FiInbox size={40} className="text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900">No restaurants found</h3>
+                      <p className="text-gray-500 max-w-xs mx-auto">
+                        {searchTerm ? "Adjust your search or filters to find what you're looking for." : "Start by adding your first restaurant to the platform."}
+                      </p>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900">No restaurants found</h3>
-                    <p className="text-gray-500 max-w-xs mx-auto">
-                      {searchTerm ? "Adjust your search or filters to find what you're looking for." : "Start by adding your first restaurant to the platform."}
-                    </p>
-                  </div>
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -224,21 +225,21 @@ function Restaurant() {
 
         {restaurant.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50/50 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Page <span className="font-semibold text-gray-900">{currentpage}</span> of <span className="font-semibold text-gray-900">{totalPages}</span>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+              Page <span className="font-semibold text-indigo-600">{currentpage}</span> of <span className="font-semibold text-gray-900">{totalPages}</span>
             </p>
             <div className="flex gap-2">
               <button
                 disabled={currentpage === 1}
                 onClick={() => setcurrentpage(prev => prev - 1)}
-                className="flex items-center px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
               >
-                <ChevronLeftIcon size={16} className="mr-1" /> Previous
+                <ChevronLeftIcon size={16} className="mr-1" /> Prev
               </button>
               <button
                 disabled={currentpage === totalPages}
                 onClick={() => setcurrentpage(prev => prev + 1)}
-                className="flex items-center px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
               >
                 Next <ChevronRightIcon size={16} className="ml-1" />
               </button>
