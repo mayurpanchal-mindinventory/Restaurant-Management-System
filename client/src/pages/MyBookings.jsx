@@ -156,11 +156,9 @@ function MyBookings() {
     }
   }, [fetchBills, activeTab]);
 
-  // Filter and sort bills on client side for additional filtering
   const filteredBills = useMemo(() => {
     let result = [...bills];
 
-    // Filter by restaurant name (client-side additional filter)
     if (filters.searchRestaurant) {
       const searchLower = filters.searchRestaurant.toLowerCase();
       result = result.filter((bill) =>
@@ -168,7 +166,6 @@ function MyBookings() {
       );
     }
 
-    // Sort bills by date
     result.sort((a, b) => {
       const dateA = new Date(a.createdAt || a.bookingId?.date || 0);
       const dateB = new Date(b.createdAt || b.bookingId?.date || 0);
@@ -273,25 +270,91 @@ function MyBookings() {
       );
     }
     return dataList.map((customer, index) => (
-      <>
-        <tr
-          key={customer._id || index}
-          className={
-            index % 2 === 0
-              ? "bg-white hidden md:table-row"
-              : "bg-gray-50 hidden md:table-row hover:bg-orange-50 transition-colors"
-          }
-        >
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-            {(pagination.bookingsPage - 1) * 10 + index + 1}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-            {customer.restaurantId?.name || "N/A"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-            {customer.numberOfGuests} Guests
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+      <tr
+        key={customer._id || index}
+        className={
+          index % 2 === 0
+            ? "bg-white"
+            : "bg-gray-50 hover:bg-orange-50 transition-colors"
+        }
+      >
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+          {(pagination.bookingsPage - 1) * 10 + index + 1}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+          {customer.restaurantId?.name || "N/A"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {customer.numberOfGuests} Guests
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {customer.date
+            ? new Date(customer.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "N/A"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {customer?.timeSlotId?.timeSlot || "N/A"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              customer.status === "Completed"
+                ? "bg-green-100 text-green-700"
+                : "bg-orange-100 text-orange-700"
+            }`}
+          >
+            {customer.status}
+          </span>
+        </td>
+      </tr>
+    ));
+  };
+
+  const renderBookingCards = (dataList) => {
+    if (dataList.length === 0) {
+      return (
+        <div className="hidden md:hidden">
+          <div className="text-center py-10 text-gray-500">
+            No bookings found for this category.
+          </div>
+        </div>
+      );
+    }
+    return dataList.map((customer, index) => (
+      <div
+        key={customer._id || index}
+        className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-600">
+                #
+                {String(
+                  (pagination.bookingsPage - 1) * 10 + index + 1
+                ).padStart(2, "0")}
+              </span>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">
+                {customer.restaurantId?.name || "N/A"}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Guests</p>
+            <p className="text-sm font-medium text-gray-900">
+              {customer.numberOfGuests}{" "}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Date</p>
             {customer.date
               ? new Date(customer.date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -299,83 +362,29 @@ function MyBookings() {
                   day: "numeric",
                 })
               : "N/A"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-            {customer?.timeSlotId?.timeSlot || "N/A"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                customer.status === "Completed"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-orange-100 text-orange-700"
-              }`}
-            >
-              {customer.status}
-            </span>
-          </td>
-        </tr>
-
-        <div className="md:hidden">
-          <div
-            key={customer._id || index}
-            className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-600">
-                    #{String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {customer.restaurantId?.name || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Guests</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {customer.numberOfGuests}{" "}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Date</p>
-                {customer.date
-                  ? new Date(customer.date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "N/A"}
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Time slots</p>
-                <p className="text-xs font-medium text-gray-900">
-                  {customer?.timeSlotId?.timeSlot || "N/A"}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Status</p>
-                <p className="text-sm font-medium text-gray-900">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      customer.status === "Completed"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-orange-100 text-orange-700"
-                    }`}
-                  >
-                    {customer.status}
-                  </span>
-                </p>
-              </div>
-            </div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Time slots</p>
+            <p className="text-xs font-medium text-gray-900">
+              {customer?.timeSlotId?.timeSlot || "N/A"}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Status</p>
+            <p className="text-sm font-medium text-gray-900">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  customer.status === "Completed"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-orange-100 text-orange-700"
+                }`}
+              >
+                {customer.status}
+              </span>
+            </p>
           </div>
         </div>
-      </>
+      </div>
     ));
   };
 
@@ -408,40 +417,129 @@ function MyBookings() {
     }
 
     return filteredBills?.map((bill, index) => (
-      <>
-        <tr
-          key={bill?._id || index}
-          className={
-            index % 2 === 0
-              ? "bg-white hidden md:table-row"
-              : "bg-gray-50 hidden md:table-row hover:bg-orange-50 transition-colors"
-          }
-        >
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-            {(pagination.billsPage - 1) * 10 + index + 1}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-            {bill?.restaurantId?.name || "Restaurant"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-            {bill?.bookingId?.numberOfGuests || "N/A"} Guests
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-            {bill?.bookingId?.date
-              ? new Date(bill?.bookingId?.date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-            {bill.bookingId?.timeSlotId?.timeSlot || "N/A"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-            ₹{bill.grandTotal?.toFixed(2) || "0.00"}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm">
+      <tr
+        key={bill?._id || index}
+        className={
+          index % 2 === 0
+            ? "bg-white"
+            : "bg-gray-50 hover:bg-orange-50 transition-colors"
+        }
+      >
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+          {(pagination.billsPage - 1) * 10 + index + 1}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+          {bill?.restaurantId?.name || "Restaurant"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {bill?.bookingId?.numberOfGuests || "N/A"} Guests
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {bill?.bookingId?.date
+            ? new Date(bill?.bookingId?.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "N/A"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+          {bill.bookingId?.timeSlotId?.timeSlot || "N/A"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+          ₹{bill.grandTotal?.toFixed(2) || "0.00"}
+        </td>
+        <td className="px-3 py-4 whitespace-nowrap text-sm">
+          <button
+            onClick={() => handleViewBill(bill)}
+            className="flex items-center space-x-2 px-3 py-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            <span className="text-xs font-medium">View Bill</span>
+          </button>
+        </td>
+      </tr>
+    ));
+  };
+
+  const renderBillCards = () => {
+    if (billsLoading) {
+      return (
+        <div className="hidden md:hidden">
+          <div className="flex flex-col items-center justify-center space-y-4 py-10">
+            <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+            <p className="text-gray-500 font-medium">Loading your bills...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (filteredBills.length === 0) {
+      return (
+        <div className="hidden md:hidden">
+          <div className="text-center py-10 text-gray-500">
+            No bills found. Bills will appear here once your restaurant bookings
+            are completed.
+          </div>
+        </div>
+      );
+    }
+
+    return filteredBills?.map((bill, index) => (
+      <div
+        key={bill._id || index}
+        className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-600">
+                #
+                {String((pagination.billsPage - 1) * 10 + index + 1).padStart(
+                  2,
+                  "0"
+                )}
+              </span>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">
+                {bill.restaurantId?.name || "N/A"}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Guests</p>
+            <p className="text-sm font-medium text-gray-900">
+              {bill?.bookingId?.numberOfGuests || "N/A"}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Date</p>
+            <p className="text-sm font-medium text-gray-900">
+              {bill?.bookingId?.date
+                ? new Date(bill?.bookingId?.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "N/A"}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Time slots</p>
+            <p className="text-sm font-medium text-gray-900">
+              {bill.bookingId?.timeSlotId?.timeSlot || "N/A"}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2">
+            <p className="text-xs text-gray-500 mb-1">Amount</p>
+            <p className="text-sm font-medium text-gray-900">
+              ₹{bill.grandTotal?.toFixed(2) || "0.00"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100 col-span-2">
             <button
               onClick={() => handleViewBill(bill)}
               className="flex items-center space-x-2 px-3 py-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
@@ -449,73 +547,9 @@ function MyBookings() {
               <Eye className="w-4 h-4" />
               <span className="text-xs font-medium">View Bill</span>
             </button>
-          </td>
-        </tr>
-        <div className="md:hidden">
-          <div
-            key={bill._id || index}
-            className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-600">
-                    #{String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {bill.restaurantId?.name || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Guests</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {bill?.bookingId?.numberOfGuests || "N/A"}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Date</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {bill?.bookingId?.date
-                    ? new Date(bill?.bookingId?.date).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        }
-                      )
-                    : "N/A"}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Time slots</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {bill.bookingId?.timeSlotId?.timeSlot || "N/A"}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-1">Guests</p>
-                <p className="text-sm font-medium text-gray-900">
-                  ₹{bill.grandTotal?.toFixed(2) || "0.00"}
-                </p>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100"></div>
-              <button
-                onClick={() => handleViewBill(bill)}
-                className="flex items-center space-x-2 px-3 py-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
-              >
-                <Eye className="w-4 h-4" />
-                <span className="text-xs font-medium">View Bill</span>
-              </button>
-            </div>
           </div>
         </div>
-      </>
+      </div>
     ));
   };
 
@@ -719,7 +753,7 @@ function MyBookings() {
               {renderFilters()}
 
               <div className="overflow-x-auto">
-                <table className=" hidden md:table min-w-full divide-y divide-gray-200">
+                <table className="hidden md:table min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       {getCurrentHeaders().map((header) => (
@@ -742,10 +776,11 @@ function MyBookings() {
                     {activeTab === "bill" && renderBillRows()}
                   </tbody>
                 </table>
-                <div className="md:hidden">
-                  {activeTab === "overview" && renderBookingRows(bookings)}
-                  {activeTab === "history" && renderBookingRows(bookings)}
-                  {activeTab === "bill" && renderBillRows()}
+
+                <div className="md:hidden space-y-4">
+                  {activeTab === "overview" && renderBookingCards(bookings)}
+                  {activeTab === "history" && renderBookingCards(bookings)}
+                  {activeTab === "bill" && renderBillCards()}
                 </div>
               </div>
               <div></div>
