@@ -88,7 +88,7 @@ function RestoDetails() {
   };
 
   useEffect(() => {
-    console.log(timeSlots);
+    // console.log(timeSlots);
     if (!selectedDate) {
       setSlotsForDate([]);
       setSelectedSlot(null);
@@ -161,7 +161,7 @@ function RestoDetails() {
     };
 
     fetchResto(id);
-  }, [id, timeSlots]);
+  }, [id]);
 
   const getSlotHour = (timeStr) => {
     const [time, modifier] = timeStr.split(" - ")[0].split(" ");

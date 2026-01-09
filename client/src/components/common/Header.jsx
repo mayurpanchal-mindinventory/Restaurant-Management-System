@@ -24,6 +24,7 @@ export default function Header() {
   const { pathname } = useLocation();
   const { user } = useSelector((state) => state.auth);
   const profileRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -34,6 +35,12 @@ export default function Header() {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target))
         setIsProfileMenuOpen(false);
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target) &&
+        !e.target.closest("button")
+      )
+        setIsMobileMenuOpen(false);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -61,26 +68,31 @@ export default function Header() {
   const getLinkStyle = (path) => {
     const active = pathname === path;
     const scrollColor = isScrolled ? "text-gray-700" : "text-white";
-    return `relative font-semibold transition-all ${active ? "text-orange-500" : `${scrollColor} hover:text-orange-500`
-      }`;
+    return `relative font-semibold transition-all ${
+      active ? "text-orange-500" : `${scrollColor} hover:text-orange-500`
+    }`;
   };
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
-        ? "bg-white/80 backdrop-blur-lg shadow-md py-3"
-        : "bg-transparent py-5"
-        }`}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        isScrolled
+          ? "bg-white/80 backdrop-blur-lg shadow-md py-3"
+          : "bg-transparent py-5"
+      }`}
     >
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         <div
-          onClick={() => { if (pathname !== '/home') handleNav("/home") }}
+          onClick={() => {
+            if (pathname !== "/home") handleNav("/home");
+          }}
           className="flex items-center gap-2 cursor-pointer group"
         >
           <div className="bg-orange-500 p-1.5 rounded-lg ">🍽️</div>
           <h1
-            className={`text-2xl font-black ${isScrolled ? "text-gray-900" : "text-white"
-              }`}
+            className={`text-2xl font-black ${
+              isScrolled ? "text-gray-900" : "text-white"
+            }`}
           >
             FOODIE<span className="text-orange-500">HUB</span>
           </h1>
@@ -105,7 +117,10 @@ export default function Header() {
           {user ? (
             <div className="relative" ref={profileRef}>
               <button
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                onClick={() => {
+                  setIsProfileMenuOpen(!isProfileMenuOpen),
+                    setIsMobileMenuOpen(false);
+                }}
                 className="flex items-center gap-2 p-1 pr-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-all"
               >
                 <div className="h-8 w-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold">
@@ -113,8 +128,9 @@ export default function Header() {
                 </div>
                 <ChevronDown
                   size={14}
-                  className={`transition-transform ${isProfileMenuOpen ? "rotate-180" : ""
-                    }`}
+                  className={`transition-transform ${
+                    isProfileMenuOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -154,8 +170,9 @@ export default function Header() {
             <div className="hidden md:flex gap-3">
               <button
                 onClick={() => handleNav("/login")}
-                className={`px-4 py-2 font-bold ${isScrolled ? "text-gray-700" : "text-white"
-                  }`}
+                className={`px-4 py-2 font-bold ${
+                  isScrolled ? "text-gray-700" : "text-white"
+                }`}
               >
                 Login
               </button>
@@ -170,8 +187,9 @@ export default function Header() {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`lg:hidden p-2 ${isScrolled ? "text-gray-900" : "text-white"
-              }`}
+            className={`lg:hidden p-2 ${
+              isScrolled ? "text-gray-900" : "text-white"
+            }`}
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -179,15 +197,19 @@ export default function Header() {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-xl border-t p-4 flex flex-col gap-2">
+        <div
+          ref={mobileMenuRef}
+          className="lg:hidden absolute top-full left-0 w-full bg-white shadow-xl border-t p-4 flex flex-col gap-2"
+        >
           {NAV_LINKS.map((link) => (
             <button
               key={link.path}
               onClick={() => handleNav(link.path)}
-              className={`w-full text-left p-3 rounded-lg font-bold ${pathname === link.path
-                ? "bg-orange-50 text-orange-600"
-                : "text-gray-600"
-                }`}
+              className={`w-full text-left p-3 rounded-lg font-bold ${
+                pathname === link.path
+                  ? "bg-orange-50 text-orange-600"
+                  : "text-gray-600"
+              }`}
             >
               {link.label}
             </button>

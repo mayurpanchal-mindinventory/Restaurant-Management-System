@@ -10,16 +10,20 @@ function RestaurantLayout() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="hidden lg:block sticky top-0 h-screen flex-shrink-0 border-r border-gray-200">
+      <aside className="hidden  lg:block sticky top-0 h-screen flex-shrink-0 border-r border-gray-200 ">
         <SidebarAdmin />
       </aside>
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-50 lg:hidden bg-gray-900/50 backdrop-blur-sm"
+          className={`fixed inset-0 z-50 lg:hidden bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 ${
+            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
-            className="w-64 h-full bg-white"
+            className={`w-64 h-full bg-white transform transition-transform duration- ease-in-out ${
+              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarAdmin />
@@ -32,7 +36,7 @@ function RestaurantLayout() {
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                className="lg:hidden p-2  text-gray-600 hover:bg-gray-100 rounded-md"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
                 <Menu size={24} />
