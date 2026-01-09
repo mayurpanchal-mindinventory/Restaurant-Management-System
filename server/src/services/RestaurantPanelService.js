@@ -1,10 +1,10 @@
 const Booking = require("../models/Booking.js");
 const User = require("../models/User.js");
-
 const Restaurant = require("../models/Restaurant.js");
 const { STATUS, MESSAGES } = require("../utils/constants.js");
 const MenuItem = require("../models/MenuItem.js");
 const TimeSlot = require("../models/TimeSlot.js");
+const { default: mongoose } = require("mongoose");
 exports.getBookingByRestaurent = async (req) => {
   try {
     const userId = req.params.userId || req.user?.id;
@@ -278,8 +278,9 @@ exports.createBill = async (req) => {
 };
 exports.getRestaurantMenu = async (req) => {
   try {
-    const limit = 2;
-    const { page } = req.query;
+    let menuData;
+    const limit = 10;
+    let { page, sortby, category, search } = req.query;
 
     const skip = (page - 1) * limit;
     const { id } = req.params;
@@ -294,28 +295,106 @@ exports.getRestaurantMenu = async (req) => {
     const user = await Restaurant.find({ userId: id });
 
     if (!user) throw new Error("No user is found");
-    const menuData = await MenuItem.find({ restaurantId: user[0]._id })
-      .populate({
-        path: "restaurantId",
-        select: "name categoryId.name ",
-      })
-      .populate({ path: "categoryId" })
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    // const menuData = await MenuItem.find({ restaurantId: user[0]._id })
+    //   .populate({
+    //     path: "restaurantId",
+    //     select: "name categoryId.name ",
+    //   })
+    //   .populate({ path: "categoryId" })
+    //   .skip(skip)
+    //   .limit(limit)
+    //   .sort({ createdAt: -1 })
+    //   .exec();
 
-    const count = await MenuItem.countDocuments({ restaurantId: user[0]._id });
+    // const count = await MenuItem.countDocuments({ restaurantId: user[0]._id });
     // console.log(count);
 
+    const pipeline = [
+      {
+        $match: {
+          restaurantId: user[0]._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "restaurants",
+          localField: "restaurantId",
+          foreignField: "_id",
+          as: "restaurants",
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "categories",
+        },
+      },
+      { $unwind: { path: "$restaurants", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$categories", preserveNullAndEmptyArrays: true } },
+      {
+        $match: search
+          ? {
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              {
+                "categories.categoryName": { $regex: search, $options: "i" },
+              },
+            ],
+          }
+          : {},
+      },
+      ...(category
+        ? [
+          {
+            $match: {
+              "categories._id": new mongoose.Types.ObjectId(category),
+            },
+          },
+        ]
+        : []),
+    ];
+    const countData = await MenuItem.aggregate([
+      ...pipeline,
+      { $count: "total" },
+    ]);
+
+    //console.log(countData);
+
+    const totalDocs = countData.length > 0 ? countData[0].total : 0;
+
+    menuData = await MenuItem.aggregate([
+      ...pipeline,
+      sortby === "1"
+        ? { $sort: { price: -1 } }
+        : sortby === "2"
+          ? { $sort: { price: 1 } }
+          : sortby === "3"
+            ? { $sort: { name: 1 } }
+            : { $sort: { name: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          name: 1,
+          price: 1,
+          image: 1,
+          categoryId: {
+            _id: "$categories._id",
+            categoryName: "$categories.categoryName",
+          },
+        },
+      }
+    ]);
     return {
       success: true,
       message: "Menus Founded",
       data: {
         menuData,
-        totalPages: Math.ceil(count / limit),
+        totalPages: Math.ceil(totalDocs / limit),
         currentPage: page * 1,
-        totalDocs: count,
+        totalDocs,
       },
     };
   } catch (error) {

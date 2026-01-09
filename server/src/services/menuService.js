@@ -109,9 +109,6 @@ const getAllMenusByRestaurant = async (req) => {
     const limit = 10;
     let { page, sortby, category, search } = req.query;
 
-    if ((search, category, !page)) {
-      page = 1;
-    }
     const skip = (page - 1) * limit;
     const { id } = req.params;
     if (!id.trim()) {
@@ -159,6 +156,15 @@ const getAllMenusByRestaurant = async (req) => {
           }
           : {},
       },
+      ...(category
+        ? [
+          {
+            $match: {
+              "categories._id": new mongoose.Types.ObjectId(category),
+            },
+          },
+        ]
+        : []),
     ];
     const countData = await MenuItem.aggregate([
       ...pipeline,
@@ -187,16 +193,7 @@ const getAllMenusByRestaurant = async (req) => {
             categoryName: "$categories.categoryName",
           },
         },
-      },
-      ...(category
-        ? [
-          {
-            $match: {
-              "categoryId._id": new mongoose.Types.ObjectId(category),
-            },
-          },
-        ]
-        : []),
+      }
     ]);
     return {
       success: true,
