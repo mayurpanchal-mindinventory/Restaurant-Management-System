@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { FiArrowLeft, FiFilter, FiPlus, FiSearch, FiRefreshCw, FiChevronLeft, FiChevronRight } from "react-icons/fi";
@@ -17,13 +17,22 @@ function MenuList() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortby, setSortBy] = useState("");
   const { confirm } = useConfirm();
+  const prevCategoryRef = useRef("");
+  const prevSearchRef = useRef("");
+  const prevSortbyRef = useRef("");
 
-  const getmenus = async (current) => {
+  const getmenus = async (current, r = sortby, s = searchTerm, c = selectedCategory) => {
     try {
-      current && setcurrentpage(1)
-      const res = await getMenuList(current ? current : currentpage, id, selectedCategory, sortby, searchTerm);
+      current && setcurrentpage(1);
+      const res = await getMenuList(current ? current : currentpage, id, c, r, s);
       setMenuList(res?.data?.data?.menuData || []);
       setTotalPages(res?.data?.data?.totalPages || 1);
+
+      prevCategoryRef.current = c;
+      prevSearchRef.current = s;
+      prevSortbyRef.current = r;
+
+
     } catch (e) {
       toast.error("Failed to load menu");
     }
@@ -41,6 +50,14 @@ function MenuList() {
     }
   };
 
+  const clearfilter = () => {
+    if (prevCategoryRef.current !== "" || prevSearchRef.current !== "" || prevSortbyRef.current !== "") {
+      setSearchTerm("");
+      setSelectedCategory("");
+      setSortBy("");
+      getmenus(1, "", "", "");
+    }
+  };
 
   useEffect(() => {
     getmenus();
@@ -119,7 +136,7 @@ function MenuList() {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
             >
-              <option value="4">Name: Z-A</option>
+              <option value="">Name: Z-A</option>
               <option value="1">Price: High to Low</option>
               <option value="2">Price: Low to High</option>
               <option value="3">Name: A-Z</option>
@@ -127,14 +144,17 @@ function MenuList() {
           </div>
 
           <button
-            onClick={() => getmenus(1)}
+            onClick={() => {
+              if (prevCategoryRef.current !== selectedCategory)
+                getmenus(1)
+            }}
             className="flex items-center justify-center w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md"
           >
             Apply Filter
           </button>
           <button
             type="button"
-            // onClick={clearfilter}
+            onClick={clearfilter}
             className="flex items-center gap-3  text-sm justify-center py-2.5 bg-slate-100 text-black-500 w-full font-bold rounded-xl hover:bg-slate-200 hover:text-slate-700 transition-all shadow-md"
           >
             <FiRefreshCw className="w-4 h-4 text-indigo-600" />  Reset Filter
