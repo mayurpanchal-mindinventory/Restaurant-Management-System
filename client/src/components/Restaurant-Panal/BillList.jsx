@@ -16,6 +16,10 @@ import {
   ChevronRight,
   Eye,
   CreditCard,
+  Search,
+  Filter,
+  Check,
+  ArrowUpDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -27,19 +31,43 @@ const BillList = ({ userId }) => {
   const [selectedBill, setSelectedBill] = useState(null);
   const [showBillDetails, setShowBillDetails] = useState(false);
 
-  const fetchBills = async (page = 1) => {
+  // Statistics states
+  const [totalrecord, setTotalrecord] = useState(0);
+  const [countStatus, setCountStatus] = useState({
+    totalPaid: 0,
+    totalUnpaid: 0,
+    totalRevenue: 0,
+  });
+
+  // Single filter state (like HandleBooking)
+  const [tempFilters, setTempFilters] = useState({
+    search: "",
+    date: "",
+    paymentStatus: "",
+    sortByDate: "newest",
+  });
+
+  const fetchBills = async (page = 1, filtersToUse = tempFilters) => {
     setLoading(true);
     try {
-      const response = await billService.getBills(userId, page);
-      console.log(response);
+      const response = await billService.getBills(userId, page, filtersToUse);
 
-      if (response.data.bills) {
-        setBills(response.data.bills);
-        setTotalPages(response.data.totalPages);
-        setCurrentPage(response.data.currentPage);
+      if (response) {
+        setBills(response.bills || []);
+        setTotalPages(response.totalPages || 1);
+        setCurrentPage(response.currentPage || page);
+        setTotalrecord(response.totalDocs || 0);
+
+        // Set statistics from backend response
+        setCountStatus({
+          totalPaid: response.totalPaid || 0,
+          totalUnpaid: response.totalUnpaid || 0,
+          totalRevenue: response.totalRevenue || 0,
+        });
       }
     } catch (error) {
       console.error("Error fetching bills:", error);
+      toast.error("Failed to fetch bills");
     } finally {
       setLoading(false);
     }
@@ -49,7 +77,32 @@ const BillList = ({ userId }) => {
     if (userId) {
       fetchBills(currentPage);
     }
-  }, [userId, currentPage]);
+  }, [userId]);
+
+  // Handle filter input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTempFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Apply filters immediately (like HandleBooking)
+  const handleApplyClick = () => {
+    setCurrentPage(1);
+    fetchBills(1);
+  };
+
+  // Reset filters (like HandleBooking)
+  const handleResetClick = () => {
+    const emptyFilters = {
+      search: "",
+      date: "",
+      paymentStatus: "",
+      sortByDate: "newest",
+    };
+    setTempFilters(emptyFilters);
+    setCurrentPage(1);
+    fetchBills(1, emptyFilters);
+  };
 
   const handleViewBill = (bill) => {
     setSelectedBill(bill);
@@ -104,18 +157,6 @@ const BillList = ({ userId }) => {
     }
   };
 
-  // Calculate statistics
-  const totalBills = bills.length;
-  const paidBills = bills.filter(
-    (bill) => bill.paymentStatus === "Paid"
-  ).length;
-  const unpaidBills = bills.filter(
-    (bill) => bill.paymentStatus === "Unpaid"
-  ).length;
-  const totalRevenue = bills
-    .filter((bill) => bill.paymentStatus === "Paid")
-    .reduce((sum, bill) => sum + (bill.grandTotal || 0), 0);
-
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -136,7 +177,7 @@ const BillList = ({ userId }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Bills</p>
-              <p className="text-2xl font-bold text-gray-900">{totalBills}</p>
+              <p className="text-2xl font-bold text-gray-900">{totalrecord}</p>
             </div>
             <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
               <FileText className="w-5 h-5 text-orange-600" />
@@ -148,7 +189,9 @@ const BillList = ({ userId }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Paid Bills</p>
-              <p className="text-2xl font-bold text-gray-900">{paidBills}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {countStatus.totalPaid}
+              </p>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-blue-600" />
@@ -160,7 +203,9 @@ const BillList = ({ userId }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Unpaid Bills</p>
-              <p className="text-2xl font-bold text-gray-900">{unpaidBills}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {countStatus.totalUnpaid}
+              </p>
             </div>
             <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-red-600" />
@@ -173,13 +218,95 @@ const BillList = ({ userId }) => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                ₹{totalRevenue.toFixed(0)}
+                ₹{countStatus.totalRevenue?.toFixed(0) || 0}
               </p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <DollarSign className="w-5 h-5 text-green-600" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Filter Section */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex items-center gap-3">
+          <div className="flex-grow relative lg:max-w-xs">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              name="search"
+              type="text"
+              placeholder="Search customer name or email..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-orange-500 outline-none"
+              value={tempFilters.search}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="relative">
+            <Calendar
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <input
+              name="date"
+              type="date"
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-orange-500 outline-none"
+              value={tempFilters.date}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="relative">
+            <Filter
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <select
+              name="paymentStatus"
+              className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:border-orange-500 outline-none"
+              value={tempFilters.paymentStatus}
+              onChange={handleChange}
+            >
+              <option value="">All Payment Status</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
+
+          <div className="relative">
+            <ArrowUpDown
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <select
+              name="sortByDate"
+              className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:border-orange-500 outline-none"
+              value={tempFilters.sortByDate}
+              onChange={handleChange}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleApplyClick}
+            className="flex items-center justify-center gap-2 px-6 py-2 bg-orange-600 text-white text-sm font-bold rounded-lg hover:bg-orange-700 transition-all shadow-sm active:scale-95"
+          >
+            <Check size={16} />
+            Apply Filters
+          </button>
+
+          <button
+            onClick={handleResetClick}
+            className="text-xs font-bold text-gray-400 hover:text-orange-600 px-2 transition-colors"
+          >
+            Reset
+          </button>
         </div>
       </div>
 
@@ -229,9 +356,9 @@ const BillList = ({ userId }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {bills.map((bill) => (
+                  {bills.map((bill, index) => (
                     <tr
-                      key={bill._id}
+                      key={bill._id || index}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4">
@@ -358,7 +485,7 @@ const BillList = ({ userId }) => {
                                 {bill?.userId?.name || "Unknown"}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {bill?.userId.email || "No-email"}
+                                {bill?.userId?.email || "No-email"}
                               </p>
                             </div>
                           </div>
@@ -484,9 +611,8 @@ const BillList = ({ userId }) => {
                 )}
               </div>
             </div>
-
             {/* Pagination */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="px-6 py-2 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between">
                 <button
                   className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -531,7 +657,6 @@ const BillList = ({ userId }) => {
           </div>
         )}
       </div>
-
       {/* Bill Details Modal */}
       {showBillDetails && selectedBill && (
         <BillDetails

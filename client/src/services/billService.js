@@ -11,13 +11,13 @@ export const billService = {
     }
   },
 
-  // Get all bills for a restaurant
-  getBills: async (userId, page = 1, limit = 5) => {
+  // Get all bills for a restaurant with optional filters (same pattern as getBookingsByRestaurantId)
+  getBills: async (userId, page, tempFilters) => {
     try {
-      const response = await apiClient.get(
-        `/api/owner/bills/${userId}?page=${page}&limit=${limit}`
-      );
-      return response.data;
+      const response = await apiClient.get(`api/owner/bills/${userId}`, {
+        params: { page, ...tempFilters },
+      });
+      return response.data.data; // Extract the bills array from the response
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to fetch bills");
     }
@@ -62,7 +62,7 @@ export const billService = {
     } catch (error) {
       throw new Error(
         error.response?.data?.message ||
-        "Failed to update shared with user status"
+          "Failed to update shared with user status"
       );
     }
   },

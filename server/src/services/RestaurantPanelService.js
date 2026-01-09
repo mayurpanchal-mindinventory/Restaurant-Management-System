@@ -28,7 +28,6 @@ exports.getBookingByRestaurent = async (req) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    // Build the dynamic filter for the main list
     const mainQuery = { restaurantId };
 
     if (req.query.status) {
@@ -38,6 +37,15 @@ exports.getBookingByRestaurent = async (req) => {
     if (req.query.date) {
       const date = new Date(req.query.date);
       mainQuery.date = date;
+    }
+
+    if (req.query.timeslot) {
+      const timeSlot = await TimeSlot.findOne({
+        timeSlot: { $regex: req.query.timeslot, $options: "i" },
+      });
+      if (timeSlot) {
+        mainQuery.timeSlotId = timeSlot._id;
+      }
     }
 
     if (req.query.search) {
@@ -68,6 +76,7 @@ exports.getBookingByRestaurent = async (req) => {
                 as: "userDetails",
               },
             },
+
             {
               $lookup: {
                 from: "timeslots",
@@ -110,11 +119,19 @@ exports.getBookingByRestaurent = async (req) => {
           totalFilteredCount: [{ $match: mainQuery }, { $count: "count" }],
           // Branch 3: Stats (Total Pending for this restaurant regardless of filter)
           pendingCount: [
+            { $match: mainQuery },
             { $match: { restaurantId, status: "Pending" } },
             { $count: "count" },
           ],
+          billGenerated: [
+            { $match: mainQuery },
+            { $match: { hasGeneratedBill: true } },
+            { $count: "count" },
+          ],
+
           // Branch 4: Stats (Total Completed for this restaurant regardless of filter)
           completedCount: [
+            { $match: mainQuery },
             { $match: { restaurantId, status: "Completed" } },
             { $count: "count" },
           ],
@@ -126,6 +143,7 @@ exports.getBookingByRestaurent = async (req) => {
     const totalDocs = results[0].totalFilteredCount[0]?.count || 0;
     const totalPending = results[0].pendingCount[0]?.count || 0;
     const totalCompleted = results[0].completedCount[0]?.count || 0;
+    const totalBillsGenerated = results[0].billGenerated[0]?.count || 0;
 
     return {
       success: true,
@@ -137,6 +155,7 @@ exports.getBookingByRestaurent = async (req) => {
         totalDocs,
         totalPending,
         totalCompleted,
+        totalBillsGenerated,
       },
     };
   } catch (error) {
@@ -336,23 +355,23 @@ exports.getRestaurantMenu = async (req) => {
       {
         $match: search
           ? {
-            $or: [
-              { name: { $regex: search, $options: "i" } },
-              {
-                "categories.categoryName": { $regex: search, $options: "i" },
-              },
-            ],
-          }
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                {
+                  "categories.categoryName": { $regex: search, $options: "i" },
+                },
+              ],
+            }
           : {},
       },
       ...(category
         ? [
-          {
-            $match: {
-              "categories._id": new mongoose.Types.ObjectId(category),
+            {
+              $match: {
+                "categories._id": new mongoose.Types.ObjectId(category),
+              },
             },
-          },
-        ]
+          ]
         : []),
     ];
     const countData = await MenuItem.aggregate([
@@ -369,10 +388,10 @@ exports.getRestaurantMenu = async (req) => {
       sortby === "1"
         ? { $sort: { price: -1 } }
         : sortby === "2"
-          ? { $sort: { price: 1 } }
-          : sortby === "3"
-            ? { $sort: { name: 1 } }
-            : { $sort: { name: -1 } },
+        ? { $sort: { price: 1 } }
+        : sortby === "3"
+        ? { $sort: { name: 1 } }
+        : { $sort: { name: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -385,7 +404,7 @@ exports.getRestaurantMenu = async (req) => {
             categoryName: "$categories.categoryName",
           },
         },
-      }
+      },
     ]);
     return {
       success: true,
@@ -420,29 +439,170 @@ exports.getBillsByRestaurant = async (req) => {
     }
 
     const restaurantId = restaurant._id;
-    const { page = 1, limit = 10 } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
     const skip = (page - 1) * limit;
 
-    const Bill = require("../models/Bill.js");
-    const bills = await Bill.find({ restaurantId })
-      .populate("bookingId", "date numberOfGuests -_id")
-      .populate("restaurantId")
-      .populate("userId", "name email -_id")
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    //  dynamic filter
+    const mainQuery = { restaurantId };
 
-    const count = await Bill.countDocuments({ restaurantId });
+    // Filter by payment status
+    if (req.query.paymentStatus) {
+      mainQuery.paymentStatus = req.query.paymentStatus;
+    }
+
+    // Filter by date (match booking date)
+    if (req.query.date) {
+      const searchDate = new Date(req.query.date);
+      mainQuery.bookingId = {
+        $exists: true,
+      };
+    }
+
+    // First.... get user IDs matching search fields if search is provided
+    if (req.query.search) {
+      const users = await User.find({
+        $or: [
+          { name: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }).select("_id");
+      const userIds = users.map((u) => u._id);
+      if (userIds.length === 0) {
+        // No users match, return empty result
+        return {
+          success: true,
+          message: "Bills retrieved successfully",
+          data: {
+            bills: [],
+            totalPages: 0,
+            currentPage: page,
+            totalDocs: 0,
+            totalPaid: 0,
+            totalUnpaid: 0,
+            totalRevenue: 0,
+          },
+        };
+      }
+      mainQuery.userId = { $in: userIds };
+    }
+
+    //  sorting
+    let sortOption = { createdAt: -1 }; // Default: newest first
+    if (req.query.sortByDate === "oldest") {
+      sortOption = { createdAt: 1 }; // Oldest first
+    }
+
+    const Bill = require("../models/Bill.js");
+
+    const results = await Bill.aggregate([
+      // First match by basic filters (before lookup)
+      { $match: mainQuery },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings",
+          localField: "bookingId",
+          foreignField: "_id",
+          as: "bookingDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$userDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$bookingDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Filter by date after booking is populated
+      ...(req.query.date
+        ? [
+            {
+              $match: {
+                "bookingDetails.date": new Date(req.query.date),
+              },
+            },
+          ]
+        : []),
+      {
+        $facet: {
+          // Branch 1: Paginated & Filtered Data
+          bills: [
+            { $sort: sortOption },
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $project: {
+                paymentStatus: 1,
+                grandTotal: 1,
+                isSharedWithUser: 1,
+                createdAt: 1,
+                items: 1,
+                bookingId: {
+                  _id: "$bookingDetails._id",
+                  date: "$bookingDetails.date",
+                  numberOfGuests: "$bookingDetails.numberOfGuests",
+                },
+                userId: {
+                  _id: "$userDetails._id",
+                  name: "$userDetails.name",
+                  email: "$userDetails.email",
+                },
+              },
+            },
+          ],
+
+          totalFilteredCount: [{ $count: "count" }],
+          paidCount: [
+            { $match: { restaurantId, paymentStatus: "Paid" } },
+            { $count: "count" },
+          ],
+          unpaidCount: [
+            { $match: { restaurantId, paymentStatus: "Unpaid" } },
+            { $count: "count" },
+          ],
+          revenueSum: [
+            { $match: { restaurantId, paymentStatus: "Paid" } },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$grandTotal" },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const bills = results[0].bills;
+    const totalDocs = results[0].totalFilteredCount[0]?.count || 0;
+    const totalPaid = results[0].paidCount[0]?.count || 0;
+    const totalUnpaid = results[0].unpaidCount[0]?.count || 0;
+    const totalRevenue = results[0].revenueSum[0]?.total || 0;
 
     return {
       success: true,
       message: "Bills retrieved successfully",
       data: {
         bills,
-        totalPages: Math.ceil(count / limit),
-        currentPage: parseInt(page),
-        totalDocs: count,
+        totalPages: Math.ceil(totalDocs / limit),
+        currentPage: page,
+        totalDocs,
+        totalPaid,
+        totalUnpaid,
+        totalRevenue,
       },
     };
   } catch (error) {

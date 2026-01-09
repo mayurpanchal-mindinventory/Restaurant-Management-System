@@ -7,6 +7,8 @@ import {
   Search,
   Filter,
   Check,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
@@ -129,6 +131,7 @@ function HanldeBooking(params) {
       setCountStatus({
         totalPending: result?.totalPending,
         totalCompleted: result?.totalCompleted,
+        totalBillsGenerated: result?.totalBillsGenerated,
       });
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -224,7 +227,6 @@ function HanldeBooking(params) {
             </div>
           </div>
         </div>
-        {console.log(selectedBooking)}
 
         <div className="bg-white rounded-lg p-6 border border-gray-200">
           <div className="flex items-center justify-between">
@@ -261,7 +263,7 @@ function HanldeBooking(params) {
                 Bills Generated
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-                {dataList.filter((b) => b.hasGeneratedBill).length}
+                {countStatus.totalBillsGenerated}
               </p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -400,10 +402,10 @@ function HanldeBooking(params) {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.date
                           ? new Date(booking.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                           : "N/A"}
                       </div>
                     </td>
@@ -466,10 +468,11 @@ function HanldeBooking(params) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${isBillGenerated(booking)
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                          }`}
+                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${
+                          isBillGenerated(booking)
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
                         {isBillGenerated(booking) ? "Generated" : "Pending"}
                       </span>
@@ -553,13 +556,13 @@ function HanldeBooking(params) {
                         <p className="text-sm font-medium text-gray-900">
                           {booking.date
                             ? new Date(booking.date).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )
                             : "N/A"}
                         </p>
                       </div>
@@ -586,10 +589,11 @@ function HanldeBooking(params) {
                         </p>
 
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${isBillGenerated(booking)
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                            }`}
+                          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${
+                            isBillGenerated(booking)
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
                         >
                           {isBillGenerated(booking) ? "Generated" : "Pending"}
                         </span>
@@ -669,28 +673,31 @@ function HanldeBooking(params) {
             )}
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-between items-center mt-4">
-        <button
-          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-          disabled={currentpage === 1}
-          onClick={goToPrevpage}
-        >
-          Previous
-        </button>
-        <div className="flex gap-2">
-          <span>
-            page {currentpage} of {totalPages}
-          </span>
+        <div className="px-6 py-2 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={currentpage === 1}
+              onClick={goToPrevpage}
+            >
+              <ChevronLeft size={10} />
+              Previous
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-600">
+                Page {currentpage} of {totalPages}
+              </span>
+            </div>
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={currentpage === totalPages}
+              onClick={goToNextPage}
+            >
+              Next
+              <ChevronRight size={10} />
+            </button>
+          </div>
         </div>
-        <button
-          className="border px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-          disabled={currentpage === totalPages}
-          onClick={goToNextPage}
-        >
-          Next
-        </button>
       </div>
 
       {/* Bill Generation Modal */}
