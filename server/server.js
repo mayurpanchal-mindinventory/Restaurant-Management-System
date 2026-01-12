@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { Server } = require('socket.io');
+const http = require('http');
 const dotenv = require("dotenv");
 const authRoutes = require("./src/routes/authRoutes.js");
 const adminRoutes = require("./src/routes/adminRoutes.js");
@@ -8,7 +10,6 @@ const userRoutes = require("./src/routes/userRoutes.js");
 const restaurantPanelRoutes = require("./src/routes/restaurantPanelRoutes.js");
 dotenv.config();
 const verifyToken = require("../server/src/middleware/authMiddleware.js");
-const { verifyRole } = require("./src/middleware/verifyRole.js");
 
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -68,6 +69,25 @@ app.use((req, res) => {
 // app.listen(, () =>
 //   console.log(`Server running on port ${process.env.PORT}`)
 // );
+
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+io.on("connection", (socket) => {
+  console.log("user Connected:", socket.id);
+  socket.on("join", (userId) => {
+    socket.join(userId);
+  });
+  socket.on("sendMessage", ({ receiverId, message }) => {
+    io.to(receiverId).emit("receiveMessage", message);
+
+  });
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
+
+  });
+});
+
+
 app.listen(process.env.PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://0.0.0.0:${process.env.PORT}`);
   console.log(

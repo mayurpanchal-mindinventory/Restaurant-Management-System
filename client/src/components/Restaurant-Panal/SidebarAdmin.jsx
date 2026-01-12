@@ -1,15 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { logout } from "../../slices/authSlice";
-import { LogOut, Calendar, Utensils, CreditCard, Home } from "lucide-react";
+import { LogOut, Calendar, Utensils, CreditCard, Home, MessageCircle } from "lucide-react";
 import { useDispatch } from "react-redux";
 
 function SidebarAdmin() {
   const dispatch = useDispatch();
   const navLinkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${
-      isActive
-        ? "bg-gray-100 text-gray-900"
-        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2 ${isActive
+      ? "bg-gray-100 text-gray-900"
+      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
     }`;
   return (
     <div className="flex flex-col w-full h-auto md:w-64 md:h-screen bg-white border-r border-gray-200">
@@ -39,6 +38,10 @@ function SidebarAdmin() {
         <NavLink to="restaurant/bills" className={navLinkClasses}>
           <CreditCard size={18} />
           Billing & Bills
+        </NavLink>
+        <NavLink to="restaurant/chats" className={navLinkClasses}>
+          <MessageCircle size={18} />
+          Chats
         </NavLink>
       </nav>
 

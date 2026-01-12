@@ -6,7 +6,11 @@ export const apiClient = axios.create({
   timeout: 10000,
   withCredentials: true,
 });
+let setIsServerDownCallback = () => { };
 
+export const setServerDownCallback = (callback) => {
+  setIsServerDownCallback = callback;
+};
 const refreshAxios = axios.create({
   baseURL: "/api/auth",
   withCredentials: true,
@@ -40,7 +44,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => { hideGlobalLoader(); return response; },
+  (response) => { hideGlobalLoader(); setServerDownCallback(false); return response; },
   async (error) => {
     hideGlobalLoader();
     const originalRequest = error.config;
@@ -48,6 +52,9 @@ apiClient.interceptors.response.use(
     const isExpiryError = error?.response?.status === 403;
     const message = error?.response?.data?.message;
     const type = error?.response?.data?.type;
+    if (error.response?.status >= 500 || error.code === 'NETWORK_ERROR' || error.message === 'Network Error' || error.message.includes('timeout')) {
+      window.dispatchEvent(new CustomEvent('serverError', { detail: true }));
+    }
 
     if (isAuthError && (message === "Token missing" || type === "TOKEN_INVALID")) {
       logoutAndRedirect();
