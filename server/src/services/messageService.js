@@ -12,7 +12,7 @@ const createMessages = async (chatId, senderId, text) => {
       error.message = MESSAGES.INVALID_REQUEST;
       throw error;
     }
-    console.log({ chatId, senderId, text });
+    // console.log({ chatId, senderId, text });
     // check chat exists or not
     const chat = await Chat.findById(chatId);
     if (!chat) {
@@ -70,6 +70,7 @@ const createMessages = async (chatId, senderId, text) => {
 
 const getMessagesByChatId = async (chatId) => {
   try {
+    // console.log(chatId);
     if (!chatId) {
       const error = new Error("Chat ID is required");
       error.status = STATUS.BAD_REQUEST;

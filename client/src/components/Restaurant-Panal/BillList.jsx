@@ -50,6 +50,7 @@ const BillList = ({ userId }) => {
   const fetchBills = async (page = 1, filtersToUse = tempFilters) => {
     setLoading(true);
     try {
+      console.log("hhhhhhhhh", page);
       const response = await billService.getBills(userId, page, filtersToUse);
 
       if (response) {
@@ -77,7 +78,7 @@ const BillList = ({ userId }) => {
     if (userId) {
       fetchBills(currentPage);
     }
-  }, [userId]);
+  }, [userId, currentPage]);
 
   // Handle filter input changes
   const handleChange = (e) => {
