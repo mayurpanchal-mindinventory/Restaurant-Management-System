@@ -58,3 +58,9 @@ export const getBillByUser = async (userId, options = {}) => {
 export const updateSharedWithUserByBookingid = async (bookingid) => {
   return await apiClient.patch(`api/user/bill/${bookingid}`);
 };
+
+
+export const sendMessage = async (body) => {
+  const res = await apiClient.post(`api/message`, body);
+  return res.data;
+};

@@ -15,15 +15,13 @@ function RestaurantLayout() {
       </aside>
       {isMobileMenuOpen && (
         <div
-          className={`fixed inset-0 z-50 lg:hidden bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 ${
-            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed inset-0 z-50 lg:hidden bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
-            className={`w-64 h-full bg-white transform transition-transform duration- ease-in-out ${
-              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`w-64 h-full bg-white transform transition-transform duration- ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarAdmin />
@@ -64,7 +62,7 @@ function RestaurantLayout() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl min-h-full mx-auto">
             <Outlet />
           </div>
         </div>
