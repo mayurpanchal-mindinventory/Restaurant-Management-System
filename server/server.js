@@ -1,13 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const { Server } = require('socket.io');
-const http = require('http');
+const { Server } = require("socket.io");
+const http = require("http");
 const dotenv = require("dotenv");
 const authRoutes = require("./src/routes/authRoutes.js");
 const adminRoutes = require("./src/routes/adminRoutes.js");
 const userRoutes = require("./src/routes/userRoutes.js");
+const chatRoute = require("./src/routes/chatRoute.js");
+const messageRoute = require("./src/routes/messageRoute.js");
 const restaurantPanelRoutes = require("./src/routes/restaurantPanelRoutes.js");
+const socketService = require("./src/services/socketService.js");
 dotenv.config();
 const verifyToken = require("../server/src/middleware/authMiddleware.js");
 
@@ -57,7 +60,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", verifyToken, adminRoutes);
 app.use("/api/user", verifyToken, userRoutes);
 app.use("/api/owner", verifyToken, restaurantPanelRoutes);
-
+app.use("/api/chat", verifyToken, chatRoute);
+app.use("/api/message", messageRoute);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
@@ -71,22 +75,15 @@ app.use((req, res) => {
 // );
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-io.on("connection", (socket) => {
-  console.log("user Connected:", socket.id);
-  socket.on("join", (userId) => {
-    socket.join(userId);
-  });
-  socket.on("sendMessage", ({ receiverId, message }) => {
-    io.to(receiverId).emit("receiveMessage", message);
-
-  });
-  socket.on("disconnect", () => {
-    console.log("User Disconnected", socket.id);
-
-  });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
+// start socket
+socketService.initialize(io);
 
 app.listen(process.env.PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://0.0.0.0:${process.env.PORT}`);
