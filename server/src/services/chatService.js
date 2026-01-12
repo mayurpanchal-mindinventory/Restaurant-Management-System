@@ -50,14 +50,28 @@ const getUserChats = async (userId) => {
     const chats = await Chat.find({ members: userId })
       .populate({
         path: "members",
-        match: { _id: { $ne: userId } }, // Only populate if ID is NOT yours
-        select: "name email ", // Choose only needed fields
+        match: { _id: { $ne: userId } }, // This makes "you" null in the array
+        select: "name email",
       })
       .sort({ updatedAt: -1 });
+
+    // Transform array of chats into objects with an 'otherUser' field
+    const formattedChats = chats.map((chat) => {
+      const chatObj = chat.toObject();
+
+      // Find the member that isn't null (the other user)
+      const otherUser = chatObj.members.find((m) => m !== null);
+
+      return {
+        ...chatObj,
+        otherUser: otherUser || null, // Your new object field
+        members: undefined, // Remove the old array field
+      };
+    });
     return {
       success: true,
       message: "Chats retrieved successfully",
-      data: chats,
+      data: formattedChats,
     };
   } catch (error) {
     if (!error.status) {
