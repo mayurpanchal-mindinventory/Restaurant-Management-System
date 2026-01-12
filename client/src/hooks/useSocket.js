@@ -8,7 +8,7 @@ export const useSocket = () => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [newMessage, setNewMessage] = useState(null);
-  l;
+
   const user = useSelector((state) => state.auth.user);
   const userId = user?._id || user?.id;
 

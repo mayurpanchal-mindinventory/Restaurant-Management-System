@@ -64,3 +64,7 @@ export const sendMessage = async (body) => {
   const res = await apiClient.post(`api/message`, body);
   return res.data;
 };
+export const getAllChat = async (id) => {
+  const res = await apiClient.get(`api/message/${id}`);
+  return res.data;
+};
