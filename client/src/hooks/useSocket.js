@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
 
-const SOCKET_URL = "http://localhost:5000";
+// Client - use same IP as server
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 export const useSocket = () => {
   const [socket, setSocket] = useState(null);

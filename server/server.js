@@ -61,7 +61,7 @@ app.use("/api/admin", verifyToken, adminRoutes);
 app.use("/api/user", verifyToken, userRoutes);
 app.use("/api/owner", verifyToken, restaurantPanelRoutes);
 app.use("/api/chat", verifyToken, chatRoute);
-app.use("/api/message", messageRoute);
+app.use("/api/message", verifyToken, messageRoute);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
