@@ -31,6 +31,7 @@ import NetworkStatus from "./components/common/NetworkStatus";
 import { useServerStatus } from "./context/ServerStatusContext";
 import ServerDownUI from "./context/ServerDownBanner";
 import { useEffect } from "react";
+import ChatList from "./pages/ChatList";
 
 function App() {
   const { isServerDown, setServerDown } = useServerStatus();
@@ -116,6 +117,8 @@ function App() {
                   >
                     <Route index element={<Home />} />
                     <Route path="restaurant" element={<RestoDetails />} />
+                    <Route path="chat" element={<ChatList />} />
+
                     <Route path="bookings" element={<MyBookings />} />
                     <Route path="menu" element={<PublicMenu />} />
                   </Route>
@@ -156,6 +159,8 @@ function App() {
                       element={<HanldeBooking />}
                     />
                     <Route path="restaurant/bills" element={<Bills />} />
+                    <Route path="chats" element={<ChatList />} />
+
                   </Route>
 
                   <Route path="/dashboard" element={<DashboardRedirect />} />

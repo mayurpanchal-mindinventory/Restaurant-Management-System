@@ -39,7 +39,7 @@ function SidebarAdmin() {
           <CreditCard size={18} />
           Billing & Bills
         </NavLink>
-        <NavLink to="restaurant/chats" className={navLinkClasses}>
+        <NavLink to="/restaurant/chats" className={navLinkClasses}>
           <MessageCircle size={18} />
           Chats
         </NavLink>

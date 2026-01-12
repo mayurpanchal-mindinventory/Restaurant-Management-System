@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { path: "/home", label: "Home" },
   { path: "/home/menu", label: "Menu" },
   { path: "/home/bookings", label: "Bookings" },
-  { path: "#footer", label: "About Us" },
+  { path: "/home/chat", label: "Chat" },
 ];
 
 export default function Header() {
@@ -68,18 +68,16 @@ export default function Header() {
   const getLinkStyle = (path) => {
     const active = pathname === path;
     const scrollColor = isScrolled ? "text-gray-700" : "text-white";
-    return `relative font-semibold transition-all ${
-      active ? "text-orange-500" : `${scrollColor} hover:text-orange-500`
-    }`;
+    return `relative font-semibold transition-all ${active ? "text-orange-500" : `${scrollColor} hover:text-orange-500`
+      }`;
   };
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/80 backdrop-blur-lg shadow-md py-3"
-          : "bg-transparent py-5"
-      }`}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
+        ? "bg-white/80 backdrop-blur-lg shadow-md py-3"
+        : "bg-transparent py-5"
+        }`}
     >
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         <div
@@ -90,9 +88,8 @@ export default function Header() {
         >
           <div className="bg-orange-500 p-1.5 rounded-lg ">🍽️</div>
           <h1
-            className={`text-2xl font-black ${
-              isScrolled ? "text-gray-900" : "text-white"
-            }`}
+            className={`text-2xl font-black ${isScrolled ? "text-gray-900" : "text-white"
+              }`}
           >
             FOODIE<span className="text-orange-500">HUB</span>
           </h1>
@@ -128,9 +125,8 @@ export default function Header() {
                 </div>
                 <ChevronDown
                   size={14}
-                  className={`transition-transform ${
-                    isProfileMenuOpen ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform ${isProfileMenuOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -170,9 +166,8 @@ export default function Header() {
             <div className="hidden md:flex gap-3">
               <button
                 onClick={() => handleNav("/login")}
-                className={`px-4 py-2 font-bold ${
-                  isScrolled ? "text-gray-700" : "text-white"
-                }`}
+                className={`px-4 py-2 font-bold ${isScrolled ? "text-gray-700" : "text-white"
+                  }`}
               >
                 Login
               </button>
@@ -187,9 +182,8 @@ export default function Header() {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`lg:hidden p-2 ${
-              isScrolled ? "text-gray-900" : "text-white"
-            }`}
+            className={`lg:hidden p-2 ${isScrolled ? "text-gray-900" : "text-white"
+              }`}
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -205,11 +199,10 @@ export default function Header() {
             <button
               key={link.path}
               onClick={() => handleNav(link.path)}
-              className={`w-full text-left p-3 rounded-lg font-bold ${
-                pathname === link.path
-                  ? "bg-orange-50 text-orange-600"
-                  : "text-gray-600"
-              }`}
+              className={`w-full text-left p-3 rounded-lg font-bold ${pathname === link.path
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600"
+                }`}
             >
               {link.label}
             </button>

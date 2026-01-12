@@ -15,3 +15,8 @@ export const updateBookingStatus = async (id, status) => {
   const res = await apiClient.patch(`api/owner/updateStatus/${id}`, { status });
   return res.data;
 };
+
+export const getChatList = async () => {
+  const res = await apiClient.get(`api/chat`);
+  return res.data;
+};
