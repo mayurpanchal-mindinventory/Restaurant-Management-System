@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { useAuthInit } from "./hooks/useAuthInit";
+import { ServerStatusProvider } from "./context/ServerStatusContext.jsx";
 
 // Component to initialize auth state
 const AuthInitializer = ({ children }) => {
@@ -14,11 +15,13 @@ const AuthInitializer = ({ children }) => {
 };
 
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <Provider store={store}>
-      <AuthInitializer>
-        <App />
-      </AuthInitializer>
-    </Provider>
-  </BrowserRouter>
+  <ServerStatusProvider>
+    <BrowserRouter>
+      <Provider store={store}>
+        <AuthInitializer>
+          <App />
+        </AuthInitializer>
+      </Provider>
+    </BrowserRouter>
+  </ServerStatusProvider>
 );

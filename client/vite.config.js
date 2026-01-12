@@ -9,7 +9,7 @@ export default defineConfig({
     host: true, // or '0.0.0.0' to listen on all addresses
     proxy: {
       "/api": {
-        target: "http://192.168.1.213:5000",
+        target: "http://192.168.1.214:5000",
         changeOrigin: true,
       },
     },
