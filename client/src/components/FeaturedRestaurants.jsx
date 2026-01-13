@@ -4,16 +4,14 @@ import { Star } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const brandColor = "text-orange-500";
-const brandBgColor = "bg-orange-500";
 const subtleOrangeBg = "bg-orange-100";
 const subtleOrangeText = "text-orange-600";
 
 const RestaurantCard = ({ restaurant }) => {
   const staticRating = 4.5;
-  const staticDiscount = 20;
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:shadow-xl transition duration-300 border border-gray-100">
+    <div className=" w-full bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:shadow-xl transition duration-300 border border-gray-100">
       <div className="relative h-[180px] w-full overflow-hidden">
         <img
           src={restaurant.mainImage || "via.placeholder.com"}
@@ -24,14 +22,12 @@ const RestaurantCard = ({ restaurant }) => {
             e.target.src = "via.placeholder.com";
           }}
         />
-
         <div
           className={`absolute top-3 left-3 ${subtleOrangeBg} ${subtleOrangeText} px-3 py-1 rounded-full text-xs font-bold shadow-md`}
         >
-          {staticDiscount}% OFF
+          {restaurant.maxDiscount}% OFF
         </div>
       </div>
-
       <div className="p-5 flex flex-col justify-between h-[150px]">
         <div>
           <h3 className="text-xl font-bold text-gray-800 truncate mb-1">
@@ -51,7 +47,10 @@ const RestaurantCard = ({ restaurant }) => {
             </span>
           </div>
 
-          <NavLink to="/Home/restaurant" state={{ id: restaurant._id }}>
+          <NavLink
+            to="/home/restaurant"
+            state={{ id: restaurant._id, discount: restaurant.maxDiscount }}
+          >
             <button
               className={`text-sm font-semibold ${brandColor} hover:text-orange-600 transition duration-200`}
             >
@@ -73,7 +72,6 @@ function FeaturedRestaurants() {
     const fetchRestaurants = async () => {
       try {
         setLoading(true);
-
         const response = await apiClient.getFeaturedRestaurants();
         setRestaurants(response.data.data.restaurants || []);
         setError(null);
@@ -140,9 +138,11 @@ function FeaturedRestaurants() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-            {restaurants.map((restaurant) => (
-              <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-            ))}
+            {restaurants
+              .filter((i) => i.isActive === true)
+              .map((restaurant) => (
+                <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+              ))}
           </div>
         )}
       </div>

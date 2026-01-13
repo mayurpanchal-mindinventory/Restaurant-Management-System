@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../slices/authSlice";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 function Register() {
   const [regiValue, setRegiValue] = useState({
@@ -12,6 +13,7 @@ function Register() {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ function Register() {
     }));
 
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev }));
     }
   };
 
@@ -39,7 +41,7 @@ function Register() {
     if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
       return "Name should only contain letters and spaces";
     }
-    return "";
+    return;
   };
 
   const validateEmail = (email) => {
@@ -50,21 +52,22 @@ function Register() {
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address";
     }
-    return "";
+    return;
   };
 
   const validatePhone = (phone) => {
     if (phone && phone.trim()) {
       const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
       const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
-      if (cleanPhone.length < 10) {
-        return "Phone number should be at least 10 digits";
-      }
+
       if (!phoneRegex.test(cleanPhone)) {
         return "Please enter a valid phone number";
       }
+      if (cleanPhone.length !== 10) {
+        return "Phone number must be 10 digits";
+      }
     }
-    return "";
+    return;
   };
 
   const validatePassword = (password) => {
@@ -77,30 +80,39 @@ function Register() {
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       return "Password must contain at least one uppercase letter, one lowercase letter, and one number";
     }
-    return "";
+    return;
   };
 
   const validateForm = () => {
-    const newErrors = {
-      name: validateName(regiValue.name),
-      email: validateEmail(regiValue.email),
-      phone: validatePhone(regiValue.phone),
-      password: validatePassword(regiValue.password),
-    };
+    const newErrors = {};
 
-    Object.keys(newErrors).forEach((key) => {
-      if (!newErrors[key]) delete newErrors[key];
-    });
+    const nameErr = validateName(regiValue.name);
+    if (nameErr) newErrors.name = nameErr;
+
+    const emailErr = validateEmail(regiValue.email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(regiValue.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const passwordErr = validatePassword(regiValue.password);
+    if (passwordErr) newErrors.password = passwordErr;
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return {
+      isValid: Object.keys(newErrors).length === 0,
+      newErrors,
+    };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      const errorMessages = Object.values(errors);
+    const { isValid, newErrors } = validateForm();
+
+    if (!isValid) {
+      const errorMessages = Object.values(newErrors);
       if (errorMessages.length > 0) {
         toast.error(errorMessages[0]);
       }
@@ -119,11 +131,9 @@ function Register() {
       navigate("/");
       toast.success("Registration successful! Please log in.");
     } catch (err) {
-      console.error("Registration failed:", err);
+      console.log(err);
 
-      toast.error(
-        "There was an error while creating your account. Please try again."
-      );
+      if (err?.response?.data?.error) toast.error(err.response.data.error);
     }
   };
 
@@ -181,10 +191,9 @@ function Register() {
           <div className="relative mb-4">
             <label htmlFor="phone" className="leading-7 text-sm text-gray-700">
               Phone Number{" "}
-              <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <input
-              type="tel"
+              type="number"
               id="phone"
               name="phone"
               value={regiValue.phone}
@@ -208,20 +217,30 @@ function Register() {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={regiValue.password}
-              onChange={handleRegister}
-              placeholder="Enter your password"
-              className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
-                errors.password
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                  : "focus:border-orange-500 focus:ring-orange-200"
-              } focus:ring-2`}
-              required
-            />
+            <div className="relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={regiValue.password}
+                onChange={handleRegister}
+                placeholder="Enter your password"
+                className={`w-full text-black rounded border transition-colors duration-200 text-base outline-none py-2 px-3 leading-8 ${
+                  errors.password
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "focus:border-orange-500 focus:ring-orange-200"
+                } focus:ring-2`}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}

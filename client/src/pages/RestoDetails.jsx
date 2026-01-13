@@ -5,7 +5,6 @@ import {
 } from "../services/adminService";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Star,
   Clock,
   Calendar,
   Phone,
@@ -15,9 +14,6 @@ import {
   Calendar as CalendarIcon,
   Utensils,
   Camera,
-  MessageSquare,
-  CheckCircle,
-  AlertCircle,
   Loader2,
   LayoutDashboard,
 } from "lucide-react";
@@ -26,107 +22,24 @@ import MenuDetails from "../components/MenuDetails";
 import { useSelector } from "react-redux";
 import { createBookings } from "../services/userService";
 
-// Success SVG Component
-const SuccessAnimation = ({ isVisible, onComplete }) => {
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        onComplete();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, onComplete]);
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center transform animate-bounce">
-        <div className="mb-6">
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 120 120"
-            className="mx-auto"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r="50"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="4"
-              className="animate-pulse"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="40"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="3"
-              strokeDasharray="251.2"
-              strokeDashoffset="251.2"
-              className="animate-[draw_2s_ease-in-out_forwards]"
-              style={{
-                animation: "draw 2s ease-in-out forwards",
-              }}
-            />
-            <path
-              d="M40 60 L52 72 L80 44"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="animate-[check_0.5s_ease-in-out_2s_forwards]"
-              style={{
-                strokeDasharray: "100",
-                strokeDashoffset: "100",
-                animation: "check 0.5s ease-in-out 2s forwards",
-              }}
-            />
-          </svg>
-        </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">
-          Booking Successful! 🎉
-        </h3>
-        <p className="text-gray-600 mb-4">
-          Your restaurant has been booked successfully. You'll receive a
-          confirmation shortly.
-        </p>
-        <div className="flex justify-center">
-          <CheckCircle className="w-8 h-8 text-green-500 animate-pulse" />
-        </div>
-      </div>
-      <style jsx>{`
-        @keyframes draw {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        @keyframes check {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
 function RestoDetails() {
+  //for slot manage with date
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slotsForDate, setSlotsForDate] = useState([]);
+
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.state?.id;
+  const itemName = location?.state?.name;
+  const disCount = location.state?.discount;
+  // console.log(location.state?.discount);
   const [timeSlots, setTimeSlots] = useState([]);
   const [resto, setResto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-
   const userString = localStorage.getItem("user");
   const userData = JSON.parse(userString);
   const userId = userData.user.id;
@@ -138,6 +51,11 @@ function RestoDetails() {
     numberOfGuests: 2,
     date: "",
   });
+  // Calculate remaining seats based on selected slot and current guest count
+  const getRemainingSeats = () => {
+    if (!selectedSlot) return 0;
+    return selectedSlot.maxBookings - bookingData.numberOfGuests;
+  };
 
   const validateBookingData = () => {
     if (!bookingData.date) {
@@ -152,6 +70,13 @@ function RestoDetails() {
       toast.error("Number of guests must be between 1 and 20");
       return false;
     }
+    const remainingSeats = getRemainingSeats();
+    if (remainingSeats < 0) {
+      toast.error(
+        `Only ${selectedSlot.maxBookings} seats available for this slot`
+      );
+      return false;
+    }
     const selectedDate = new Date(bookingData.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -161,6 +86,21 @@ function RestoDetails() {
     }
     return true;
   };
+
+  useEffect(() => {
+    // console.log(timeSlots);
+    if (!selectedDate) {
+      setSlotsForDate([]);
+      setSelectedSlot(null);
+      return;
+    }
+
+    const slots = timeSlots.filter(
+      (slot) => new Date(slot?.date).toISOString().split("T")[0] == selectedDate
+    );
+    setSlotsForDate(slots);
+    setSelectedSlot(null);
+  }, [selectedDate, timeSlots]);
 
   const handleBooking = async () => {
     if (!validateBookingData()) {
@@ -172,10 +112,16 @@ function RestoDetails() {
       const result = await createBookings(bookingData);
 
       if (result.data) {
-        setShowSuccessAnimation(true);
         toast.success("Restaurant booked successfully!", {
           duration: 5000,
           icon: "🎉",
+        });
+        setBookingData({
+          userId: userId,
+          restaurantId: id,
+          timeSlotId: "",
+          numberOfGuests: 2,
+          date: "",
         });
       }
     } catch (error) {
@@ -193,17 +139,6 @@ function RestoDetails() {
     }
   };
 
-  const handleSuccessAnimationComplete = () => {
-    setShowSuccessAnimation(false);
-
-    setBookingData({
-      userId: userId,
-      restaurantId: id,
-      timeSlotId: "",
-      numberOfGuests: 2,
-      date: "",
-    });
-  };
   useEffect(() => {
     const fetchResto = async (id) => {
       try {
@@ -215,7 +150,6 @@ function RestoDetails() {
           setLoading(false);
           return;
         }
-
         const response = await getRestaurantsById(id);
         setResto(response.data);
       } catch (err) {
@@ -227,12 +161,38 @@ function RestoDetails() {
     };
 
     fetchResto(id);
-  }, [id, timeSlots]);
+  }, [id]);
+
+  const getSlotHour = (timeStr) => {
+    const [time, modifier] = timeStr.split(" - ")[0].split(" ");
+    let [hours] = time.split(":");
+    let hour = parseInt(hours, 10);
+    if (modifier === "PM" && hour !== 12) hour += 12;
+    if (modifier === "AM" && hour === 12) hour = 0;
+    return hour;
+  };
+
+  const now = new Date();
+  const todayDate = now.toISOString().split("T")[0];
+  const currentHour = now.getHours();
+
+  const filteredSlots = slotsForDate?.filter((time) => {
+    const selectedDate = bookingData?.date;
+    if (selectedDate < todayDate) return false;
+
+    if (selectedDate === todayDate) {
+      return getSlotHour(time.timeSlot) > currentHour;
+    }
+    return true;
+  });
+
   useEffect(() => {
     const fetchSlots = async () => {
-      const response = await getSlotListByRestaurant(id);
+      const response = await getSlotListByRestaurant(id, "", "", "");
 
-      setTimeSlots(response.data.data);
+      // console.log("hhhh", response.data.data.data.slots);
+
+      setTimeSlots(response.data.data.data.slots);
       // console.log("heloooooooooooooo", response.data.data);
     };
     fetchSlots();
@@ -245,7 +205,6 @@ function RestoDetails() {
       day: "numeric",
     });
   };
-
   const formatClosedDates = (dates) => {
     if (!dates || dates.length === 0) return "No upcoming closures";
     return dates.map((date) => formatDate(date)).join(", ");
@@ -256,7 +215,7 @@ function RestoDetails() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading restaurant details...</p>
+          <p className="text-gray-600">Loading restaurant details....</p>
         </div>
       </div>
     );
@@ -303,14 +262,10 @@ function RestoDetails() {
     );
   }
 
-  const staticRating = 4.5;
-  const staticReviewCount = 127;
-
   const tabs = [
     { id: "overview", label: "Restaurant Details ", icon: LayoutDashboard },
     { id: "menu", label: "Menu Items", icon: Utensils },
     { id: "photos", label: "Photos", icon: Camera },
-    { id: "reviews", label: "Reviews", icon: MessageSquare },
   ];
 
   return (
@@ -329,13 +284,15 @@ function RestoDetails() {
 
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition duration-200 z-10"
+          onClick={() => {
+            itemName ? navigate(`/menu?search=${itemName}`) : navigate(-1);
+          }}
+          className="absolute top-20 left-6 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition duration-200 z-10"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        {/* Restaurant Name and Logo - Bottom Left */}
+        {/* Restaurant Name and Logo */}
         <div className="absolute bottom-6 left-6 flex items-center space-x-4">
           {resto.logoImage && (
             <img
@@ -359,29 +316,14 @@ function RestoDetails() {
         </div>
 
         {/* Rating - Bottom Right */}
-        <div className="absolute bottom-6 right-6 bg-white bg-opacity-95 px-6 py-3 rounded-xl shadow-lg">
+        <div className="absolute bottom-6 right-6 bg-transparent bg-opacity-95 px-6 py-3 rounded-xl shadow-lg">
           <div className="flex items-center space-x-3">
-            <Star className="w-6 h-6 text-orange-500 fill-current" />
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-xl text-gray-800">
-                  {staticRating}
+              <div className="absolute top-0 right-4 bg-white rounded-full shadow-lg px-4 py-2 flex items-center gap-2">
+                <span className="text-orange-500 font-bold text-sm md:text-xl">
+                  {disCount}%
                 </span>
-                <span className="text-gray-600">
-                  ({staticReviewCount} reviews)
-                </span>
-              </div>
-              <div className="flex items-center space-x-1 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= staticRating
-                        ? "text-orange-500 fill-current"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
+                <span className="text-gray-600 text-sm font-medium">OFF</span>
               </div>
             </div>
           </div>
@@ -394,7 +336,7 @@ function RestoDetails() {
           <div className="lg:w-[70%]">
             {/* Navigation Tabs */}
             <div className="bg-white rounded-xl shadow-lg mb-6">
-              <div className="flex border-b border-gray-200 overflow-x-auto">
+              <div className="flex flex-col md:flex-row border-b border-gray-200 overflow-x-auto">
                 {tabs.map((tab) => {
                   const IconComponent = tab.icon;
                   return (
@@ -421,7 +363,7 @@ function RestoDetails() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                      About {resto.name}
+                      About <span className="underline">{resto.name}</span>{" "}
                     </h3>
                     <p className="text-gray-600 text-lg leading-relaxed">
                       {resto.description ||
@@ -454,7 +396,6 @@ function RestoDetails() {
                         </p>
                       )}
                     </div>
-
                     <div className="bg-gray-50 rounded-lg p-6">
                       <div className="flex items-center space-x-3 mb-4">
                         <Calendar className="w-6 h-6 text-orange-500" />
@@ -463,11 +404,17 @@ function RestoDetails() {
                         </h4>
                       </div>
                       <p className="text-gray-600">
-                        {formatClosedDates(resto.closedDates)}
+                        {formatClosedDates(
+                          resto.closedDates.filter((date) => {
+                            const closedDate = new Date(date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return closedDate >= today;
+                          })
+                        )}
                       </p>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {resto.userId?.email && (
                       <div className="flex items-center space-x-3 text-gray-600">
@@ -484,7 +431,7 @@ function RestoDetails() {
                   </div>
                 </div>
               )}
-              {/*Menu part */}
+              {/* Menu part */}
               {activeTab === "menu" && (
                 <div className="text-center py-12">
                   <h3 className="text-xl flex flex-row font-semibold text-gray-600 mb-2">
@@ -506,18 +453,6 @@ function RestoDetails() {
                   </p>
                 </div>
               )}
-
-              {activeTab === "reviews" && (
-                <div className="text-center py-12">
-                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                    Customer Reviews
-                  </h3>
-                  <p className="text-gray-500">
-                    Reviews will be displayed here.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -526,7 +461,6 @@ function RestoDetails() {
               <h3 className="text-xl font-bold text-gray-800 mb-6">
                 Book Restaurant
               </h3>
-
               {/* Date */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -537,80 +471,129 @@ function RestoDetails() {
                   <input
                     type="date"
                     value={bookingData.date}
-                    onChange={(e) =>
-                      setBookingData({ ...bookingData, date: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setBookingData({ ...bookingData, date: e.target.value }),
+                        setSelectedDate(e.target.value);
+                    }}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     min={new Date().toISOString().split("T")[0]}
                   />
                 </div>
               </div>
               {/* Time Slots */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time Slots
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* {console.log(timeSlots)} */}
-                  {timeSlots?.map((time) => (
+              {selectedDate && slotsForDate.length > 0 ? (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Time Slots
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {filteredSlots?.map((time) => (
+                      <button
+                        disabled={time?.maxBookings < 1}
+                        key={time.timeSlot}
+                        onClick={() => {
+                          setBookingData({
+                            ...bookingData,
+                            timeSlotId: time._id,
+                          });
+                          setSelectedSlot(
+                            slotsForDate.find((s) => s._id === time._id) || null
+                          );
+                        }}
+                        className={`px-3 py-2 text-sm rounded-lg border transition duration-200 ${
+                          bookingData.timeSlotId === time._id
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                        }`}
+                      >
+                        {time.timeSlot}
+                      </button>
+                    ))}
+                    {filteredSlots?.length === 0 && (
+                      <p className="col-span-2 text-gray-400">
+                        You missed slots for this date.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : selectedDate != "" ? (
+                <div className="text-center text-red-600">
+                  No slot available
+                </div>
+              ) : (
+                <div />
+              )}
+              {/* Number of People */}
+              {selectedSlot && selectedSlot?.maxBookings > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Number of People
+                  </label>
+                  <div className="flex items-center space-x-3">
                     <button
-                      key={time.timeSlot}
                       onClick={() =>
                         setBookingData({
                           ...bookingData,
-                          timeSlotId: time._id,
+                          numberOfGuests: Math.max(
+                            1,
+                            bookingData.numberOfGuests - 1
+                          ),
                         })
                       }
-                      className={`px-3 py-2 text-sm  rounded-lg border transition duration-200 ${
-                        bookingData.timeSlotId === time._id
-                          ? "bg-orange-500 text-white border-orange-500"
-                          : "bg-white text-gray-600 border-gray-300 hover:border-orange-500 hover:text-orange-500"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
+                    >
+                      -
+                    </button>
+                    <div className="flex items-center space-x-2">
+                      <Users className="w-5 h-5 text-gray-500" />
+                      <span className="text-lg font-semibold">
+                        {bookingData.numberOfGuests}
+                      </span>
+                    </div>
+                    <button
+                      disabled={
+                        bookingData.numberOfGuests >= 20 ||
+                        bookingData.numberOfGuests + 1 >
+                          selectedSlot?.maxBookings
+                      }
+                      onClick={() =>
+                        setBookingData({
+                          ...bookingData,
+                          numberOfGuests: bookingData.numberOfGuests + 1,
+                        })
+                      }
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition duration-200 ${
+                        bookingData.numberOfGuests >= 20 ||
+                        bookingData.numberOfGuests + 1 >
+                          selectedSlot?.maxBookings
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
                       }`}
                     >
-                      {time.timeSlot}
+                      +
                     </button>
-                  ))}
-                </div>
-              </div>
-              {/* Number of People */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Number of People
-                </label>
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() =>
-                      setBookingData({
-                        ...bookingData,
-                        numberOfGuests: Math.max(
-                          1,
-                          bookingData.numberOfGuests - 1
-                        ),
-                      })
-                    }
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
-                  >
-                    -
-                  </button>
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-5 h-5 text-gray-500" />
-                    <span className="text-lg font-semibold">
-                      {bookingData.numberOfGuests}
-                    </span>
+                    {selectedSlot ? (
+                      <p
+                        className={
+                          getRemainingSeats() <= 5
+                            ? "text-red-600 font-semibold"
+                            : getRemainingSeats() <= 10
+                            ? "text-orange-600 font-medium"
+                            : "text-green-600"
+                        }
+                      >
+                        {getRemainingSeats() > 0
+                          ? `${getRemainingSeats()} seat${
+                              getRemainingSeats() !== 1 ? "s" : ""
+                            } remaining`
+                          : "No seats available"}
+                      </p>
+                    ) : (
+                      <p></p>
+                    )}
                   </div>
-                  <button
-                    onClick={() =>
-                      setBookingData({
-                        ...bookingData,
-                        numberOfGuests: bookingData.numberOfGuests + 1,
-                      })
-                    }
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition duration-200"
-                  >
-                    +
-                  </button>
                 </div>
-              </div>
+              )}
 
               <button
                 disabled={
@@ -632,11 +615,6 @@ function RestoDetails() {
           </div>
         </div>
       </div>
-
-      <SuccessAnimation
-        isVisible={showSuccessAnimation}
-        onComplete={handleSuccessAnimationComplete}
-      />
     </div>
   );
 }

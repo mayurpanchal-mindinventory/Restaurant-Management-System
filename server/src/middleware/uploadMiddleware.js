@@ -9,7 +9,7 @@ const uploadDir = path.join(__dirname, "uploads", "temp");
 const ensureDirExists = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`Created directory: ${dir}`);
+    // console.log(`Created directory: ${dir}`);
   }
 };
 

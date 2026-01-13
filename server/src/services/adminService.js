@@ -6,7 +6,8 @@ const fs = require("fs");
 const cloudinary = require("../config/cloudinaryConfig.js");
 const mongoose = require("mongoose");
 const { STATUS, MESSAGES } = require("../utils/constants");
-const Booking = require('../models/Booking.js')
+const Booking = require("../models/Booking.js");
+const TimeSlot = require("../models/TimeSlot.js");
 const uploadToCloudinary = (filePath, folderName) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
@@ -20,12 +21,10 @@ const uploadToCloudinary = (filePath, folderName) => {
             console.log(`Deleted local temp file: ${filePath}`);
           }
         });
-
         if (error) {
           console.error("Cloudinary upload failed:", error.message);
           return reject(error);
         }
-
         console.log("Cloudinary upload successful:", result.secure_url);
         resolve(result.secure_url);
       }
@@ -33,12 +32,44 @@ const uploadToCloudinary = (filePath, folderName) => {
   });
 };
 
+// Helper function to extract public ID from Cloudinary URL
+const extractPublicIdFromUrl = (cloudinaryUrl) => {
+  if (!cloudinaryUrl) return null;
+  // Cloudinary URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/filename.jpg
+  // We need to extract: folder/filename
+  const parts = cloudinaryUrl.split("/");
+  // Find "upload" index and skip past it and the version number
+  const uploadIndex = parts.indexOf("upload");
+  if (uploadIndex === -1) return null;
+
+  // Get everything after "upload" and the version (e.g., v1234567890)
+  const afterUpload = parts.slice(uploadIndex + 2);
+  // Remove file extension
+  const publicIdWithPath = afterUpload.join("/").replace(/\.[^/.]+$/, "");
+
+  return publicIdWithPath;
+};
+
+// Helper function to delete image from Cloudinary
+const deleteImageFromCloudinary = async (cloudinaryUrl) => {
+  if (!cloudinaryUrl) return;
+  const publicId = extractPublicIdFromUrl(cloudinaryUrl);
+  if (!publicId) return;
+
+  try {
+    await cloudinary.uploader.destroy(publicId);
+    console.log(`Successfully deleted image: ${publicId}`);
+  } catch (error) {
+    console.error(`Failed to delete image from Cloudinary: ${error.message}`);
+  }
+};
+
 const createRestaurantAccount = async (req) => {
   const { email, restaurantName, description, phone, password } = req.body;
 
-  if (!email || !restaurantName) {
+  if (!email || !restaurantName || !req.files["logoImage"] || !description || !password) {
     const error = new Error(
-      "Missing required fields: email and restaurantName are required."
+      `Missing required fields: email,restaurantName,description,password and logo Image are required.`
     );
     error.status = STATUS.BAD_REQUEST;
     error.details = {
@@ -148,27 +179,132 @@ const createRestaurantAccount = async (req) => {
 
 const getAllRestaurantsWithOwners = async (req) => {
   try {
-    const { page } = req.query;
-    const limit = 2;
-    const skip = (page - 1) * limit;
-    const restaurants = await Restaurant.find({}).populate({
-      path: "userId",
-      select: "name email phone",
-    }).skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    let { page = 1, search, sortby, date } = req.query;
+    const limit = 5;
+    const skip = (Math.max(1, page) - 1) * limit;
 
-    const count = await Restaurant.countDocuments();;
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      { $unwind: { path: "$owner", preserveNullAndEmptyArrays: true } },
+      {
+        $match: search
+          ? {
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              { "owner.name": { $regex: search, $options: "i" } },
+              { "owner.email": { $regex: search, $options: "i" } },
+              { "owner.phone": { $regex: search, $options: "i" } },
+            ],
+          }
+          : {},
+      },
+    ];
+
+    // Count data logic remains the same...
+    const countData = await Restaurant.aggregate([
+      ...pipeline,
+      { $count: "total" },
+    ]);
+    const totalDocs = countData.length > 0 ? countData[0].total : 0;
+
+    const restaurants = await Restaurant.aggregate([
+      ...pipeline,
+      sortby === "1"
+        ? { $sort: { name: 1 } }
+        : sortby === "2"
+          ? { $sort: { name: -1 } }
+          : { $sort: { createdAt: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+
+      {
+        $lookup: {
+          from: "timeslots", // Fixed: was "TimeSlot" (case-sensitive)
+          let: { resId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    // Use $toObjectId if your TimeSlot schema stores restaurantId as a string
+                    { $eq: ["$restaurantId", "$$resId"] },
+                    ...(date ? [{ $eq: ["$date", new Date(date)] }] : []),
+                  ],
+                },
+              },
+            },
+            { $sort: { discountPercent: -1 } }, // Fixed: was "discountPercentage" - field name in schema is "discountPercent"
+            { $limit: 1 },
+            { $project: { _id: 0, discountPercent: 1 } }, // Fixed: was "discountPercentage"
+          ],
+          as: "maxSlot",
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          isActive: 1,
+          address: 1,
+          logoImage: 1,
+          mainImage: 1,
+          openDays: 1,
+          // Use $arrayElemAt to extract the object from the maxSlot array
+          maxDiscount: {
+            $ifNull: [{ $arrayElemAt: ["$maxSlot.discountPercent", 0] }, 0], // Fixed: was "discountPercentage"
+          },
+          userId: {
+            name: "$owner.name",
+            email: "$owner.email",
+            phone: "$owner.phone",
+            _id: "$owner._id",
+          },
+        },
+      },
+    ]);
 
     return {
       success: true,
       message: MESSAGES.RESTAURANT_FOUND,
       data: {
-        restaurants, totalPages: Math.ceil(count / limit),
-        currentPage: page * 1,
-        totalDocs: count
-      }
+        restaurants,
+        totalPages: Math.ceil(totalDocs / limit),
+        currentPage: Number(page),
+        totalDocs,
+      },
+    };
+  } catch (error) {
+    // Error handling...
+    throw error;
+  }
+};
+
+const changeRestaurantStatusById = async (req) => {
+  try {
+    const restaurantId = req.params.id;
+
+    const existingRestaurant = await Restaurant.findById(restaurantId);
+
+    if (!existingRestaurant) {
+      return {
+        success: false,
+        message: MESSAGES.RESTAURANT_NOT_FOUND,
+        data: null,
+      };
+    }
+
+    existingRestaurant.isActive = !existingRestaurant.isActive;
+    await existingRestaurant.save();
+    return {
+      success: true,
+      message: "",
+      data: existingRestaurant,
     };
   } catch (error) {
     if (!error.status) {
@@ -208,11 +344,17 @@ const getRestaurantWithOwnerById = async (Id) => {
   }
 };
 
-
 const updateRestaurant = async (req) => {
   const { restaurantId } = req.params;
-  const { email, restaurantName, description, phone, openDays, closedDates, password } =
-    req.body;
+  const {
+    email,
+    restaurantName,
+    description,
+    phone,
+    openDays,
+    closedDates,
+    password,
+  } = req.body;
 
   // Validation
   if (!restaurantId) {
@@ -251,16 +393,20 @@ const updateRestaurant = async (req) => {
     let logoImageUrl = existingRestaurant.logoImage;
     let mainImageUrl = existingRestaurant.mainImage;
 
-    // Upload new logo if provided
+    // Upload new logo if provided and delete old one
     if (logoFile) {
+      // Delete old logo from Cloudinary
+      await deleteImageFromCloudinary(existingRestaurant.logoImage);
       logoImageUrl = await uploadToCloudinary(
         logoFile.path,
         "restaurant_logos"
       );
     }
 
-    // Upload new main image if provided
+    // Upload new main image if provided and delete old one
     if (mainFile) {
+      // Delete old main image from Cloudinary
+      await deleteImageFromCloudinary(existingRestaurant.mainImage);
       mainImageUrl = await uploadToCloudinary(
         mainFile.path,
         "restaurant_main_images"
@@ -276,11 +422,14 @@ const updateRestaurant = async (req) => {
           : existingRestaurant.description,
       logoImage: logoImageUrl,
       mainImage: mainImageUrl,
-      openDays: openDays || existingRestaurant.openDays,
+      openDays: typeof openDays === "string" ? openDays.split(",") : openDays,
       closedDates: closedDates || existingRestaurant.closedDates,
     };
 
-    await Restaurant.findByIdAndUpdate(restaurantId, updateData, { session });
+    await Restaurant.findByIdAndUpdate(restaurantId, updateData, {
+      session,
+      new: true,
+    });
 
     // Update user details if provided
     if (restaurantName || email || phone || password) {
@@ -288,8 +437,8 @@ const updateRestaurant = async (req) => {
       if (restaurantName) userUpdateData.name = restaurantName.trim();
       if (email) userUpdateData.email = email.toLowerCase().trim();
       if (phone) userUpdateData.phone = phone.trim();
-      if (password) userUpdateData.passwordHash = await bcrypt.hash(password, 10);
-
+      if (password)
+        userUpdateData.passwordHash = await bcrypt.hash(password, 10);
 
       await User.findByIdAndUpdate(existingRestaurant.userId, userUpdateData, {
         session,
@@ -364,35 +513,12 @@ const deleteRestaurant = async (req) => {
 
     // Delete images from Cloudinary if they exist
     const deletePromises = [];
-
-    if (existingRestaurant.logoImage) {
-      const publicId = existingRestaurant.logoImage
-        .split("/")
-        .pop()
-        .split(".")[0];
-      deletePromises.push(
-        cloudinary.uploader
-          .destroy(`restaurant_logos/${publicId}`)
-          .catch((error) =>
-            console.error("Failed to delete logo from Cloudinary:", error)
-          )
-      );
-    }
-
-    if (existingRestaurant.mainImage) {
-      const publicId = existingRestaurant.mainImage
-        .split("/")
-        .pop()
-        .split(".")[0];
-      deletePromises.push(
-        cloudinary.uploader
-          .destroy(`restaurant_main_images/${publicId}`)
-          .catch((error) =>
-            console.error("Failed to delete main image from Cloudinary:", error)
-          )
-      );
-    }
-
+    deletePromises.push(
+      deleteImageFromCloudinary(existingRestaurant.logoImage)
+    );
+    deletePromises.push(
+      deleteImageFromCloudinary(existingRestaurant.mainImage)
+    );
     await Promise.all(deletePromises);
 
     // Delete restaurant and user documents
@@ -423,44 +549,134 @@ const deleteRestaurant = async (req) => {
 };
 const allBooking = async (req) => {
   try {
-    const { page } = req.query;
-    const limit = 5;
-    const skip = (page - 1) * limit;
-    const booking = await Booking.find()
-      .populate('userId', 'name -_id')
-      .populate('restaurantId', 'name logoImage -_id')
-      .populate('timeSlotId', 'timeSlot -_id')
-      .select('numberOfGuests date status -_id')
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .exec();
+    let { page, search, sortby, date, status } = req.query;
+    // if ((search || sortby || date || status) && page != 1) {
+    //   page = 1;
+    // }
+    let startOfDay, nextDay;
+    if (date) {
+      //  page = 1;
+      startOfDay = new Date(date);
+      // console.log(startOfDay);
+      nextDay = new Date(startOfDay);
+      nextDay.setDate(startOfDay.getDate() + 1);
+      console.log(nextDay);
+    }
+    const limit = 6;
+    const skip = (Math.max(1, page) - 1) * limit;
 
-    const count = await Booking.countDocuments();
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $lookup: {
+          from: "restaurants",
+          localField: "restaurantId",
+          foreignField: "_id",
+          as: "restaurant",
+        },
+      },
+      {
+        $lookup: {
+          from: "timeslots",
+          localField: "timeSlotId",
+          foreignField: "_id",
+          as: "timeSlot",
+        },
+      },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$restaurant", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$timeSlot", preserveNullAndEmptyArrays: true } },
+
+      {
+        $match: search
+          ? {
+            $or: [
+              { "user.name": { $regex: search, $options: "i" } },
+              { "restaurant.name": { $regex: search, $options: "i" } },
+              { status: { $regex: search, $options: "i" } },
+            ],
+          }
+          : {},
+      },
+      {
+        $match: date
+          ? {
+            date: {
+              $gte: startOfDay,
+              $lt: nextDay,
+            },
+          }
+          : {},
+      },
+      {
+        $match: status
+          ? {
+            status: { $regex: status, $options: "i" },
+          }
+          : {},
+      },
+    ];
+
+    const totalResults = await Booking.aggregate([
+      ...pipeline,
+      { $count: "count" },
+    ]);
+    const totalDocs = totalResults.length > 0 ? totalResults[0].count : 0;
+
+    const booking = await Booking.aggregate([
+      ...pipeline,
+      sortby === "1"
+        ? { $sort: { date: 1 } }
+        : sortby === "2"
+          ? { $sort: { "restaurant.name": 1 } }
+          : sortby === "3"
+            ? { $sort: { "restaurant.name": -1 } }
+            : { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          numberOfGuests: 1,
+          date: 1,
+          status: 1,
+          "userId.name": "$user.name",
+          "restaurantId.name": "$restaurant.name",
+          "restaurantId.logoImage": "$restaurant.logoImage",
+          "timeSlotId.timeSlot": "$timeSlot.timeSlot",
+        },
+      },
+    ]);
 
     return {
       success: true,
       data: {
-        booking, totalPages: Math.ceil(count / limit),
-        currentPage: page * 1,
-        totalDocs: count
-      }
-
+        booking,
+        totalPages: Math.ceil(totalDocs / limit),
+        currentPage: Number(page),
+        totalDocs,
+      },
     };
   } catch (error) {
-    if (!error.status) {
-      error.status = STATUS.INTERNAL_SERVER_ERROR;
-      error.message;
-    }
     throw error;
   }
 };
+
 module.exports = {
   uploadToCloudinary,
+  extractPublicIdFromUrl,
+  deleteImageFromCloudinary,
   createRestaurantAccount,
   getAllRestaurantsWithOwners,
   updateRestaurant,
   deleteRestaurant,
   getRestaurantWithOwnerById,
-  allBooking
+  allBooking,
+  changeRestaurantStatusById,
 };

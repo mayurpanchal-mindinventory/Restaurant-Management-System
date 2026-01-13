@@ -33,7 +33,7 @@ const getDashboardRoute = (role) => {
       return "/restaurant";
     case "user":
     default:
-      return "/Home";
+      return "/home";
   }
 };
 

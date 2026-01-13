@@ -17,8 +17,22 @@ export const loginUser = createAsyncThunk(
 
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
+        localStorage.setItem("token", response.data.token);
       }
       return response.data;
+    } catch (error) {
+
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (thunkAPI) => {
+    try {
+      await apiClient.post("api/auth/logout");
+      localStorage.clear();
+      window.location.href = "/";
     } catch (error) {
       const message =
         (error.response &&
@@ -35,19 +49,21 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, thunkAPI) => {
     try {
-      console.log(userData);
+      //  console.log(userData);
 
       const response = await apiClient.post("api/auth/register", userData);
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      // console.log(error);
+
+      // const message =
+      //   (error.response &&
+      //     error.response.data &&
+      //     error.response.data.error) ||
+      //   error.error ||
+      //   error.toString();
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
@@ -58,14 +74,17 @@ const authSlice = createSlice({
   initialState,
 
   reducers: {
-    // Logout Reducer: clears state and local storage
-    logout: (state) => {
-      localStorage.removeItem("user"); // Clear the 'user' item
-      state.user = null;
-      state.isAuthenticated = false;
-      state.isLoading = false;
-      state.error = null;
-    },
+    // // Logout Reducer: clears state and local storage
+    // logout: (state) => {
+    //   // localStorage.removeItem("user"); // Clear the 'user' item
+    //   // localStorage.removeItem("token"); // Clear the 'token'
+
+    //   // state.user = null;
+    //   // state.isAuthenticated = false;
+    //   // state.isLoading = false;
+    //   // state.error = null;
+
+    // },
 
     // Set user from localStorage (for initialization)
     setUserFromStorage: (state, action) => {
@@ -100,7 +119,9 @@ const authSlice = createSlice({
         // Store the response data in localStorage if not already stored
         if (action.payload) {
           localStorage.setItem("user", JSON.stringify(action.payload));
-          console.log("User data stored in localStorage:", action.payload);
+          localStorage.setItem("token", action.payload.token);
+
+          //console.log("User data stored in localStorage:", action.payload);
         }
 
         // Set user in state - handle both possible data structures
@@ -127,5 +148,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setUserFromStorage, clearAuthState } = authSlice.actions;
+export const { setUserFromStorage, clearAuthState } = authSlice.actions;
 export default authSlice.reducer;

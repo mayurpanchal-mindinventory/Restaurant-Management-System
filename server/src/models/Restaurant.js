@@ -10,13 +10,13 @@ const restaurantSchema = new mongoose.Schema(
     },
     name: { type: String, required: true },
     description: { type: String, required: true },
-
-    logoImage: { type: String },
+    isActive: { type: Boolean, required: true, default: true },
+    logoImage: { type: String, required: true },
     mainImage: { type: String },
 
     openDays: [
       {
-        type: String,
+        type: String
       },
     ],
 

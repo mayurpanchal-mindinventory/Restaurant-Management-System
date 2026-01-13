@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { getMenuList } from "../services/adminService";
+import { getMenuList, getMenuList1 } from "../services/adminService";
 
 function MenuDetails({ id }) {
   const [item, setItem] = useState(null);
   useEffect(() => {
     const fetchMenu = async (id) => {
-      const response = await getMenuList(id);
-      console.log(response.data.data);
-      setItem(response.data.data);
+      const response = await getMenuList1(id);
+      console.log(response);
+      setItem(response.data.data.menuData);
     };
     fetchMenu(id);
   }, []);
@@ -24,16 +24,21 @@ function MenuDetails({ id }) {
             >
               <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
                 <img
-                  src={i.image || "via.placeholder.com"}
+                  src={i?.image || "https://placehold.co/600x400"}
                   alt={`${i.name || "Product"} image`}
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <div className="flex flex-row w-full px-5  gap-10 ml-4 justify-between items-baseline">
-                <h2 className="text-base font-semibold text-gray-700">
-                  {i.name || "Unnamed Product"}
-                </h2>
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-base font-semibold text-gray-700">
+                    {i.name || "Unnamed Product"}
+                  </h2>
+                  <p className="bg-orange-100 text-orange-500 h-fit px-1 w-fit rounded-full text-xs">
+                    {i.categoryId.categoryName}
+                  </p>
+                </div>
 
                 <p className="text-lg font-bold text-orange-600 mt-1">
                   ₹{i.price ? parseFloat(i.price).toFixed(2) : "N/A"}

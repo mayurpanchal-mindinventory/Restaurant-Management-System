@@ -5,7 +5,9 @@ const { STATUS, sendResponse } = require("../utils/constants");
 exports.createSlot = async (req, res) => {
     try {
         const slot = await createSlot(req.body);
-        return sendResponse(res, STATUS.OK, slot.message, slot.data);
+        console.log(slot);
+
+        return sendResponse(res, STATUS.OK, "Slot Created", slot);
 
     } catch (err) {
         res.status(STATUS.BAD_REQUEST).json({ error: err.message });
@@ -14,7 +16,7 @@ exports.createSlot = async (req, res) => {
 exports.getSlotList = async (req, res) => {
     try {
         const slot = await slotList(req);
-        return sendResponse(res, STATUS.OK, "", slot);
+        return sendResponse(res, STATUS.OK, slot.message, slot);
 
     } catch (error) {
         return sendResponse(
@@ -30,7 +32,7 @@ exports.getSlotList = async (req, res) => {
 exports.deleteSlotById = async (req, res) => {
     try {
         const result = await deleteSlot(req);
-        return sendResponse(res, STATUS.OK, result.message, result.data);
+        return sendResponse(res, STATUS.OK, "Slot Deleted", result);
     } catch (error) {
         console.error("Error in deleteSlotcontroller:", error);
         return sendResponse(

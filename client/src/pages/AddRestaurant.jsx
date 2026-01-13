@@ -5,7 +5,8 @@ import DatePicker from "react-multi-date-picker";
 import { createRestaurant, getRestaurantsById, updateRestaurant } from "../services/adminService";
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from "react";
-import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi"; // Optional: npm install react-icons
+import { FiUpload, FiArrowLeft, FiSave } from "react-icons/fi";
+import { Eye, EyeOff } from "lucide-react";
 
 
 export default function RestaurantForm() {
@@ -14,12 +15,26 @@ export default function RestaurantForm() {
     const navigate = useNavigate();
     const [apiData, setApiData] = useState(null);
     const [previews, setPreviews] = useState({ main: null, logo: null });
+    const [showPassword, setShowPassword] = useState(false);
 
     const validationSchema = Yup.object({
         restaurantName: Yup.string().required("Name is required"),
-        password: id ? Yup.string() : Yup.string().required("Password is required"),
+        password: id
+            ? Yup.string()
+                .test('password-validation', 'Password is too short - should be 8 characters minimum.',
+                    val => !val || val.length >= 8)
+                .test('password-uppercase', 'Password requires an uppercase letter',
+                    val => !val || /[A-Z]/.test(val))
+                .test('password-number', 'Password requires a number',
+                    val => !val || /[0-9]/.test(val))
+            : Yup.string()
+                .required("Password is required")
+                .min(8, 'Password is too short - should be 8 characters minimum.')
+                .matches(/[A-Z]/, 'Password requires an uppercase letter')
+                .matches(/[0-9]/, 'Password requires a number'),
         email: Yup.string().email().required("Email is required"),
-        phone: Yup.string().required("Phone number is required"),
+        description: Yup.string().required("Description is required"),
+        phone: Yup.string().required("Phone number is required").min(10).max(10),
         mainImage: Yup.mixed().required("Cover photo is required"),
         logoImage: Yup.mixed().required("Profile photo is required"),
     });
@@ -27,7 +42,7 @@ export default function RestaurantForm() {
         try {
             const res = await getRestaurantsById(id);
             setApiData(res.data);
-            setPreviews({ main: res.data.mainImage, logo: res.data.logoImage });
+            setPreviews({ main: res?.data?.mainImage, logo: res?.data?.logoImage });
         } catch (e) {
             toast.error("Failed to fetch details");
         }
@@ -42,9 +57,11 @@ export default function RestaurantForm() {
         description: apiData?.description || "",
         phone: apiData?.userId?.phone || "",
         closedDates: apiData?.closedDates || [],
-        openDays: apiData?.openDays || [],
         mainImage: apiData?.mainImage || null,
         logoImage: apiData?.logoImage || null,
+        openDays: typeof apiData?.openDays === 'string'
+            ? apiData.openDays.split(',')
+            : apiData?.openDays || [],
     };
 
     const handleFileChange = (e, setFieldValue, fieldName) => {
@@ -58,7 +75,7 @@ export default function RestaurantForm() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
             <Formik
                 initialValues={initialValues}
                 enableReinitialize={true}
@@ -78,16 +95,21 @@ export default function RestaurantForm() {
                         toast.success(`Restaurant ${id ? 'Updated' : 'Created'} Successfully`);
                         navigate('/admin');
                     } catch (e) {
-                        toast.error("An error occurred");
+                        toast.error(e?.response?.data?.message || "An error occurred");
                     }
                 }}
             >
                 {({ setFieldValue, values, isSubmitting }) => (
                     <Form className="flex-1 flex flex-col">
-                        {/* HEADER STICKY BAR */}
-                        <header className="bg-white border-b sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
-                            <div className="flex text-orange-500 items-center gap-4">
-                                <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-orange-500 hover:text-white rounded-full">
+                        <header className="bg-white border-b px-8 py-4 flex items-center justify-between">
+                            <div className="flex text-gray-500 items-center gap-4">
+                                {/* <button type="button" onClick={() => navigate(-1)} className="p-2">
+                                    <FiArrowLeft size={20} className="hover:text-indigo-700" />
+                                </button> */}
+                                <button type="button"
+                                    onClick={() => navigate(-1)}
+                                    className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                                >
                                     <FiArrowLeft size={20} />
                                 </button>
                                 <h1 className="text-xl font-bold text-gray-800">
@@ -97,7 +119,7 @@ export default function RestaurantForm() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="bg-orange-500 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                                className="bg-indigo-700 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
                             >
                                 <FiSave /> {isSubmitting ? "Saving..." : "Save Changes"}
                             </button>
@@ -105,15 +127,12 @@ export default function RestaurantForm() {
 
                         <main className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                            {/* LEFT COLUMN: Media & Branding */}
                             <div className="lg:col-span-1 space-y-6  text-black">
                                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                                    <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Branding</h2>
 
-                                    {/* Cover Image */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium mb-2">Cover Photo</label>
-                                        <div className="relative h-40 w-full bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group">
+                                        <div className="relative h-40 w-full bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 group">
                                             {previews.main ? (
                                                 <img src={previews.main} className="w-full h-full object-cover" alt="Cover" />
                                             ) : (
@@ -131,7 +150,6 @@ export default function RestaurantForm() {
                                         <ErrorMessage name="mainImage" component="p" className="text-red-500 text-xs mt-1" />
                                     </div>
 
-                                    {/* Logo Image */}
                                     <div className="flex flex-col items-center">
                                         <label className="block text-sm font-medium mb-2 w-full text-left">Logo</label>
                                         <div className="relative h-24 w-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100 group">
@@ -148,10 +166,10 @@ export default function RestaurantForm() {
                                         </div>
                                         <ErrorMessage name="logoImage" component="p" className="text-red-500 text-xs mt-1" />
                                     </div>
+                                    <p className="text-xs text-red-600 p-6 text-center">Note: All images must be less than 5 MB</p>
                                 </div>
                             </div>
 
-                            {/* RIGHT COLUMN: Form Details */}
                             <div className="lg:col-span-2 space-y-6  text-black">
                                 <div className="bg-white p-8 rounded-xl shadow-sm border">
                                     <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">General Information</h2>
@@ -171,13 +189,28 @@ export default function RestaurantForm() {
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-600">Phone Number</label>
-                                            <Field name="phone" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <Field name="phone" type="number" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
                                             <ErrorMessage name="phone" component="p" className="text-red-500 text-xs mt-1" />
                                         </div>
 
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-600">Password</label>
-                                            <Field name="password" type="password" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <div className="relative mt-1">
+                                                <Field
+                                                    name="password"
+                                                    type={showPassword ? "text" : "password"}
+                                                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-10 bg-gray-50 border"
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                                >
+                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
                                             <ErrorMessage name="password" component="p" className="text-red-500 text-xs mt-1" />
 
                                         </div>
@@ -185,11 +218,12 @@ export default function RestaurantForm() {
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-600">Description</label>
                                             <Field as="textarea" rows="3" name="description" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 bg-gray-50 border" />
+                                            <ErrorMessage name="description" component="p" className="text-red-500 text-xs mt-1" />
+
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Operations Section */}
                                 <div className="bg-white p-8 rounded-xl shadow-sm border">
                                     <h2 className="text-lg font-semibold mb-6 border-b pb-2 text-gray-700">Operational Hours</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -205,7 +239,7 @@ export default function RestaurantForm() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-600 mb-3">Weekly Off Days</label>
+                                            <label className="block text-sm font-medium text-gray-600 mb-3">Operational Days</label>
                                             <div className="flex flex-wrap gap-3">
                                                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                                                     <label key={day} className="flex items-center px-3 py-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">

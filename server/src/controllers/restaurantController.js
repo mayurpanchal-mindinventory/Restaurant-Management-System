@@ -6,7 +6,9 @@ const {
   deleteRestaurant,
   getRestaurantWithOwnerById,
   allBooking,
+  changeRestaurantStatusById,
 } = require("../services/adminService.js");
+const { getRestaurantMenu } = require("../services/RestaurantPanelService.js");
 
 exports.createRestaurantAccount = async (req, res) => {
   try {
@@ -36,12 +38,12 @@ exports.getAllRestaurantsWithOwners = async (req, res) => {
     );
   }
 };
+
 exports.getRestaurantsWithOwnerById = async (req, res) => {
   try {
     const Id = req.params.Id;
-    // console.log(Id);
+    //console.log(Id);
     const result = await getRestaurantWithOwnerById(Id);
-
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error in getRestaurantsWithOwnerById controller:", error);
@@ -52,6 +54,7 @@ exports.getRestaurantsWithOwnerById = async (req, res) => {
     );
   }
 };
+
 exports.updateRestaurant = async (req, res) => {
   try {
     const result = await updateRestaurant(req);
@@ -82,6 +85,20 @@ exports.deleteRestaurant = async (req, res) => {
   }
 };
 
+exports.restaurantStatusChange = async (req, res) => {
+  try {
+    const result = await changeRestaurantStatusById(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in changeStatus controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR,
+      error.details
+    );
+  }
+};
 exports.getAllBookingswithDetails = async (req, res) => {
   try {
     const result = await allBooking(req);
@@ -89,6 +106,20 @@ exports.getAllBookingswithDetails = async (req, res) => {
     return sendResponse(res, STATUS.OK, result.message, result.data);
   } catch (error) {
     console.error("Error in getRestaurantsWithOwnerById controller:", error);
+    return sendResponse(
+      res,
+      error.status || STATUS.INTERNAL_SERVER_ERROR,
+      error.message || MESSAGES.SERVER_ERROR
+    );
+  }
+};
+
+exports.getAllMenu = async (req, res) => {
+  try {
+    const result = await getRestaurantMenu(req);
+    return sendResponse(res, STATUS.OK, result.message, result.data);
+  } catch (error) {
+    console.error("Error in getAllMenu controller:", error);
     return sendResponse(
       res,
       error.status || STATUS.INTERNAL_SERVER_ERROR,

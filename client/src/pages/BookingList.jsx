@@ -1,116 +1,382 @@
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import { getAllBooking } from "../services/adminService";
-import Loader from "../components/common/Loader";
+import {
+  FiCalendar,
+  FiRefreshCw,
+  FiChevronLeft,
+  FiChevronRight,
+  FiInbox,
+  FiClock,
+} from "react-icons/fi";
+import { PersonStanding, User2, Users, Users2 } from "lucide-react";
+
 function BookingList() {
-    const [booking, setBooking] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [currentpage, setcurrentpage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const statusStyles = {
-        Pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
-        Accepted: "bg-blue-100 text-blue-700 border border-blue-300",
-        Completed: "bg-green-100 text-green-700 border border-green-300",
-        Cancelled: "bg-red-100 text-red-700 border border-red-300",
-    };
+  const [booking, setBooking] = useState([]);
+  const [currentpage, setcurrentpage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const isInitialMount = useRef(true);
+  const [sortby, setSortBy] = useState("");
+  const [status, setStatus] = useState("");
+  const [date, setDate] = useState("");
+  const prevStatusRef = useRef("");
+  const prevDateRef = useRef("");
+  const prevSortByRef = useRef("");
+  const statusStyles = {
+    Pending: "bg-amber-50 text-amber-700 border-amber-200",
+    Accepted: "bg-blue-50 text-blue-700 border-blue-200",
+    Completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+  };
 
-    const bookingList = async () => {
-        const res = await getAllBooking(currentpage);
-        setBooking(res?.data?.booking);
-        console.log(res.data);
-        setTotalPages(res?.data?.totalPages)
+  const bookingList = async (sr = sortby, s = status, d = date) => {
+    if (prevStatusRef.current !== status || prevDateRef.current != date) {
+      setcurrentpage(1);
+    }
+    const res = await getAllBooking(currentpage, searchTerm, sr, s, d);
+    setBooking(res?.data?.booking || []);
+    setTotalPages(res?.data?.totalPages || 1);
+    prevSortByRef.current = sr;
+    prevStatusRef.current = s;
+    prevDateRef.current = d;
+  };
 
-    };
-    useEffect(() => {
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      setcurrentpage(1);
+      const debouncedSearch = setTimeout(() => {
         bookingList();
-    }, [currentpage])
-    const goToNextPage = () => {
-        if (currentpage < totalPages) {
-            setcurrentpage(currentpage + 1);
+      }, 500);
+
+      return () => clearTimeout(debouncedSearch);
+    }
+  }, [searchTerm, sortby]);
+
+  useEffect(() => {
+    bookingList();
+  }, [currentpage]);
+
+  const clearfilter = () => {
+    if (prevStatusRef.current !== "" || prevDateRef.current !== "") {
+      setStatus("");
+      setDate("");
+      setSortBy("");
+      bookingList("", "", "");
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentpage < totalPages) setcurrentpage(currentpage + 1);
+  };
+
+  const goToPrevpage = () => {
+    if (currentpage > 1) setcurrentpage(currentpage - 1);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 ">
+      <div className="flex flex-col text-start lg:flex-row md:items-center justify-between gap-4">
+        <div className="w-full xl:w-auto">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Booking List
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Manage and monitor customer reservations.
+          </p>
+        </div>
+
+        <div className="w-full xl:w-auto">
+          <input
+            type="text"
+            value={searchTerm}
+            id="searchanything"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search name, user, or status..."
+            className="pl-10 pr-4 py-2.5 w-full lg:w-80 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
+          />
+        </div>
+      </div>
+
+      <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="grid grid-cols-1  lg:grid-cols-4 gap-3">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Sort Results
+            </label>
+            <select
+              id="sortby"
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+            >
+              <option value="">Created At</option>
+              <option value="1">Booking Date</option>
+              <option value="2">Restaurant (A-Z)</option>
+              <option value="3">Restaurant (Z-A)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              onChange={(e) => setStatus(e.target.value)}
+              value={status}
+              className="w-full bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+            >
+              <option value="">All Statuses</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">
+              Filter Date
+            </label>
+            <div className="relative">
+              <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="date"
+                id="date-range"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full pl-10 bg-slate-50 border-none text-slate-700 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (
+                  prevStatusRef.current !== status ||
+                  prevDateRef.current !== date
+                )
+                  bookingList();
+              }}
+              className="flex-1 bg-slate-900 text-white text-xs font-bold py-3 rounded-lg hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
+            >
+              Apply Filters
+            </button>
+            <button
+              type="button"
+              onClick={clearfilter}
+              className="p-3 bg-slate-100 text-slate-500 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all"
+            >
+              <FiRefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left bg-white rounded-2xl border-slate-200 shadow-sm">
+            <thead className="xl:table-row-group hidden">
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Restaurant
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Guest
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                  Slot Time
+                </th>
+                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+
+
+            <tbody className="hidden xl:table-row-group divide-y divide-slate-100">
+              {booking.length > 0 ? (
+                booking.map((r) => (
+                  <tr
+                    key={r._id}
+                    className="hover:bg-slate-50/50 transition-colors group"
+                  >
+                    <td className="px-6 py-4 text-sm font-bold text-slate-700">
+                      {r?.date
+                        ? new Date(r.date).toLocaleString().split(",")[0]
+                        : "Date unavailable"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            r?.restaurantId?.logoImage ||
+                            "https://placehold.co/400"
+                          }
+                          className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-100 group-hover:ring-indigo-200 transition-all"
+                          alt="logo"
+                        />
+                        <span className="text-sm font-bold text-slate-900">
+                          {r?.restaurantId?.name || "Restaurant Removed"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-900 leading-none">
+                          {r?.userId?.name}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">
+                          Verified User
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                        <Users size={12} className="text-slate-400" />
+                        {r?.numberOfGuests || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                        <FiClock size={12} className="text-slate-400" />
+                        {r?.timeSlotId?.timeSlot || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end">
+                        <span
+                          className={`px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[r?.status] ||
+                            "bg-slate-100 text-slate-700 border-slate-200"
+                            }`}
+                        >
+                          {r?.status}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="py-24">
+                    <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
+                      <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                        <FiInbox className="text-slate-300" size={32} />
+                      </div>
+                      <h3 className="text-slate-900 font-bold">
+                        No Bookings found
+                      </h3>
+                      <p className="text-slate-500 text-xs mt-1">
+                        Try adjusting your filters or search terms to find what
+                        you're looking for.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
+          </table>
+
+          <div className={`xl:hidden grid grid-cols-1 md:grid-cols-1 ${booking.length > 0 ? `lg:grid-cols-2` : `lg:grid-cols-1`} gap-4 p-4`}>
+            {booking.length > 0 ? (
+              booking.map((r) => (
+                <div key={r._id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={r?.restaurantId?.logoImage || "https://placehold.co/400"}
+                        className="h-12 w-12 rounded-full object-cover ring-1 ring-slate-100"
+                        alt="logo"
+                      />
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 leading-tight">
+                          {r?.restaurantId?.name || "Restaurant Removed"}
+                        </h4>
+
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500 justify-center items-center font-medium">
+                      {r?.date ? new Date(r.date).toLocaleDateString() : "Date unavailable"}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div className="flex items-center gap-2 text-slate-600 font-mono text-xs">
+                      <Users size={14} className="text-slate-400" />
+                      <span>{r?.numberOfGuests || "-"} Guests</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600 font-mono text-xs">
+                      <FiClock size={14} className="text-slate-400" />
+                      <span>{r?.timeSlotId?.timeSlot || "-"}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-900">{r?.userId?.name}</span>
+                      <span className="text-[10px] font-medium text-slate-400 uppercase">Verified User</span>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${statusStyles[r?.status] || "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                      {r?.status}
+                    </span>                      </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center max-w-xs mx-auto">
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <FiInbox className="text-slate-300" size={32} />
+                </div>
+                <h3 className="text-slate-900 font-bold">
+                  No Bookings found
+                </h3>
+                <p className="text-slate-500 text-xs mt-1">
+                  Try adjusting your filters or search terms to find what
+                  you're looking for.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        {
+          booking.length > 0 && (
+            <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                Page <span className="text-indigo-600">{currentpage}</span> of{" "}
+                {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  disabled={currentpage === 1}
+                  onClick={goToPrevpage}
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  <FiChevronLeft /> Prev
+                </button>
+                <button
+                  disabled={currentpage === totalPages}
+                  onClick={goToNextPage}
+                  className="flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                >
+                  Next <FiChevronRight />
+                </button>
+              </div>
+            </div>
+          )
         }
-    };
-
-    const goToPrevpage = () => {
-        if (currentpage > 1) {
-            setcurrentpage(currentpage - 1);
-        }
-    };
-    return (
-        loading ? <Loader loading={loading} size={60} /> : (booking.length > 0 ? (<div className="w-full bg-white  text-black shadow-md rounded-xl p-4">
-
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="w-full text-center">
-                    <h2 className="text-xl font-semibold"> Booking List</h2>
-                </div>
-
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        className="border w-full md:w-64 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                    />
-
-                </div>
-            </div>
-
-            <div className="mt-6 overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                    <thead>
-                        <tr className="bg-gray-100 text-gray-700 text-base font-extrabold">
-                            <th className="p-3">Restaurant</th>
-                            <th className="p-3">Restaurant Name</th>
-                            <th className="p-3">Username</th>
-                            <th className="p-3">Slot Time</th>
-                            <th className="p-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-black">
-                        {booking?.map((r) => (
-
-                            <tr key={r._id} className="border-b">
-                                <td className="p-3">
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src={r?.restaurantId?.logoImage}
-                                            className="h-11 w-11 rounded-full border"
-                                            alt="restaurant"
-                                        />
-                                    </div>
-                                </td>
-                                <td className="p-3"> {r?.restaurantId?.name}</td>
-                                <td className="p-3">{r?.userId?.name}</td>
-                                <td className="p-3">{r?.timeSlotId?.timeSlot}</td>
-                                <td className="p-3">
-                                    <p className={`w-fit px-4 py-1 text-center rounded-full text-xs font-medium ${statusStyles[r?.status] || "bg-gray-100 text-gray-700"}`}>
-                                        {r?.status}
-                                    </p>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-
-
-                </table>
-            </div>
-
-            <div className="flex justify-between items-center mt-4">
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === 1} onClick={() => goToPrevpage()}>Previous</button>
-
-                <div className="flex gap-2">
-                    <span>page {currentpage} of {totalPages}</span>
-                </div>
-
-                <button className="border px-4 py-2 rounded-lg text-sm" disabled={currentpage === totalPages} onClick={() => goToNextPage()}>Next</button>
-            </div>
-
-        </div >) : <div className="h-full flex text-gray-800 items-center justify-center">
-            <p className="text-3xl font-bold">
-                No Booking Yet
-            </p>
-        </div>)
-    );
+      </div >
+    </div>
+  );
 }
 
 export default BookingList;
